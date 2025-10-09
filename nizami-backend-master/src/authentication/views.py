@@ -107,8 +107,6 @@ def forgot_password(request):
 
 
 @api_view(['POST'])
-@authentication_classes([])
-@permission_classes([])
 def reset_password(request):
     try:
         serializer = PasswordResetSerializer(data=request.data)
