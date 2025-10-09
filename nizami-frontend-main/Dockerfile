@@ -22,12 +22,13 @@ RUN npm run build -- --configuration ${CONFIGURATION}
 FROM nginx:alpine
 
 # Copy built files from build stage
-COPY --from=build /app/dist/nizami_admin_panel/browser /usr/share/nginx/html
+COPY --from=build /app/dist/nizami-frontend/browser /usr/share/nginx/html
 
-# Copy custom nginx configuration if needed
+# Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+

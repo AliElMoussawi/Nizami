@@ -34,11 +34,26 @@ services:
         condition: service_healthy
 
   admin-panel:
-    build: ../nizami-admin-panel-master
+    build:
+      context: ../nizami-admin-panel-master
+      args:
+        CONFIGURATION: development
     container_name: admin-panel
     hostname: admin-panel
     ports:
       - "4200:80"
+    depends_on:
+      - web
+
+  frontend:
+    build:
+      context: ../nizami-frontend-main
+      args:
+        CONFIGURATION: development
+    container_name: frontend
+    hostname: frontend
+    ports:
+      - "4201:80"
     depends_on:
       - web
 
