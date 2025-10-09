@@ -20,6 +20,8 @@ from ..users.models import User
 
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 def login(request):
     email = request.data.get('email')
     password = request.data.get('password')
@@ -37,6 +39,8 @@ def login(request):
 
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 def register(request: Request):
     request.data._mutable = True
 
@@ -64,6 +68,8 @@ def register(request: Request):
 
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 @throttle_classes([ForgotPasswordThrottle])
 def forgot_password(request):
     email = request.data.get('email')
