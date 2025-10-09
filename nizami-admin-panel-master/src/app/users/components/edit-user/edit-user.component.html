@@ -1,0 +1,30 @@
+<app-template>
+  <div class="flex flex-col gap-2 p-5">
+
+    <div class="flex flex-row gap-4 text-grey5">
+      <a routerLink="/users" class="">Users Management</a>
+      <span class="text-grey1 font-bold">></span>
+      <span class="font-bold ">Edit</span>
+    </div>
+
+    <div class="text-3xl font-grey6 font-bold">
+      Update User
+    </div>
+
+    @if (isLoading()) {
+      <app-spinner></app-spinner>
+    } @else if (user()) {
+      <app-user-form
+        #userForm
+        [value]="user()"
+        (onSubmit)="submit($event)"
+        [disabled]="isUpdating()"
+        submitText="Save"
+        [showCreateAnother]="false"
+        [showPasswordNote]="false"
+      ></app-user-form>
+    }
+
+  </div>
+</app-template>
+

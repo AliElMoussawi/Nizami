@@ -1,0 +1,25 @@
+<div class="h-full flex flex-col">
+
+  <span class="hidden xl:block xl:flex-1"></span>
+
+  <ng-container *ngIf="stepTemplates.length >= step()">
+    <ng-container *ngTemplateOutlet="currentStepTemplate!"></ng-container>
+  </ng-container>
+
+  <span class="flex-1"></span>
+
+  <div class="flex flex-row gap-3 mb-8 mt-4 h-2 items-center justify-center">
+    @for (i of steps; track i; let index = $index) {
+      <button
+        type="button"
+        (click)="stepClicked(i)"
+        [disabled]="step() <= index || disabled()"
+        class="w-20 h-full rounded"
+        [ngClass]="{
+        'bg-blue1 cursor-pointer': step() > index,
+         'bg-grey9 cursor-not-allowed': step() <= index
+        }"
+      ></button>
+    }
+  </div>
+</div>

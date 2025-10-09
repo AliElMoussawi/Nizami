@@ -1,0 +1,16 @@
+<div
+  [dir]="dir"
+  [ngClass]="'mt-3 xl:ml-32'"
+  [className]="className"
+>
+  <hr>
+  <div
+    class="text-grey5 text-xs font-normal mt-3"
+  >
+    @if (translation_disclaimer_language() == 'en') {
+      This answer includes content translated either from English to Arabic or Arabic to English. The translation may not fully reflect the original legal meaning.
+    } @else {
+      تتضمن هذه الإجابة محتوى مترجمًا من العربية إلى الإنجليزية أو من الإنجليزية إلى العربية. قد لا تعكس الترجمة المعنى القانوني الكامل للنص الأصلي بدقة.
+    }
+  </div>
+</div>

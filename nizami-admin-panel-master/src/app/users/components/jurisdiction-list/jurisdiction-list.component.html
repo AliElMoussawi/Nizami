@@ -1,0 +1,43 @@
+@if (list()) {
+  <div class="flex flex-row gap-3 items-center">
+    @for (flag of list()!.slice(0, 2); track flag) {
+      <app-flag
+        [code]="flag"
+      ></app-flag>
+    }
+
+    @if (list()!.length > 2) {
+      <button
+        class="bg-purple2 rounded-lg p-1 text-sm font-normal"
+        [cdkMenuTriggerFor]="menu"
+        #trigger="cdkMenuTriggerFor"
+        type="button"
+        (mouseover)="openMenu(trigger)"
+        (mouseleave)="closeMenu(trigger)"
+        (click)="openMenuByClicking(trigger)"
+      >
+        +{{ list()!.length - 2 }}
+      </button>
+    }
+  </div>
+
+
+  <ng-template #menu>
+    <div cdkMenu
+         (closed)="onClosed()"
+         class="
+         flex flex-row gap-2 p-4
+         bg-white rounded-lg
+         text-sm text-grey13
+         shadow-[0px_0px_6px_3px_#00000008,0px_12px_16px_-4px_#10182814]
+         border border-grey13
+"
+    >
+      @for (flag of list(); track flag) {
+        <app-flag
+          [code]="flag"
+        ></app-flag>
+      }
+    </div>
+  </ng-template>
+}

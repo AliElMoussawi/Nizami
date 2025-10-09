@@ -1,0 +1,37 @@
+<div class="flex flex-col gap-1">
+  @if (label()) {
+    <div class="text-start text-sm font-medium ">
+      {{ label() }}
+    </div>
+  }
+
+  <div
+    class="
+     w-full border-grey1 border
+     rounded-lg flex flex-row gap-2 bg-white
+      placeholder:bg-white autofill:bg-white items-stretch
+"
+    [ngClass]="{
+      'ring-4 ring-indigo2 border-red2 focus-within:ring-4 focus-within:ring-indigo2 focus-within:border-red2': hasError,
+      'focus-within:ring-4 focus-within:ring-indigo1 focus-within:border-purple1': !hasError,
+    }"
+  >
+    <ng-content select=".icon-before"></ng-content>
+
+    <input
+      #input
+      [type]="type()"
+      [placeholder]="placeholder()"
+      class="w-full p-2 rounded-lg outline-none"
+      [ngModel]="value"
+      (ngModelChange)="onInputChange($event)"
+      (blur)="onTouched()"
+      [disabled]="isDisabled"
+    >
+
+    <ng-content select=".icon-after" class="h-full"></ng-content>
+  </div>
+
+  <ng-content select="app-control-errors"></ng-content>
+  <ng-content select=".custom-errors"></ng-content>
+</div>

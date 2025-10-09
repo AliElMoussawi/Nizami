@@ -1,0 +1,21 @@
+<div class="h-full flex flex-col justify-center">
+  <div class="flex flex-col gap-6 items-center">
+    <div>
+      <img src="/assets/icons/lock-red.svg" alt="Locked">
+    </div>
+
+    <div class="flex flex-col text-sm font-normal gap-4 text-center text-grey12">
+      <div>
+        {{ 'errors.chat_locked' | translate }}
+      </div>
+
+      <div>
+        {{ 'contact_admin_for_support' | translate }}
+      </div>
+    </div>
+
+    <app-outline-button (onClick)="redirectToNewChat()">
+      {{ 'got_it' | translate }}
+    </app-outline-button>
+  </div>
+</div>

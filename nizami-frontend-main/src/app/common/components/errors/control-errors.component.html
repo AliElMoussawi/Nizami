@@ -1,0 +1,13 @@
+@if (control().touched || control().dirty) {
+  @if (control().hasError('required')) {
+    <app-error>
+      {{ 'validation.required' | translate }}
+    </app-error>
+  }
+
+  @if (control().hasError('email')) {
+    <app-error>
+      {{ 'validation.invalid_email' | translate }}
+    </app-error>
+  }
+}

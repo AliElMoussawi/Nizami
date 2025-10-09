@@ -1,0 +1,11 @@
+{
+	"login": "login",
+	"dont_have_account": "dont_have_account",
+	"sign_up": "sign_up",
+	"placeholders.email": "placeholders.email",
+	"labels.email": "labels.email",
+	"labels.password": "labels.password",
+	"remember_me_label": "remember_me_label",
+	"forgot_password": "forgot_password",
+	"sign_in": "sign_in"
+}

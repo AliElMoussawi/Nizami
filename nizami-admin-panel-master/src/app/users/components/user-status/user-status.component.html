@@ -1,0 +1,19 @@
+<div
+  class="flex flex-row gap-1 rounded-lg border  py-0.5 px-1 max-w-fit pr-2"
+  [ngClass]="{
+  'bg-green2 border-green1 text-green1': isActive(),
+  'bg-red1 border-red2 text-red2': !isActive(),
+  }"
+>
+  @if (!isActive()) {
+    <img src="/assets/icons/block.svg" alt="Blocked">
+    <span>
+      Blocked
+    </span>
+  } @else {
+    <img src="/assets/icons/check-circle.svg" alt="Active">
+    <span>
+      Active
+    </span>
+  }
+</div>

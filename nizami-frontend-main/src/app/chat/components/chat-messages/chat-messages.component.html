@@ -1,0 +1,60 @@
+<div class="
+flex flex-col gap-8
+py-1 pb-6 xl:pb-16 h-full w-full
+scroll-auto overflow-y-auto relative
+  transition-all duration-300 ease-in-out px-6
+" #chatContainer
+     (scroll)="scroll()"
+     [ngClass]="{
+      'xl:px-40': sidebar.isOpen(),
+      'xl:pl-80': !sidebar.isOpen(),
+     }"
+>
+
+
+  @for (message of messages(); track message.uuid; let isLast = $last) {
+    <app-message
+      [message]="message"
+      [isLast]="isLast"
+    ></app-message>
+  }
+
+  @if (isNewChat()) {
+    <app-initial-messages
+      class="h-full"
+      (onUploadForReview)="uploadForReview()"
+      (onGetLegalAdvice)="getLegalAdvice()"
+      (onAdjustDocument)="adjustDocument()"
+      [disabled]="disabled()"
+      (onNewMessage)="onNewMessage.emit($event)"
+    ></app-initial-messages>
+  }
+
+  @if (isGeneratingResponse()) {
+    <app-generating-response-message
+    ></app-generating-response-message>
+  }
+
+  @if (error()) {
+    <app-error-message
+      [error]="error()"
+      (onRetry)="onRetry.emit()"
+    ></app-error-message>
+  }
+
+  @if (loadingError()) {
+    <app-loading-error
+      [error]="loadingError()"
+      (onRetry)="onRetryLoading.emit()"
+    >
+    </app-loading-error>
+  }
+
+  <button
+    class="relative-element fixed bottom-24 left-[43%] xl:left-[50%] translate-x-[-50%] border border-grey1 p-2 bg-white rounded-lg z-[1000]"
+    (click)="smoothScrollToBottom()"
+    [@fadeInOut]="showScrollToBottomButton() ? 'in' : 'out'">
+    <img src="/assets/icons/arrow-down.svg" alt="Scroll to bottom">
+  </button>
+
+</div>

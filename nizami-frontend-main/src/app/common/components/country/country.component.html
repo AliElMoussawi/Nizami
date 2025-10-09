@@ -1,0 +1,14 @@
+<div class="flex flex-row gap-2 items-center">
+  <app-flag
+    [code]="code()"
+  ></app-flag>
+
+  <span
+    class="text-sm truncate"
+    [ngClass]="{
+    'text-grey12': !selected(),
+    'text-purple4': selected(),
+    'hidden xl:block': hideName(),
+    }"
+  >{{ code() | countryName }}</span>
+</div>

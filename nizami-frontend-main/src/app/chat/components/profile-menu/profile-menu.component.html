@@ -1,0 +1,31 @@
+<div cdkMenu
+     class="
+         flex flex-col
+         min-w-48 bg-white rounded-lg
+         text-sm text-grey7
+         shadow-[0px_0px_6px_3px_#00000008,0px_12px_16px_-4px_#10182814]
+         border border-grey13
+"
+>
+  @if (showEmail()) {
+    <div cdkMenuItem class="text-grey5 font-medium px-4 py-3 border-b border-grey13 min-h-8">
+      {{ user()?.email }}
+    </div>
+  }
+
+  <button cdkMenuItem class="flex flex-row gap-2 items-center px-4 py-3 border-b border-grey13  min-h-8 hover:bg-green202 hover:text-green203 group"
+          (click)="openProfileClicked()"
+  >
+    <img src="/assets/icons/gear.svg" alt="Settings" class="block group-hover:hidden">
+    <img src="/assets/icons/gear-green.svg" alt="Settings" class="hidden group-hover:block">
+
+    <span>{{ 'profile_settings' | translate }}</span>
+  </button>
+
+  <button cdkMenuItem class="flex flex-row gap-2 items-center px-4 py-3  min-h-8 hover:bg-green202 hover:text-green203 group" (click)="logout()">
+    <img src="/assets/icons/logout.svg" [alt]="'logout' | translate" class="block group-hover:hidden">
+    <img src="/assets/icons/logout-green.svg" [alt]="'logout' | translate" class="hidden group-hover:block">
+
+    <span>{{ 'logout' | translate }}</span>
+  </button>
+</div>

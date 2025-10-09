@@ -1,0 +1,13 @@
+@if (control().touched || control().dirty) {
+  @if (control().hasError('required')) {
+    <app-error>
+      This field is required
+    </app-error>
+  }
+
+  @if (control().hasError('email')) {
+    <app-error>
+      This field must be an email address
+    </app-error>
+  }
+}

@@ -1,0 +1,20 @@
+<div class="
+flex flex-row gap-3
+bg-white rounded-xl
+p-4 border-2 border-grey1
+"
+     [ngClass]="{
+       'cursor-pointer hover:bg-grey1': selectable(),
+       'rounded-tl-none': isUserMessage(),
+       'rounded-tr-none': !isUserMessage(),
+     }"
+>
+  <div class="text-grey5">
+    <img src="/assets/icons/document-2.svg" alt="File" class="w-min">
+  </div>
+
+  <div class="flex flex-col gap-0.5 items-start text-sm">
+    <div class="text-grey12">{{ file().file_name }}</div>
+    <div class="font-medium text-grey6">{{ file().size | fileSize }}</div>
+  </div>
+</div>

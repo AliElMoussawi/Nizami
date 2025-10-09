@@ -1,0 +1,58 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="h-full content-center"
+>
+  <app-auth-card>
+    <h1 class="text-3xl font-semibold">
+      Sign in
+    </h1>
+
+    <div class="text-start flex flex-col gap-6">
+      <app-input
+        type="email"
+        placeholder="Enter Your Email"
+        label="Email*"
+        formControlName="email"
+      ></app-input>
+
+      <app-input
+        [type]="isPasswordVisible() ? 'text' : 'password'"
+        placeholder="••••••••"
+        label="Password*"
+        formControlName="password"
+      >
+        <button class="icon-after px-3 flex items-center  border-l border-grey1 group" (click)="showPassword()"
+                type="button">
+          @if (isPasswordVisible()) {
+            <img src="assets/icons/eye-slash.svg" class="block group-hover:hidden">
+            <img src="assets/icons/eye-slash-navy.svg" class="hidden group-hover:block">
+          } @else {
+            <img src="assets/icons/eye.svg" class="block group-hover:hidden">
+            <img src="assets/icons/eye-navy.svg" class="hidden group-hover:block">
+          }
+        </button>
+      </app-input>
+    </div>
+
+    <div class="flex flex-row justify-between">
+      <app-checkbox
+        formControlName="remember_me"
+        label="Remember me"
+      ></app-checkbox>
+
+      <a routerLink="/forgot-password" class="text-blue1 hover:text-purple5 text-sm font-bold hover:underline">
+        Forgot password
+      </a>
+    </div>
+
+    <div>
+      <app-button
+        [disabled]="form.disabled || form.invalid"
+      >
+        Sign in
+      </app-button>
+    </div>
+
+  </app-auth-card>
+</form>

@@ -1,0 +1,68 @@
+<div
+  class="border-2 border-grey3 rounded-2xl p-3 flex flex-row gap-2"
+  [ngClass]="{
+  'bg-red1 border-red2 text-red3 font-bold': error() != null,
+  }"
+>
+  <div>
+    <img src="/assets/icons/document-2.svg" alt="Uploading Document">
+  </div>
+
+  <div class="flex flex-col flex-1 truncate">
+    <div class="flex items-center justify-between gap-2 w-full truncate">
+      <p class="truncate">
+        {{ file().file_name ?? file().file?.name }}
+      </p>
+
+      @if (progress() == 100 && !showDeleteButton()) {
+        <div
+          class="text-green-500 shrink-0"
+          (mouseover)="showDeleteButton.set(true)" (mouseleave)="showDeleteButton.set(false)">
+          <img src="/assets/icons/check-circle.svg" alt="Uploaded!" class="w-min">
+        </div>
+      }
+
+      @if (progress() < 100 || showDeleteButton()) {
+        <button class="text-red-600 shrink-0" (click)="onRemove.emit()" (mouseover)="showDeleteButton.set(true)"
+                (mouseleave)="showDeleteButton.set(false)">
+          <img src="/assets/icons/trash.svg" alt="Delete" class="w-min">
+        </button>
+      }
+    </div>
+
+    @if (error()) {
+      <div class="text-red2 text-bold">
+        Upload failed, please try again
+      </div>
+
+      <button
+        (click)="onTryAgain.emit()"
+        class="text-left text-red3 font-bold">
+        Try again
+      </button>
+    } @else {
+      <div class="text-grey6 text-bold">
+        {{ (file().size ?? file().file?.size) | fileSize }}
+      </div>
+
+      <div class="flex flex-row gap-1 items-center justify-between">
+        <div class="w-full relative flex items-center">
+          <div
+            class="h-2 rounded-full bg-gray-300 w-full absolute"
+          ></div>
+          <div
+            [ngClass]="{
+        'bg-blue1': progress() < 100,
+        'bg-green1': progress() >= 100,
+        }"
+            class=" h-2 rounded-full absolute"
+            [style.width.%]="progress()"
+          ></div>
+        </div>
+        <span>
+      {{ progress() }}%
+      </span>
+      </div>
+    }
+  </div>
+</div>

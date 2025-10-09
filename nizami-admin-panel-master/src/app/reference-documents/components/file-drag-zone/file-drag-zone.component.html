@@ -1,0 +1,36 @@
+<div class="flex flex-col gap-2">
+  @if (label()) {
+    <span class="font-medium text-sm text-grey6">{{ label() }}</span>
+  }
+
+  <div class="drop-zone">
+    <div *ngIf="!droppedFile"
+         class="border-2 border-grey1 h-20 flex flex-col justify-center items-center rounded-lg border-dashed"
+    >
+      <div>
+        Drag & Drop your files or
+        <button (click)="browse(fileInput)" class="text-blue1" type="button">Browse</button>
+      </div>
+    </div>
+
+    <input type="file" class="hidden" #fileInput (change)="fileSelected($event)" accept=".docx">
+
+    @if (droppedFile) {
+      <div class="h-20 relative flex flex-col justify-center items-center rounded-lg bg-purple1">
+        <div
+          class="flex flex-row pt-2 pl-5 gap-2 absolute h-full w-full items-start  bg-gradient-to-b from-black  rounded-lg via-transparent to-transparent">
+          <button (click)="remove(fileInput)" class="bg-grey5 text-white text-sm rounded-full p-2 mt-1" type="button">
+            <img src="/assets/icons/x.svg" alt="Close" class="w-full h-full">
+          </button>
+          <div class="flex flex-col items-start">
+            <span class="text-sm text-white font-normal">{{ file!.name }}</span>
+            <span class="text-xs text-grey11 font-normal">{{ file!.size | fileSize }}</span>
+          </div>
+        </div>
+
+        <img src="/assets/icons/document.svg" alt="Document" class="h-full object-cover p-2"/>
+      </div>
+    }
+
+  </div>
+</div>

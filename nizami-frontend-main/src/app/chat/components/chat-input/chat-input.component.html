@@ -1,0 +1,61 @@
+<div class="
+bg-white border-2 border-grey1 rounded-xl p-1 mx-6 xl:mx-auto"
+>
+  <div class="relative flex flex-col gap-2" [formGroup]="form">
+    <div class="flex flex-row gap-2" [ngClass]="{
+      'hidden': files.length <= 0,
+      'pb-2': files.length > 2,
+    }">
+      <input
+        type="file"
+        #filesInput
+        hidden
+        (change)="onFilesSelected($event)"
+        accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      />
+
+      @if (files.length > 0) {
+        <div class="w-full grid grid-cols-1 xl:grid-cols-2 gap-2 max-h-28 overflow-y-auto">
+          @for (file of files; track i; let i = $index) {
+            <app-file-uploading-progress
+              [file]="file().file"
+              (onRemove)="removeFile(i, file().file)"
+              [progress]="file().progress"
+              [error]="file().error"
+              (onTryAgain)="tryAgain(i, file().file)"
+            ></app-file-uploading-progress>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="flex flex-row gap-1 items-center pr-1">
+      <textarea [placeholder]="'send_message' | translate"
+                class="resize-none w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-grey11  my-3
+           disabled:cursor-not-allowed disabled:placeholder-gray-400 disabled:bg-white
+           max-h-32
+"
+                #input
+                (input)="editingText()"
+                rows="1"
+                formControlName="text"
+                (keydown.enter)="prevent($event)"
+                (keyup.enter)="sendMessage()"
+      ></textarea>
+
+      <div class="flex justify-end">
+        <app-icon-button
+          type="primary"
+          [disabled]="!isTyping() && (form.invalid || disabled() || form.disabled || uploadingFilesCount > 0)"
+          (onClick)="isTyping() ? stopTyping() : sendMessage()"
+        >
+          @if (isTyping()) {
+            <img src="/assets/icons/stop.svg" alt="Stop">
+          } @else {
+            <img src="/assets/icons/send.svg" alt="Send" class="flip-rtl">
+          }
+        </app-icon-button>
+      </div>
+    </div>
+  </div>
+</div>

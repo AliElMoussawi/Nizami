@@ -1,0 +1,37 @@
+<button [matMenuTriggerFor]="actionMenu" class="hover:bg-grey13 p-1 rounded-md flex">
+  <ng-icon size="20" name="heroEllipsisVertical"></ng-icon>
+</button>
+
+<mat-menu #actionMenu="matMenu">
+  <ng-content select=".before"></ng-content>
+
+  @if (showSelect) {
+    <button mat-menu-item (click)="select()">
+      <ng-icon name="heroCursorArrowRays"></ng-icon>
+      <span>Select</span>
+    </button>
+  }
+
+  @if (viewRouterLink) {
+    <a [routerLink]="viewRouterLink" mat-menu-item>
+      <img src="/assets/icons/eye.svg" alt="View">
+      <span>View</span>
+    </a>
+  }
+
+  @if (editRouterLink) {
+    <a [routerLink]="editRouterLink" mat-menu-item>
+      <img src="/assets/icons/edit.svg" alt="Edit">
+      <span>Edit</span>
+    </a>
+  }
+
+  @if (showDelete) {
+    <button mat-menu-item (click)="delete()">
+      <img src="/assets/icons/trash.svg" alt="Delete">
+      <span>Delete</span>
+    </button>
+  }
+
+  <ng-content select=".after"></ng-content>
+</mat-menu>

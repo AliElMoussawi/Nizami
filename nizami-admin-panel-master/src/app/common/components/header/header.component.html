@@ -1,0 +1,39 @@
+<div
+  class="
+  bg-grey102 flex flex-row justify-between items-center
+  border-b border-grey1
+"
+>
+  <app-sidebar-logo
+    class="p-6"
+  ></app-sidebar-logo>
+
+  <div class="flex flex-row gap-2 items-center pr-8">
+    <span
+      class="font-medium text-sm"
+    >{{ auth.user()?.email }}</span>
+
+    <button [matMenuTriggerFor]="actionMenu" class="
+    flex justify-center items-center
+">
+      <app-user-profile-image></app-user-profile-image>
+    </button>
+
+
+    <mat-menu #actionMenu="matMenu">
+      <div class="p-3">
+        {{ auth.user()?.email }}
+      </div>
+
+      <div
+        class="border-b-2 border-grey2"
+      >
+      </div>
+
+      <button mat-menu-item (click)="logout()">
+        <img src="/assets/icons/logout.svg" alt="Logout">
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </div>
+</div>

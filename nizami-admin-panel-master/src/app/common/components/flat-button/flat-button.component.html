@@ -1,0 +1,12 @@
+<button class="
+px-5 py-2.5 disabled:bg-white rounded-lg disabled:text-grey3 w-full disabled:cursor-not-allowed
+bg-white border border-grey1 text-black hover:bg-grey13
+shadow-[0px_1px_2px_0px_#1018280D]
+"
+        [ngClass]="klass()"
+        [type]="type()"
+        [disabled]="disabled()"
+        (click)="click()"
+>
+  <ng-content></ng-content>
+</button>

@@ -1,0 +1,31 @@
+<div class="w-full flex flex-row gap-4">
+  <app-user-profile-image
+    [disabled]="true"
+  ></app-user-profile-image>
+
+  <div class="flex flex-col text-sm justify-center">
+    <div class="font-bold font-grey7">
+      {{ user()?.first_name | titlecase }}&nbsp;{{ user()?.last_name | titlecase }}
+    </div>
+
+    @if (showEmail()) {
+      <div class="flex flex-row justify-between">
+        <div class="text-grey5 font-normal text-sm">
+          {{ user()?.email }}
+        </div>
+      </div>
+    }
+  </div>
+
+  <button class="mr-auto p-2" [cdkMenuTriggerFor]="menu">
+    <img src="/assets/icons/3-dots.svg" alt="Open Menu">
+  </button>
+
+  <ng-template #menu>
+    <app-profile-menu
+      [showEmail]="!showEmail()"
+      [shouldOpenProfileSettingsDialog]="shouldOpenProfileSettingsDialog()"
+    ></app-profile-menu>
+  </ng-template>
+
+</div>

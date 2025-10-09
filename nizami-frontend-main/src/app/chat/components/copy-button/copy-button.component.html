@@ -1,0 +1,23 @@
+<app-tooltip
+  [arrow]="true"
+>
+  <button
+    [disabled]="isCopied()"
+    (click)="onClick()"
+    class="relative-element"
+  >
+    @if (isCopied()) {
+      <ng-icon name="heroCheck" size="16"></ng-icon>
+    } @else {
+      <ng-icon name="heroDocumentDuplicate" size="16"></ng-icon>
+    }
+  </button>
+
+  <span class="message">
+    @if (isCopied()) {
+      Copied
+    } @else {
+      Copy
+    }
+  </span>
+</app-tooltip>

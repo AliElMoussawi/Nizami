@@ -1,0 +1,28 @@
+<div class="flex flex-col max-h-fit ">
+  <div class="w-full flex flex-col gap-8">
+
+    <div class="flex flex-col xl:flex-row">
+      <div class="min-w-full xl:min-w-36 text-grey6 font-bold text-sm">
+        {{ 'email' | translate }}
+      </div>
+
+      <div class="text-grey5 text-sm font-normal">
+        {{ user()?.email }}
+      </div>
+    </div>
+
+    <hr class="text-grey1 -mx-7 xl:mx-0">
+
+    <span class="flex-1 hidden xl:block"></span>
+
+    <div class="flex flex-row self-end gap-2 xl:gap-4 mb-1">
+      <app-outline-button
+        (onClick)="onCancel.emit()"
+        type="button"
+      >
+        {{ 'close' | translate }}
+      </app-outline-button>
+    </div>
+
+  </div>
+</div>

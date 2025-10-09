@@ -1,0 +1,20 @@
+<div class="flex flex-col gap-1 country">
+  <div class="text-start text-sm ">
+    {{ label() }}
+  </div>
+
+    <lib-country-list
+      [ngClass]="{
+      'invalid': hasError,
+      'valid': !hasError,
+    }"
+      [countryListConfig]="countryListConfig"
+      [selectedCountryConfig]="selectedCountryConfig"
+      (onCountryChange)="onInputChange($event)"
+      [selectedCountryCode]="value"
+      [allowedCountryCodes]="allowedCountries()"
+      placeholderText="Jurisdiction"
+    ></lib-country-list>
+
+  <ng-content select="app-control-errors"></ng-content>
+</div>

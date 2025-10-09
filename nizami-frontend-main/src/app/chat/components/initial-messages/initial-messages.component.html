@@ -1,0 +1,41 @@
+<div
+  class="
+  flex flex-col justify-center
+  leading-1.5 py-1 rounded-xl
+  h-full content-center
+"
+>
+  <div class="text-2xl xl:text-4xl font-medium text-grey6 mb-3 xl:mb-5">
+    {{ 'hi_there' | translate:{name: user()?.first_name | titlecase} }}
+  </div>
+
+  <div class="text-3xl xl:text-5xl mb-2 text-grey12 font-medium">
+    {{ 'what_would_you_like_to_know' | translate }}
+  </div>
+
+  <div class="mb-9 text-grey5 font-medium text-base xl:text-lg">
+    {{ 'use_one_of_common' | translate }}
+  </div>
+
+  <div class="grid xl:grid-cols-1 gap-6 xl:mb-11">
+    <app-suggestion-box
+      (onClick)="onGetLegalAdvice.emit()"
+      class="group"
+    >
+        <img src="/assets/icons/helpful.svg" alt="Legal Advice" class="w-min block group-hover:hidden">
+        <img src="/assets/icons/helpful-blue.svg" alt="Legal Advice" class="w-min hidden group-hover:block">
+
+      <div>
+        {{ 'get_legal_advice' | translate }}
+      </div>
+    </app-suggestion-box>
+  </div>
+
+  <app-chat-input
+    *ngIf="showChatInput()"
+    #chatInput
+    class="w-full hidden xl:block"
+    [disabled]="disabled()"
+    (onNewMessage)="onNewMessage.emit($event)"
+  ></app-chat-input>
+</div>

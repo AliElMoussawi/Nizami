@@ -1,0 +1,29 @@
+image: node:20
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - dist/
+
+stages:
+  - build
+  - deploy
+
+build_main:
+  stage: build
+  script:
+    - npm install
+    - npm run build
+  only: [ 'main' ]
+
+deploy_main:
+  image: python:latest
+  stage: deploy
+  before_script:
+    - pip install awscli
+  script:
+    - aws s3 sync ./dist/nizami-frontend/browser s3://app.nizami.ai --delete
+    - aws cloudfront create-invalidation --distribution-id E41IXO08TQA8J --paths "/*"
+  only: [ 'main' ]
+

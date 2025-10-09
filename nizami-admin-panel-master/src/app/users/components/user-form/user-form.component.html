@@ -1,0 +1,119 @@
+<form
+  [formGroup]="form"
+  class="flex flex-col gap-2"
+  (ngSubmit)="submit()"
+>
+  <div class="grid grid-cols-3 gap-8">
+    <div class="col-span-2 flex flex-col gap-6 border-2 border-grey101 rounded-xl p-6">
+      <div class="font-bold text-sm">
+        Account details
+      </div>
+
+      <div class="flex flex-row gap-2 w-full">
+        <app-input class="w-full" label="First name*" placeholder="First name" formControlName="first_name">
+          <app-control-errors
+            [control]="form.controls.first_name"
+          ></app-control-errors>
+        </app-input>
+        <app-input class="w-full" label="Last name*" placeholder="Last name" formControlName="last_name">
+          <app-control-errors
+            [control]="form.controls.last_name"
+          ></app-control-errors>
+        </app-input>
+      </div>
+
+      <div class="flex flex-row gap-2 w-full">
+        <app-input
+          label="Email*"
+          type="email"
+          placeholder="Email"
+          formControlName="email"
+          class="w-full"
+        >
+          <app-control-errors
+            [control]="form.controls.email"
+          ></app-control-errors>
+        </app-input>
+
+        <app-date-picker
+          label="Date of birth*"
+          placeholder="Date of birth"
+          formControlName="date_of_birth"
+          class="w-full"
+        >
+          <app-control-errors
+            [control]="form.controls.date_of_birth"
+          ></app-control-errors>
+          <div class="icon-after flex flex-col justify-center pr-4">
+            <ng-icon name="heroCalendar" size="20" class="text-grey11 group-hover:text-black"></ng-icon>
+          </div>
+        </app-date-picker>
+      </div>
+
+      @if (showPasswordNote()) {
+        <div class="text-grey11 text-sm">
+        <span
+          class="font-bold">Note:</span><span> Password will be automatically generated and sent to user via email</span>
+        </div>
+      }
+    </div>
+
+    <div class="col-span-1 flex flex-col gap-6 border-2 border-grey101 rounded-xl p-6">
+      <div class="font-bold text-sm">
+        Profile details
+      </div>
+
+      <app-profile-image-drag
+        formControlName="profile_image"
+      >
+        <app-control-errors
+          [control]="form.controls.profile_image"
+        ></app-control-errors>
+      </app-profile-image-drag>
+
+      <app-input
+        type="text"
+        placeholder="Company name"
+        label="Company name*"
+        formControlName="company_name"
+      >
+        <app-control-errors [control]="form.controls.company_name"></app-control-errors>
+      </app-input>
+
+      <app-input
+        type="text"
+        placeholder="Job title"
+        label="Job title"
+        formControlName="job_title"
+        class="mb-6"
+      >
+        <app-control-errors [control]="form.controls.job_title"></app-control-errors>
+      </app-input>
+    </div>
+  </div>
+
+  <div class="flex flex-row gap-2 justify-start">
+    <app-button
+      [disabled]="form.invalid || disabled()"
+    >
+      {{ submitText() }}
+    </app-button>
+
+    @if (showCreateAnother()) {
+      <app-flat-button
+        [disabled]="form.invalid || disabled()"
+        type="button"
+        (onClick)="createAndCreateAnother()"
+      >
+        Create & create another
+      </app-flat-button>
+    }
+
+    <app-flat-button
+      type="button"
+      [disabled]="disabled()"
+      (onClick)="cancelClicked()"
+    >Cancel
+    </app-flat-button>
+  </div>
+</form>

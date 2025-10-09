@@ -1,0 +1,51 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+>
+  <div
+    class="text-center flex flex-col gap-11 h-full justify-center w-auto xl:w-96 mt-4 xl:m-auto"
+  >
+
+    <div class="flex flex-col gap-4">
+      <h1 class="text-grey6 text-3xl font-semibold">
+        {{ 'enter_personal_details' | translate }}
+      </h1>
+
+      <div>
+        {{ 'already_have_account' | translate }} <a routerLink="/sign-in" class="text-blue1 font-bold hover:underline hover:text-purple5">{{'sign_in' | translate}}</a>
+      </div>
+    </div>
+
+    <div class="text-start flex flex-col gap-7">
+
+      <app-profile-image-input
+        (onSelectFile)="selectFile($event)"
+        [initial]="form.controls.profile_image.value"
+        class="self-center"
+      >
+        <app-control-errors
+          [control]="form.controls.profile_image"
+        ></app-control-errors>
+      </app-profile-image-input>
+
+      <app-date-picker
+        [label]="'labels.date_of_birth' | translate"
+        [placeholder]="'placeholders.date_of_birth' | translate"
+        formControlName="date_of_birth"
+      >
+        <app-control-errors
+          [control]="form.controls.date_of_birth"
+        ></app-control-errors>
+      </app-date-picker>
+
+    </div>
+
+    <div>
+      <app-button
+        [disabled]="form.disabled || form.invalid"
+      >
+        {{ 'next' | translate }}
+      </app-button>
+    </div>
+  </div>
+</form>

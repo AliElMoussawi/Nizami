@@ -1,0 +1,22 @@
+<div class="w-full flex flex-row gap-4">
+  <app-user-profile-image
+    [disabled]="true"
+  ></app-user-profile-image>
+
+  <div class="flex flex-row w-full items-between flex-1">
+    <div class="flex flex-col text-sm">
+      <div class="font-bold font-grey7">
+        {{ user()?.first_name | titlecase }}&nbsp;{{ user()?.last_name | titlecase }}
+      </div>
+      <div class="flex flex-row justify-between">
+        <div class="text-grey5 font-normal text-sm">
+          {{ user()?.email }}
+        </div>
+      </div>
+    </div>
+
+    <button (click)="logout()" class="ml-auto">
+      <img src="/assets/icons/logout.svg" alt="Logout">
+    </button>
+  </div>
+</div>

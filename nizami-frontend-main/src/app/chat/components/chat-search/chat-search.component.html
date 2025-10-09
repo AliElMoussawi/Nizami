@@ -1,0 +1,12 @@
+<div class="px-4 xl:px-7">
+  <app-input
+    [placeholder]="'search' | translate"
+    [(ngModel)]="value"
+    (ngModelChange)="onChange($event)"
+  >
+    <button class="icon-before pr-3 flex items-center" (click)="search()" type="button">
+      <img src="/assets/icons/search.svg" alt="" class="block group-focus-within:hidden">
+      <img src="/assets/icons/search-black.svg" alt="" class="hidden group-focus-within:block">
+    </button>
+  </app-input>
+</div>

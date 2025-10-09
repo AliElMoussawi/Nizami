@@ -1,0 +1,39 @@
+<div class="flex flex-col gap-2 p-5">
+  <div class="text-3xl">
+    {{ prompt().title }}
+  </div>
+
+  <div class="text-base">
+    {{ prompt().description }}
+  </div>
+
+  <div class="flex flex-row gap-2 w-full">
+    <form
+      [formGroup]="form"
+      class="flex flex-col gap-2 w-full"
+      (ngSubmit)="submit()"
+    >
+
+      <textarea
+        appAutoExpand
+        formControlName="value"
+        class="bg-grey2 rounded-lg border-grey4 border p-4"
+      ></textarea>
+
+      <div class="flex flex-row gap-2 justify-end">
+        <app-flat-button
+          type="button"
+          [disabled]="isUpdating()"
+          (onClick)="reset()"
+        >Reset
+        </app-flat-button>
+
+        <app-button
+          [disabled]="form.invalid || isUpdating()"
+        >
+          Save
+        </app-button>
+      </div>
+    </form>
+  </div>
+</div>

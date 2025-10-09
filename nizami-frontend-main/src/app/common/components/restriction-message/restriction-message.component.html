@@ -1,0 +1,19 @@
+<ngx-tooltip
+  [open]="isOpened()"
+  class="restriction-tooltip"
+  [dialogOffset]="10"
+  [enterDelay]="100"
+  (onClose$)="handleClose$()"
+  (onOpen$)="handleOpen$()"
+>
+  <img
+    src="/assets/icons/exclamation-blue.svg"
+    alt="Alarm"
+    class="relative-element"
+    #tooltipTrigger
+    (click)="isOpened.set(!isOpened())"
+  >
+  <span class="message text-sm text-grey6 font-medium px-6 py-4">
+    {{ 'communicate_with_admin' | translate }}
+  </span>
+</ngx-tooltip>

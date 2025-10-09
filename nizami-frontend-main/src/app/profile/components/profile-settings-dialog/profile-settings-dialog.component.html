@@ -1,0 +1,41 @@
+<div class="flex flex-col bg-white rounded-3xl shadow-lg px-9 py-8 w-full xl:min-w-128 min-h-[80vh] max-h-[80vh]">
+  <div class="flex flex-row justify-between">
+    <h2 class="text-2xl font-semibold text-grey6">{{ 'profile_settings' | translate }}</h2>
+  </div>
+
+  <h3 class="text-sm text-grey6 mb-5">{{ 'modify_your_account' | translate }}</h3>
+
+  <hr>
+
+  <div class="flex flex-row gap-12 overflow-auto">
+    <div class="flex flex-col gap-1 text-grey6 max-w-48 mt-7">
+      @for (tab of tabs; track tab.id) {
+        <app-tabs-button
+          [selected]="tab.id == selectedTabId()"
+          (onClick)="selectTab(tab)"
+          [tab]="tab"
+        >
+        </app-tabs-button>
+      }
+    </div>
+    <div class="min-w-[41rem] overflow-auto pt-7">
+      @switch (selectedTabId()) {
+        @case (allTabs.AccountDetails) {
+          <app-account-details-tab
+            (onCancel)="close()"
+          ></app-account-details-tab>
+        }
+        @case (allTabs.Personal) {
+          <app-personal-details-tab
+            (onCancel)="close()"
+          ></app-personal-details-tab>
+        }
+        @case (allTabs.Password) {
+          <app-update-password-tab
+            (onCancel)="close()"
+          ></app-update-password-tab>
+        }
+      }
+    </div>
+  </div>
+</div>

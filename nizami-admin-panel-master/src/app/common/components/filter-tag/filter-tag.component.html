@@ -1,0 +1,9 @@
+<div class="border text-sm rounded-2xl py-0.5 px-4 font-medium cursor-pointer"
+     [ngClass]="{
+     'bg-blue1 border-blue1 text-white': isActive(),
+     'bg-white border-grey1': !isActive(),
+     }"
+     (click)="onClick.emit()"
+>
+  <ng-content></ng-content>
+</div>

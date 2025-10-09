@@ -1,0 +1,30 @@
+<div class="flex flex-col gap-2 justify-center items-center">
+  @if (imagePreview) {
+    <div class="relative">
+      <img
+        [src]="imagePreview!"
+        alt="Profile Image"
+        class="w-24 h-24 rounded-full object-cover"
+      >
+
+      <button (click)="clearFile(file)"
+              type="button"
+              class="absolute top-0 right-0 bg-white border-2 border-grey1 rounded-full p-1 w-6 h-6 flex justify-center items-center"
+      >
+        ✖
+      </button>
+    </div>
+  } @else {
+    <button
+      type="button"
+      class="cursor-pointer bg-indigo1 rounded-full p-8 border-white border-4 w-24 h-24"
+      (click)="file.click()"
+    >
+      <img src="/assets/icons/camera.svg" alt="Profile Image">
+    </button>
+  }
+
+  <input class="hidden" accept="image/*" type="file" #file (change)="selectFile($event)">
+
+  <ng-content select="app-control-errors"></ng-content>
+</div>

@@ -1,0 +1,85 @@
+<form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-8">
+  <div class="flex flex-col xl:flex-row gap-6 xl:gap-0">
+    <div class="min-w-full xl:min-w-36 text-grey6 font-bold text-sm">
+      {{ 'personal_details' | translate }}
+    </div>
+
+    <div class="text-start flex flex-col gap-6 items-center xl:items-start w-full">
+      <app-profile-image-input
+        [initialUrl]="profileImage"
+        (onSelectFile)="selectFile($event)"
+      ></app-profile-image-input>
+
+      <div class="flex flex-col xl:flex-row gap-6 w-full">
+        <app-input type="text" [placeholder]="'placeholders.first_name' | translate" [label]="'labels.first_name' | translate" formControlName="first_name"
+                   class="w-full">
+          <app-control-errors [control]="form.controls.first_name"></app-control-errors>
+        </app-input>
+        <app-input type="text" [placeholder]="'placeholders.last_name' | translate" [label]="'labels.last_name' | translate" formControlName="last_name" class="w-full">
+          <app-control-errors [control]="form.controls.last_name"></app-control-errors>
+        </app-input>
+      </div>
+
+      <app-date-picker
+        [label]="'placeholders.date_of_birth' | translate"
+        [placeholder]="'placeholders.date_of_birth' | translate"
+        formControlName="date_of_birth"
+        class="w-full"
+      >
+        <app-control-errors
+          [control]="form.controls.date_of_birth"
+        ></app-control-errors>
+      </app-date-picker>
+
+    </div>
+  </div>
+
+  <hr class="text-grey1 -mx-7 xl:mx-0">
+
+  <div class="flex flex-col xl:flex-row gap-6 xl:gap-0">
+    <div class="min-w-full xl:min-w-36 text-grey6 font-bold text-sm">
+      {{ 'work_details' | translate }}
+    </div>
+
+    <div class="text-start flex flex-col gap-6 items-start w-full">
+      <app-input
+        type="text"
+        [placeholder]="'placeholders.job_title' | translate"
+        [label]="'labels.job_title' | translate"
+        formControlName="job_title"
+        class="w-full"
+      >
+        <app-control-errors [control]="form.controls.job_title"></app-control-errors>
+      </app-input>
+
+      <app-input
+        type="text"
+        [placeholder]="'placeholders.company_name' | translate"
+        [label]="'labels.company_name' | translate"
+        formControlName="company_name"
+        class="w-full"
+      >
+        <app-control-errors [control]="form.controls.company_name"></app-control-errors>
+      </app-input>
+    </div>
+  </div>
+
+  <span class="flex-1 hidden xl:block"></span>
+
+  <div class="flex flex-row self-end gap-2 xl:gap-4 mb-1">
+    <app-outline-button
+      (onClick)="onCancel.emit()"
+      type="button"
+      [disabled]="form.disabled || isSaving()"
+    >
+      {{ 'cancel' | translate }}
+    </app-outline-button>
+    <app-button
+      type="submit"
+      [disabled]="form.disabled || isSaving()"
+    >
+      {{ 'save' | translate }}
+    </app-button>
+  </div>
+
+</form>

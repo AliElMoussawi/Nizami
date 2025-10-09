@@ -1,0 +1,21 @@
+<div class="inline-flex items-center gap-2">
+  <label class="flex items-center cursor-pointer relative">
+    <input type="checkbox"
+           [disabled]="isDisabled"
+           [ngModel]="value"
+           (ngModelChange)="onInputChange($event)"
+           (blur)="onTouched()"
+           class="peer h-4 w-4 cursor-pointer transition-all appearance-none rounded hover:shadow-sm border border-grey1 bg-white checked:border-purple6"
+           id="check-box"/>
+
+    <span
+      class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full flex items-center justify-center">
+                <img src="/assets/icons/check-purple.svg">
+              </span>
+  </label>
+
+  <label for="check-box" class="cursor-pointer text-sm font-normal text-grey7">
+    <span>{{ label() }}</span>
+  </label>
+</div>
+

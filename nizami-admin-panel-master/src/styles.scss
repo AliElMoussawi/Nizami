@@ -1,0 +1,207 @@
+/* You can add global styles to this file, and also import other style files */
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.markdown-clipboard-button {
+  color: yellow;
+}
+
+html, body {
+  height: 100%;
+  background-color: white;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 1.25rem;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  border: 0.35rem solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  border-radius: 9999px;
+  background-color: #AAAAAA;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #999999;
+}
+
+//@use '@angular/material' as mat;
+//@use '@angular/material/menu' as mat-menu;
+//
+//@include mat.core();
+//@include mat.menu-theme();
+
+
+.mat-mdc-menu-content {
+  @apply p-0 !important ;
+}
+
+.mat-mdc-menu-panel {
+  @apply bg-white shadow-[0px_0px_6px_3px_#00000008,0px_12px_16px_-4px_#10182814] rounded-lg border-2 border-grey2 text-base !important;
+}
+
+.mat-mdc-menu-item-text {
+  @apply flex flex-row gap-2 items-center;
+}
+
+.mat-mdc-menu-item {
+  @apply hover:bg-grey13 !important;
+}
+
+.dt-paging > nav {
+  @apply flex flex-row gap-2 justify-center px-4 py-2;
+}
+
+.dt-paging-button {
+  @apply border-2 border-grey2 rounded-lg p-2 hover:bg-grey13;
+
+  &.current {
+    @apply bg-grey3 border-grey3 cursor-default;
+  }
+
+  &.disabled {
+    @apply bg-grey2 border-grey2 text-grey3 cursor-not-allowed;
+  }
+
+  &.first {
+    @apply mr-auto !important;
+  }
+
+  &.last {
+    @apply ml-auto !important;
+  }
+}
+
+.table-section {
+  .info {
+    @apply flex flex-row gap-2 justify-end px-4 py-2 items-center;
+
+    .dt-info {
+      @apply text-center w-full;
+    }
+
+    .dt-length {
+      @apply whitespace-nowrap border-2 border-grey9 rounded-lg pr-1;
+
+      .dt-input {
+        @apply p-2 rounded-lg bg-white rounded-r-none border-r-2 border-grey9;
+      }
+
+      label {
+        @apply p-2;
+      }
+    }
+  }
+}
+
+.table {
+  //:hover {
+  //  @apply cursor-hand;
+  //}
+
+  thead {
+    tr {
+      @apply bg-grey13 font-bold text-left border-b-2 border-grey9 text-black text-sm;
+      th:first-child {
+        @apply p-4;
+      }
+
+    }
+  }
+
+  tbody {
+    tr {
+      @apply border-b-2 border-grey9 text-sm;
+
+      td:first-child {
+        @apply px-4 py-3;
+      }
+
+      td:not(:first-child) {
+        @apply pr-4;
+      }
+
+      &:hover {
+        @apply bg-grey13;
+      }
+    }
+  }
+}
+
+
+.dt-scroll-head {
+  @apply hidden;
+}
+
+
+body {
+  @apply text-grey6 font-lato;
+}
+
+h1 {
+  @apply font-poppins;
+}
+
+
+.country {
+  .ipv_selected-item {
+    @apply rounded-lg border border-grey1 pl-2;
+  }
+
+  .ipv_country-name {
+    @apply text-black;
+  }
+
+  .ipv_search_box {
+    @apply pl-2 rounded-lg;
+  }
+
+  .invalid {
+    .ipv_selected-item {
+      @apply ring-4 ring-indigo2 border-red2 focus-within:ring-4 focus-within:ring-indigo2 focus-within:border-red2;
+    }
+  }
+
+  .valid {
+    .ipv_selected-item {
+      @apply focus-within:ring-4 focus-within:ring-indigo1 focus-within:border-purple2;
+    }
+  }
+}
+
+.clear.country {
+  .ipv_search_box, .ipv_selected-item {
+    @apply border-none;
+  }
+}
+
+.dataTable.table {
+  th {
+    @apply text-black py-4;
+  }
+
+  td {
+    @apply text-grey12;
+  }
+}
+
+
+.flatpickr-day.selected {
+    @apply bg-blue1 border-blue1 !important;
+}
+
+.cdk-overlay-pane {
+  background-color: white;
+}

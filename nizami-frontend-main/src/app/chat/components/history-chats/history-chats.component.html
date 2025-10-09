@@ -1,0 +1,39 @@
+<div
+  class="flex flex-col flex-1 max-h-min pr-4 xl:pr-7 gap-2"
+  [ngClass]="{
+    'pl-2': !hasScrollBar(),
+  }"
+>
+  @for (chat of historyChats.chats(); track chat.id; let i = $index) {
+    @if (i == 0 || (i > 0 && historyChats.chats()[i - 1].relative_date != chat.relative_date)) {
+      <span class="sticky top-0 text-sm font-semibold bg-white z-20 mt-4 text-grey6">
+          {{ chat.relative_date }}
+      </span>
+    }
+
+    <app-history-chat-item
+      [chat]="chat"
+      [highlightedText]="historyChats.searchValue()"
+      (onClick)="viewChat(chat)"
+      (onDelete)="deleteChat(chat)"
+      [selected]="chat.id == selected_id"
+      [alwaysShowActions]="alwaysShowActions()"
+    ></app-history-chat-item>
+  }
+
+  @if (historyChats.searchValue() && historyChats.chats().length <= 0 && !historyChats.isLoading()) {
+    <div class="flex flex-row gap-2 mt-5 pl-8">
+      <div>{{ 'no_results_found' | translate }}</div>
+      <img src="/assets/icons/sad.svg" [alt]="'no_results_found' | translate">
+    </div>
+  }
+
+  @if (historyChats.isLoading()) {
+    <app-spinner></app-spinner>
+  } @else if (historyChats.hasMorePages() && !historyChats.error()) {
+    <app-button (onClick)="onLoadMore()" class="pt-1">
+      {{'load_more' | translate}}
+    </app-button>
+  }
+
+</div>

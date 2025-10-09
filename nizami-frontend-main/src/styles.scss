@@ -1,0 +1,232 @@
+/* You can add global styles to this file, and also import other style files */
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.markdown-clipboard-button {
+  color: yellow;
+}
+
+html, body {
+  height: 100%;
+  background-color: #f4f4ff;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 1.25rem;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  border: 0.35rem solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  border-radius: 9999px;
+  background-color: #AAAAAA;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #999999;
+}
+
+.language-plaintext {
+  @apply whitespace-break-spaces text-black !important;
+  //white-space: break-spaces !important;
+  //color: black !important;
+  text-shadow: none !important;
+}
+
+
+* {
+  @apply font-lato;
+}
+
+h1 {
+  @apply font-poppins;
+}
+
+.country {
+  .disabled {
+    @apply pointer-events-none;
+
+    .ipv_selected-item {
+      @apply border-grey2 bg-grey13 text-grey2;
+    }
+
+    .ipv_country-name {
+      @apply text-grey5;
+    }
+  }
+
+  .ipv_selected-item {
+    @apply rounded-lg border border-grey1 text-grey10 pl-2;
+  }
+
+  .ipv_country-name {
+    @apply text-black;
+  }
+
+  .ipv_search_box {
+    @apply pl-2;
+  }
+
+  .invalid {
+    .ipv_selected-item {
+      @apply ring-4 ring-indigo2 border-red2 focus-within:ring-4 focus-within:ring-indigo2 focus-within:border-red2;
+    }
+  }
+
+  .valid {
+    .ipv_selected-item {
+      @apply focus-within:ring-4 focus-within:ring-indigo1 focus-within:border-purple1;
+    }
+  }
+}
+
+
+.cdk-overlay-container {
+  @apply z-[9999] !important;
+}
+
+.ipv_country-list {
+  @apply min-w-52 xl:min-w-max !important;
+}
+
+.jurisdiction {
+  .ipv_country {
+    @apply my-0.5 relative;
+  }
+
+  .ipv_country-list {
+    @apply p-4 pr-0 rounded-xl;
+    @apply max-w-32 !important;
+  }
+
+  .ipv_country:hover {
+    @apply bg-purple2 rounded-lg !important;
+  }
+
+  .ipv_highlight {
+    @apply bg-purple2 rounded-lg !important;
+    &::after {
+      content: '';
+      background-image: url('assets/icons/check-blue.svg');
+      width: 15px;
+      height: 15px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      vertical-align: middle;
+      margin-left: auto;
+    }
+  }
+
+  .ipv_selected-item {
+    @apply h-9 border-2 !important;
+  }
+
+  .ipv_country-list::before {
+    content: "Model";
+    @apply text-grey11 mb-2 block absolute;
+  }
+
+  .ipv_country-list::after {
+    content: "Once the chat starts, the selected jurisdiction cannot be changed.";
+    @apply cursor-default text-grey11 pl-4 block mt-2 absolute;
+  }
+}
+
+
+.flatpickr-day.selected {
+  @apply bg-blue1 border-blue1 !important;
+}
+
+
+.restriction-tooltip {
+  .ngxTooltip-tooltip {
+    @apply rounded-xl;
+    box-shadow: 0px 1px 3px 1px #00000026;
+
+    box-shadow: 0px 1px 2px 0px #0000004D;
+  }
+  .ngxTooltip-animated-inner-dialog-with-bridge {
+    @apply p-1;
+  }
+
+  .tooltipClass {
+    @apply bg-white;
+  }
+}
+
+[dir='rtl'] {
+  ng-icon {
+    transform: scaleX(-1);
+  }
+  .flip-rtl {
+    transform: scaleX(-1);
+  }
+}
+
+
+@font-face {
+  font-family: 'Bahij TheSansArabic';
+  src: url('/assets/fonts/Bahij_TheSansArabic/Bahij_TheSansArabic-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bahij TheSansArabic';
+  src: url('/assets/fonts/Bahij_TheSansArabic/Bahij_TheSansArabic-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bahij TheSansArabic';
+  src: url('/assets/fonts/Bahij_TheSansArabic/Bahij_TheSansArabic-Plain.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bahij TheSansArabic';
+  src: url('/assets/fonts/Bahij_TheSansArabic/Bahij_TheSansArabic-SemiLight.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bahij TheSansArabic';
+  src: url('/assets/fonts/Bahij_TheSansArabic/Bahij_TheSansArabic-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bahij TheSansArabic';
+  src: url('/assets/fonts/Bahij_TheSansArabic/Bahij_TheSansArabic-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bahij TheSansArabic';
+  src: url('/assets/fonts/Bahij_TheSansArabic/Bahij_TheSansArabic-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bahij TheSansArabic';
+  src: url('/assets/fonts/Bahij_TheSansArabic/Bahij_TheSansArabic-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}

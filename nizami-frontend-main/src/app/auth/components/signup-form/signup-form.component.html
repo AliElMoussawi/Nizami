@@ -1,0 +1,31 @@
+<app-stepper
+  [step]="step()"
+  [stepsCount]="3"
+  (onStepClicked)="onStepClicked($event)"
+  [disabled]="isCreating()"
+>
+  <app-create-account-step
+    *appStep="1"
+    (onSubmit)="createAccountSubmit($event)"
+    [disabled]="isCreating()"
+    [initial]="data"
+    (onChange)="onChange($event)"
+  ></app-create-account-step>
+
+  <app-personal-details-step-1
+    *appStep="2"
+    (onSubmit)="personalStep1Submit($event)"
+    [disabled]="isCreating()"
+    [initial]="data"
+    (onChange)="onChange($event)"
+  ></app-personal-details-step-1>
+
+  <app-personal-details-step-2
+    *appStep="3"
+    (onSubmit)="personalStep2Submit($event)"
+    [disabled]="isCreating()"
+    [initial]="data"
+    (onChange)="onChange($event)"
+  ></app-personal-details-step-2>
+
+</app-stepper>

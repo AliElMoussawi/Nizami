@@ -1,0 +1,23 @@
+<app-template>
+  <div class="flex flex-col gap-2 p-5">
+
+    <div class="flex flex-row gap-4 text-grey5">
+      <a routerLink="/users" class="">Users Management</a>
+      <span class="text-grey1 font-bold">></span>
+      <span class="font-bold ">Create</span>
+    </div>
+
+    <div class="text-3xl font-grey6 font-bold">
+      Create New User
+    </div>
+
+    <app-user-form
+      #userForm
+      (onSubmit)="submit($event)"
+      (onSubmitAndReset)="submit($event, true)"
+      [disabled]="isCreating()"
+    ></app-user-form>
+
+  </div>
+</app-template>
+

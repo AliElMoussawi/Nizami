@@ -1,0 +1,38 @@
+<div
+  class="
+  flex gap-4 items-start
+  leading-1.5 p-4
+  border-2 border-red2 bg-red1 rounded-xl
+  text-black
+"
+>
+  <div class="w-min">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 6.66663V9.99996M10 13.3333H10.0084M18.3334 9.99996C18.3334 14.6023 14.6024 18.3333 10 18.3333C5.39765 18.3333 1.66669 14.6023 1.66669 9.99996C1.66669 5.39759 5.39765 1.66663 10 1.66663C14.6024 1.66663 18.3334 5.39759 18.3334 9.99996Z" stroke="#F04438" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <p class="text-red3 font-bold text-sm">
+      {{ 'errors.something_went_wrong' | translate }}
+    </p>
+    <p class="text-grey12 text-sm font-normal">{{ error() }}</p>
+  </div>
+
+  <span class="flex-1"></span>
+
+  <div>
+    <app-tooltip>
+      <div class="relative-element">
+        <button (click)="onRetry.emit()" class="flex">
+          <ng-icon name="heroArrowPath" size="22"></ng-icon>
+        </button>
+      </div>
+
+      <div class="message">
+        {{ 'retry' | translate }}
+      </div>
+    </app-tooltip>
+  </div>
+
+</div>

@@ -1,0 +1,29 @@
+image: node:20
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - dist/
+
+stages:
+  - build
+  - deploy
+
+build_master:
+  stage: build
+  script:
+    - npm install
+    - npm run build
+  only: [ 'master' ]
+
+deploy_master:
+  image: python:latest
+  stage: deploy
+  before_script:
+    - pip install awscli
+  script:
+    - aws s3 sync ./dist/nizami_admin_panel/browser s3://admin.app.nizami.ai --delete
+    - aws cloudfront create-invalidation --distribution-id E3RY8ROZZOHREG --paths "/*"
+  only: [ 'master' ]
+

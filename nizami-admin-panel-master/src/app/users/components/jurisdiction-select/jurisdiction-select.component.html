@@ -1,0 +1,45 @@
+<div class="flex flex-col gap-1">
+  <div class="flex flex-col gap-1 country clear">
+    <div class="text-start text-sm ">
+      Jurisdiction*
+    </div>
+
+    <div class="border border-grey1 rounded-lg">
+      @if (value() && value().length > 0) {
+        <div class="flex flex-row gap-2 items-center m-2">
+          @for (country of value(); track country) {
+            <div class="border border-indigo1 bg-purple2 text-blue1 p-2 flex flex-row gap-2 rounded-lg items-center">
+              <app-flag
+                [code]="country"
+              ></app-flag>
+
+              <button
+                type="button"
+                (click)="remove(country)"
+              >
+                <img src="/assets/icons/x-blue.svg" alt="✖">
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      @if (isLoaded()) {
+        <lib-country-list
+          #f
+          [ngClass]="{
+      'invalid': hasError,
+      'valid': !hasError,
+    }"
+          placeholderText="Select option"
+          [countryListConfig]="countryListConfig"
+          [selectedCountryConfig]="selectedCountryConfig"
+          (onCountryChange)="onInputChange($event, f)"
+          [allowedCountryCodes]="allowedCountries"
+        ></lib-country-list>
+      }
+    </div>
+  </div>
+
+  <ng-content select="app-control-errors"></ng-content>
+</div>

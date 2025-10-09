@@ -1,0 +1,55 @@
+<div
+  class="bg-white rounded-3xl shadow-lg px-10 py-8 w-full min-w-[28rem] flex flex-col justify-center items-center gap-4"
+>
+
+  <div class="flex flex-col gap-6 w-full">
+    <h1 class="text-2xl  font-grey6 font-semibold text-center text-grey6">
+      Edit document
+    </h1>
+
+    <form
+      [formGroup]="form"
+      class="flex flex-col gap-6"
+      (ngSubmit)="submit()"
+    >
+      <app-input
+        label="Document Name*"
+        placeholder="Document Name"
+        formControlName="name"
+      >
+        <app-control-errors
+          [control]="form.controls.name"
+        ></app-control-errors>
+      </app-input>
+
+      <app-input
+        label="Description for AI"
+        placeholder="Description for AI"
+        formControlName="description"
+      >
+        <app-control-errors
+          [control]="form.controls.description"
+        ></app-control-errors>
+      </app-input>
+
+      <app-language-select
+        formControlName="language"
+      ></app-language-select>
+
+      <div class="flex flex-row gap-5 mt-6 justify-end">
+        <app-flat-button
+          type="button"
+          (onClick)="close()"
+        >Cancel
+        </app-flat-button>
+
+        <app-button
+          [disabled]="form.invalid || form.disabled"
+        >Save
+        </app-button>
+      </div>
+    </form>
+
+  </div>
+
+</div>

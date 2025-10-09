@@ -1,0 +1,18 @@
+<a class="
+hover:bg-purple101 hover:cursor-pointer hover:text-green3
+p-3.5 flex flex-row gap-3 justify-start items-center rounded-lg
+"
+   [routerLink]="routerLink()"
+   [routerLinkActive]="routerLinkActive()"
+   [routerLinkActiveOptions]="routerLinkActiveOptions()"
+
+   #rla="routerLinkActive"
+
+   [ngClass]="
+{
+'bg-purple1 text-green3 font-bold': rla.isActive,
+}"
+>
+  <ng-content select=".icon"></ng-content>
+  <ng-content select=".title"></ng-content>
+</a>

@@ -1,0 +1,52 @@
+@if (editModeEnabled()) {
+  <app-edit-history-chat-item-name
+    [chat]="chat()"
+    (onCancel)="editModeEnabled.set(false)"
+    (onSave)="editModeEnabled.set(false)"
+  ></app-edit-history-chat-item-name>
+} @else {
+  <div class="relative">
+
+    <div class="
+flex flex-row items-center px-3 py-3 gap-3
+hover:bg-green202 rounded-lg group cursor-pointer
+" (click)="viewChat()"
+         [ngClass]="{
+     'bg-green202': selected(),
+     }"
+         (mouseover)="mouseOver()"
+         (mouseout)="mouseOut()"
+    >
+      <app-tooltip preferredPlacement="top" [enterDelay]="500" [arrow]="true" class="flex-1 truncate">
+        <div
+          class="flex flex-row items-center gap-3 relative-element font-medium"
+        >
+          <app-flag
+            [code]="'sa'"
+          ></app-flag>
+
+          <span
+            class="flex-1 truncate text-grey6 text-sm font-medium"
+            [innerHTML]="chat().title  | highlight:highlightedText()">
+          </span>
+        </div>
+
+        <span class="message">
+      {{ chat().title }}
+    </span>
+      </app-tooltip>
+
+      @if ((alwaysShowActions() || showButtons() || selected())) {
+        <div class="flex flex-row gap-3">
+          <button (click)="onEditClicked($event)" class="flex items-center">
+            <img src="/assets/icons/edit.svg" alt="Edit" class="w-min">
+          </button>
+          <button (click)="onDeleteClicked($event)" class="pl-0 flex items-center text-red2">
+            <img src="/assets/icons/trash.svg" alt="Delete" class="w-min">
+          </button>
+        </div>
+      }
+    </div>
+
+  </div>
+}

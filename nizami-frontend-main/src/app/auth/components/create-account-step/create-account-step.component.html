@@ -1,0 +1,68 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+>
+  <div
+    class="text-center flex flex-col gap-11 h-full justify-center w-auto xl:w-96 mt-4 xl:m-auto"
+  >
+
+    <div class="flex flex-col gap-4">
+      <h1 class="text-grey6 text-3xl font-semibold">
+          {{ 'create_account' | translate }}
+      </h1>
+
+      <div>
+          {{ 'already_have_account' | translate }} <a routerLink="/sign-in" class="text-blue1 font-bold hover:underline hover:text-purple5"> {{ 'sign_in' | translate }}</a>
+      </div>
+    </div>
+
+    <div class="text-start flex flex-col gap-7">
+      <div class="flex flex-col xl:flex-row gap-7 xl:gap-6">
+        <app-input type="text" [placeholder]="'placeholders.first_name' | translate" [label]="'labels.first_name' | translate" formControlName="first_name">
+          <app-control-errors [control]="form.controls.first_name"></app-control-errors>
+        </app-input>
+        <app-input type="text" [placeholder]="'placeholders.last_name' | translate" [label]="'labels.last_name' | translate" formControlName="last_name">
+          <app-control-errors [control]="form.controls.last_name"></app-control-errors>
+        </app-input>
+      </div>
+
+      <app-input
+        type="email"
+        [placeholder]="'placeholders.email' | translate"
+        [label]="'labels.email' | translate"
+        formControlName="email"
+      >
+        <app-control-errors [control]="form.controls.email"></app-control-errors>
+      </app-input>
+
+      <app-input
+        [type]="isPasswordVisible() ? 'text' : 'password'"
+        placeholder="••••••••"
+        [label]="'labels.password' | translate"
+        formControlName="password"
+      >
+        <button class="icon-after px-3 flex items-center group" (click)="showPassword()" type="button">
+          @if (isPasswordVisible()) {
+            <img src="assets/icons/eye-slash.svg" class="block group-hover:hidden">
+            <img src="assets/icons/eye-slash-navy.svg" class="hidden group-hover:block">
+          } @else {
+            <img src="assets/icons/eye.svg" class="block group-hover:hidden">
+            <img src="assets/icons/eye-navy.svg" class="hidden group-hover:block">
+          }
+        </button>
+      </app-input>
+
+      <app-password-validation-errors
+        [control]="passwordControl"
+      ></app-password-validation-errors>
+    </div>
+
+    <div>
+      <app-button
+        [disabled]="form.disabled || form.invalid"
+      >
+          {{ 'next' | translate }}
+      </app-button>
+    </div>
+  </div>
+</form>

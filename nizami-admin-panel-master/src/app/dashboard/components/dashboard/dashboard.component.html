@@ -1,0 +1,21 @@
+<app-template>
+  <div class="grid grid-cols-8 gap-2 pt-2 pb-4">
+    @for (card of cards(); track card) {
+      <app-dashboard-card>
+        @if (card.icon) {
+          <ng-icon class="icon" [name]="card.icon" size="20"></ng-icon>
+        }
+
+        @if (card.title) {
+          <div class="title">{{ card.title }}</div>
+        }
+
+        @if (card.body) {
+          <div class="body w-full text-center">
+            {{ card.body }}
+          </div>
+        }
+      </app-dashboard-card>
+    }
+  </div>
+</app-template>

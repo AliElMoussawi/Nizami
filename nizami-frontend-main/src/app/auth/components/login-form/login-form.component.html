@@ -1,0 +1,68 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="h-full"
+>
+
+  <div
+    class="text-center flex flex-col gap-9 h-full justify-center w-auto xl:w-96 xl:m-auto"
+  >
+    <div class="flex flex-col gap-4">
+      <h1 class="text-grey6 text-3xl font-semibold">
+        {{ 'login' | translate }}
+      </h1>
+
+      <div class="text-sm font-normal">
+        {{ 'dont_have_account' | translate }} <a routerLink="/sign-up"
+                                                 class="text-blue1 font-bold hover:underline hover:text-purple5">{{ 'sign_up' | translate }}</a>
+      </div>
+    </div>
+
+    <div class="text-start flex flex-col gap-7">
+      <app-input
+        type="email"
+        [placeholder]="'placeholders.email' | translate"
+        [label]="'labels.email' | translate"
+        formControlName="email"
+      ></app-input>
+
+      <app-input
+        [type]="isPasswordVisible() ? 'text' : 'password'"
+        placeholder="••••••••"
+        [label]="'labels.password' | translate"
+        formControlName="password"
+      >
+        <button class="icon-after px-3 flex items-center group" (click)="showPassword()" type="button">
+          @if (isPasswordVisible()) {
+            <img src="assets/icons/eye-slash.svg" class="block group-hover:hidden">
+            <img src="assets/icons/eye-slash-navy.svg" class="hidden group-hover:block">
+          } @else {
+            <img src="assets/icons/eye.svg" class="block group-hover:hidden">
+            <img src="assets/icons/eye-navy.svg" class="hidden group-hover:block">
+          }
+        </button>
+      </app-input>
+
+      <div class="flex flex-col gap-6">
+        <div class="flex flex-row justify-between">
+          <app-checkbox
+            formControlName="remember_me"
+            [label]="'labels.remember_me' | translate"
+          ></app-checkbox>
+
+          <a routerLink="/forgot-password" class="text-blue1 text-sm font-bold hover:underline hover:text-purple5">
+            {{ 'forgot_password' | translate }}
+          </a>
+        </div>
+
+        <div>
+          <app-button
+            [disabled]="form.disabled || form.invalid"
+          >
+            {{ 'sign_in' | translate }}
+          </app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

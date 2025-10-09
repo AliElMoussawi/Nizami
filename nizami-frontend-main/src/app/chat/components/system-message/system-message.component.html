@@ -1,0 +1,66 @@
+<div
+  class="
+  leading-1.5 py-1
+  rounded-xl flex flex-col gap-2
+"
+>
+  <div class="flex flex-row gap-4">
+    <app-chat-system-profile></app-chat-system-profile>
+
+    <p class="w-full text-sm font-normal flex items-start pt-2.5 xl:ml-32"
+       [dir]="message().language == 'en' ? 'ltr' : 'rtl'"
+    >
+      @if (isLast() && isTyping()) {
+        <ngx-typed-writer
+          [strings]="[
+        text
+      ]"
+          [isHTML]="true"
+          [smartBackspace]="false"
+          [backSpeed]="15"
+          [typeSpeed]="10"
+          [loop]="false"
+          (completeLoop)="writingDone()"
+          [showCursor]="showCursor()"
+        ></ngx-typed-writer>
+      } @else {
+        <div [innerHTML]="text | safeHtml"></div>
+<!--        <markdown-->
+<!--          class="whitespace-break-spaces"-->
+<!--          lineNumbers-->
+<!--          lineHighlight-->
+<!--          emoji-->
+<!--          katex-->
+<!--          clipboard-->
+<!--          [data]="message().text.trim()"-->
+<!--          [disableSanitizer]="true"-->
+<!--        >-->
+<!--        </markdown>-->
+      }
+    </p>
+  </div>
+
+  @if (message().messageFiles && message().messageFiles!.length > 0) {
+    <div class="flex flex-wrap gap-2 justify-start">
+
+      @for (file of message().messageFiles; track file.id) {
+        <app-user-message-file
+          [file]="file"
+          (click)="clicked(file)"
+          [selectable]="true"
+          [isUserMessage]="false"
+        ></app-user-message-file>
+      }
+
+    </div>
+  }
+
+  @if (false) {
+    <div class="flex flex-row gap-1">
+      <app-copy-button
+        [text]="message().text"
+      ></app-copy-button>
+    </div>
+  }
+
+</div>

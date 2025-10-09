@@ -1,0 +1,28 @@
+<form class="pb-1 pl-1" [formGroup]="form" (ngSubmit)="save()">
+  <app-input
+    placeholder="Title"
+    formControlName="title"
+  >
+    <div class="icon-before w-6">
+    </div>
+
+    <div class="icon-after flex flex-row gap-2 items-center justify-center pl-4">
+      <app-tooltip>
+        <button type="submit" class="relative-element flex items-center" [disabled]="form.invalid || isSaving()">
+          <img src="/assets/icons/check.svg" alt="Save" class="h-4">
+        </button>
+        <div class="message">{{ 'save' | translate }}</div>
+      </app-tooltip>
+
+      <app-tooltip>
+        <button type="button" class="relative-element flex items-center" (click)="cancel()" [disabled]="isSaving()">
+          <img src="/assets/icons/cross.svg" alt="Cancel" class="h-4">
+        </button>
+
+        <div class="message">
+          {{ 'cancel' | translate }}
+        </div>
+      </app-tooltip>
+    </div>
+  </app-input>
+</form>

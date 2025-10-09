@@ -1,0 +1,11 @@
+<app-delete-confirmation-dialog
+  (confirmed)="deleteChat()"
+  [title]="'delete_chat?' | translate"
+  (onClose)="close()"
+  [disabled]="isDeleting()"
+>
+  <div class="font-normal text-lg"
+       [innerHTML]="'are_you_sure_delete_chat?' | translate:{title: chat.title} "
+  >
+  </div>
+</app-delete-confirmation-dialog>

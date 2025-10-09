@@ -1,0 +1,26 @@
+<app-template>
+  <div class="flex flex-col gap-2 pt-2 pb-20">
+    <div class="flex flex-row justify-between items-center">
+      <div class="text-2xl">
+        Prompts
+      </div>
+    </div>
+
+    <div>
+      @if (isLoading()) {
+        <app-spinner></app-spinner>
+      } @else {
+        @for (prompt of prompts(); track prompt.id; let isLast = $last) {
+          <app-edit-prompt
+            [prompt]="prompt"
+          ></app-edit-prompt>
+
+          @if (!isLast) {
+            <hr>
+          }
+        }
+      }
+    </div>
+  </div>
+</app-template>
+

@@ -1,0 +1,140 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "nizami-frontend": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/nizami-frontend",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.scss",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css",
+              "node_modules/katex/dist/katex.min.css",
+              "node_modules/ngx-toastr/toastr.css",
+              "node_modules/flatpickr/dist/flatpickr.css",
+              "node_modules/ngx-countries-dropdown/assets/styles.css"
+            ],
+            "scripts": [
+              "node_modules/prismjs/prism.js",
+              "node_modules/prismjs/components/prism-csharp.min.js",
+              "node_modules/prismjs/components/prism-css.min.js",
+              "node_modules/prismjs/components/prism-cshtml.min.js",
+              "node_modules/prismjs/components/prism-python.min.js",
+              "node_modules/prismjs/components/prism-typescript.js",
+              "node_modules/prismjs/components/prism-javascript.js",
+              "node_modules/prismjs/components/prism-java.js",
+              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.js",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js",
+              "node_modules/emoji-toolkit/lib/js/joypixels.min.js",
+              "node_modules/katex/dist/katex.min.js",
+              "node_modules/katex/dist/contrib/auto-render.min.js",
+              "node_modules/clipboard/dist/clipboard.min.js"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1.5MB",
+                  "maximumError": "2MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "nizami-frontend:build:production"
+            },
+            "development": {
+              "buildTarget": "nizami-frontend:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": false
+  },
+}

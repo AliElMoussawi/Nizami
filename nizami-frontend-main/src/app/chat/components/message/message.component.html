@@ -1,0 +1,17 @@
+@if (message().role == 'user') {
+  <app-user-message
+    [message]="message()"
+  ></app-user-message>
+} @else {
+  <app-system-message
+    [message]="message()"
+    [isLast]="isLast()"
+  ></app-system-message>
+
+  @if(message().show_translation_disclaimer) {
+    <app-translation-disclaimer
+      [language]="message().language"
+      [translation_disclaimer_language]="message().translation_disclaimer_language"
+    ></app-translation-disclaimer>
+  }
+}

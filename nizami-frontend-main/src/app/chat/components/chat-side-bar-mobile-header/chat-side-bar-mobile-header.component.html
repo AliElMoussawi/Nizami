@@ -1,0 +1,18 @@
+<div class="w-full flex flex-row justify-between">
+  <div>
+    <app-icon-button
+      (click)="toggleSidebar()"
+      type="button">
+      <img src="/assets/icons/menu.svg" alt="Close">
+    </app-icon-button>
+  </div>
+
+  <div class="justify-end">
+    <app-icon-button
+      type="primary"
+      (onClick)="newChatClicked()"
+    >
+      <img src="/assets/icons/plus-circle.svg" alt="New Chat">
+    </app-icon-button>
+  </div>
+</div>

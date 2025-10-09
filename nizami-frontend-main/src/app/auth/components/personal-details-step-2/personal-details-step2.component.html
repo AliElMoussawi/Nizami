@@ -1,0 +1,47 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+>
+  <div
+    class="text-center flex flex-col gap-11 h-full justify-center w-auto xl:w-96 mt-4 xl:m-auto"
+  >
+
+    <div class="flex flex-col gap-4">
+      <h1 class="text-grey6 text-3xl font-semibold">
+        {{ 'enter_personal_details' | translate }}
+      </h1>
+
+      <div>
+        {{ 'already_have_account' | translate }} <a routerLink="/sign-in" class="text-blue1 font-bold hover:underline hover:text-purple5"> {{ 'sign_in' | translate }}</a>
+      </div>
+    </div>
+
+    <div class="text-start flex flex-col gap-7">
+      <app-input
+        type="text"
+        [placeholder]="'placeholders.job_title' | translate"
+        [label]="'labels.job_title' | translate"
+        formControlName="job_title"
+      >
+        <app-control-errors [control]="form.controls.job_title"></app-control-errors>
+      </app-input>
+
+      <app-input
+        type="text"
+        [placeholder]="'placeholders.company_name' | translate"
+        [label]="'labels.company_name' | translate"
+        formControlName="company_name"
+      >
+        <app-control-errors [control]="form.controls.company_name"></app-control-errors>
+      </app-input>
+    </div>
+
+    <div>
+      <app-button
+        [disabled]="form.disabled || form.invalid"
+      >
+        {{ 'sign_up_now' | translate }}
+      </app-button>
+    </div>
+  </div>
+</form>

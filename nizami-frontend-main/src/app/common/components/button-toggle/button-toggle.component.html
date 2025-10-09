@@ -1,0 +1,13 @@
+<div
+  class=" text-sm py-2 px-4 w-full text-center transition-all duration-200 ease-in-out"
+  [ngClass]="{
+  'font-bold bg-blue1 text-white': selected(),
+  'font-normal cursor-pointer hover:bg-purple3': !selected(),
+  'rounded-l-lg': isFirst(),
+  'rounded-r-lg': isLast(),
+  'border-x border-grey1': !isFirst() && !isLast(),
+  }"
+  (click)="onClick.emit()"
+>
+  {{ tab().title | translate }}
+</div>

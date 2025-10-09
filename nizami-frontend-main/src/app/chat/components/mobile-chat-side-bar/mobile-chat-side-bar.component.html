@@ -1,0 +1,42 @@
+<div class="
+fixed inset-0  items-start z-50
+flex flex-col h-full
+"
+     [@slideInOut]="sidebar.isOpen() ? 'open' : 'closed'"
+     (@slideInOut.done)="onAnimationDone($event)"
+     (click)="sidebar.close()"
+>
+  <div
+    (click)="$event.stopPropagation()"
+    class="bg-white h-full flex flex-col flex-1 w-[80%] border-x-grey1 border-x-2">
+    <div class="flex flex-col">
+      <app-chat-side-bar-mobile-header
+        class="flex w-full px-4 py-6"
+        (onNewChat)="onNewChat.emit()"
+      ></app-chat-side-bar-mobile-header>
+
+      <app-chat-search
+        (onSearch)="search($event)"
+      ></app-chat-search>
+
+      <div class="flex flex-row pr-4 gap-2 pt-4">
+        <img src="/assets/icons/history-chats.svg" alt="" class="text-grey11">
+        <h1 class="text-grey6 font-medium text-base">{{ 'history_chats' | translate }}</h1>
+      </div>
+    </div>
+
+    <app-history-chats
+      class="h-full flex-1 overflow-y-auto"
+      [alwaysShowActions]="false"
+      (onViewChat)="viewChat($event)"
+      (onDeleteChat)="deleteChat($event)"
+    ></app-history-chats>
+
+    <app-chat-side-bar-mobile-footer
+      [showEmail]="false"
+      [shouldOpenProfileSettingsDialog]="false"
+      class="flex px-4 py-3 max-h-[70px] h-[70px] min-h-[70px] border-t-2 border-grey1"
+    ></app-chat-side-bar-mobile-footer>
+  </div>
+
+</div>

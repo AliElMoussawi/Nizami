@@ -1,0 +1,43 @@
+<div class="flex flex-row justify-between px-4 py-6 xl:p-7 gap-2">
+  <app-icon-button
+    class="block xl:hidden"
+    (onClick)="sidebar.open()"
+  >
+    <img src="/assets/icons/menu.svg" alt="Open">
+  </app-icon-button>
+
+  <app-jurisdiction-select
+    class="ml-auto xl:ml-0"
+  ></app-jurisdiction-select>
+
+  <img src="/assets/icons/logo.svg" alt="Nizami" class="block xl:hidden ml-auto xl:ml-0">
+
+  @if (false) {
+    <app-button>
+      <div class="flex flex-row items-center gap-2">
+        <ng-icon name="heroGlobeAlt" size="20"></ng-icon>
+        <span>English</span>
+      </div>
+    </app-button>
+  }
+
+  <span class="flex-1 hidden xl:block"></span>
+
+  <app-button
+    class="hidden xl:block"
+    (onClick)="newChatClicked()"
+  >
+    <div class="flex flex-row items-center gap-2">
+      <img src="/assets/icons/add-circle.svg" [alt]="'new_chat' | translate" class="w-min">
+      <span>{{ 'new_chat' | translate }}</span>
+    </div>
+  </app-button>
+
+  <app-icon-button
+    type="primary"
+    class="block xl:hidden"
+    (onClick)="newChatClicked()"
+  >
+    <img src="/assets/icons/plus-circle.svg" [alt]="'new_chat' | translate">
+  </app-icon-button>
+</div>

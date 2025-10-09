@@ -1,0 +1,38 @@
+<div
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 w-full"
+>
+  <div class="bg-white rounded-2xl shadow-lg p-6 m-6 xl:m-0 xl:w-128 text-center">
+    <h2 class="text-2xl font-semibold mb-1 text-grey6">
+      {{ 'important_notice' | translate }}
+    </h2>
+
+    <div class="text-grey6 mb-4 font-normal text-sm">
+      <div
+        [innerHTML]="'jurisdiction_access_removed_by_admin' | translate:{jurisdiction: chat.jurisdiction | countryName}"
+      >
+      </div>
+      <div>
+        {{ 'contact_admin_for_support' | translate }}
+      </div>
+    </div>
+
+    <div class="flex flex-col xl:flex-row justify-end gap-3">
+      <button
+        class="px-4 py-2 bg-white text-black hover:bg-grey1 border rounded-lg"
+        (click)="close()"
+      >
+        {{ 'got_it' | translate }}
+      </button>
+
+      <button
+        class="px-4 py-2 bg-red2 hover:bg-red-600 text-white rounded-lg flex flex-row gap-3 items-center justify-center"
+        (click)="confirm()"
+      >
+        <img src="/assets/icons/trash-white.svg" alt="Delete">
+        <p>{{ 'delete_this_chat' | translate }}</p>
+      </button>
+    </div>
+  </div>
+</div>
+
+

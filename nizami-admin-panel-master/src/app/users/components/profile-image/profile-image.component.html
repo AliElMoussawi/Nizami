@@ -1,0 +1,15 @@
+@if (imageUrl()) {
+  <a [href]="imageUrl()" target="_blank">
+    <img [src]="imageUrl()" class="bg-indigo1 rounded-full  w-10 h-10 object-cover">
+  </a>
+} @else {
+  <div class="flex flex-col w-10 h-10">
+    <div class="
+   text-center w-full h-full place-content-center
+  bg-indigo1 border-2 border-grey1 rounded-full font-bold text-base
+  ">
+      {{ firstName()[0] | titlecase }}{{ lastName()[0] | titlecase }}
+    </div>
+  </div>
+
+}
