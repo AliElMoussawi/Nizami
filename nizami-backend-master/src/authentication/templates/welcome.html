@@ -1,0 +1,73 @@
+<!-- emails/welcome_signup_email.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to JP Ai</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #5C6BC0;
+        }
+
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .content p {
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Welcome to JP Ai, {{ user.first_name }} {{ user.last_name }}!</h1>
+    </div>
+    <div class="content">
+        <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+        <p>Congratulations on successfully signing up to our platform! We're excited to have you with us.</p>
+        <p>We're here to assist you if you have any questions or need help getting started.</p>
+        <p>Best regards,<br>JP Ai team</p>
+    </div>
+    <div class="footer">
+        <p>&copy; {{ current_year }} JP Ai. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

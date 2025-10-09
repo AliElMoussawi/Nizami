@@ -1,0 +1,13 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  image: python:3.8
+  script:
+    - apt-get update -y
+    - apt-get install -y ssh
+    - pip install paramiko
+    - python deploy.py
+  only:
+    - master
