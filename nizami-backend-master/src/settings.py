@@ -79,6 +79,9 @@ INSTALLED_APPS = [
     'src.chats',
     'src.dashboard',
     'src.prompts',
+    
+    # Payment apps
+    'src.plan'
 ]
 
 MIDDLEWARE = [
