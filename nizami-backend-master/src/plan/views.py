@@ -1,21 +1,15 @@
-from django.shortcuts import render
-from django.contrib.auth import password_validation, update_session_auth_hash
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import AccessToken
 
 from .models import Plan
+from src.subscription.models import UserSubscription
+from src.plan.enums import Tier
 from .serializers import ListPlanSerializer
 from src.common.permissions import IsAdminPermission
 from src.common.pagination import PerPagePagination
-from rest_framework.viewsets import ReadOnlyModelViewSet
 
 
 @api_view(['GET'])
@@ -85,3 +79,28 @@ def activate(request: Request):
     return Response({"message": f"Plan successfully activated: {plan.name}"}, status=status.HTTP_200_OK)
 
 
+@api_view(['GET'])
+def available_for_upgrade(request: Request):
+    exclude_tiers = [Tier.BASIC]
+
+    active_subscription = (
+            UserSubscription.objects
+            .filter(user=request.user, is_active=True)
+            .select_related('plan')
+            .first()
+        )
+    if active_subscription and active_subscription.plan and active_subscription.plan.tier:
+        exclude_tiers.append(active_subscription.plan.tier)
+
+    queryset = (
+        Plan.objects
+        .filter(is_deleted=False)
+        .exclude(tier__in=exclude_tiers)
+        .order_by('-created_at')
+    )
+
+    paginator = PerPagePagination()
+    page = paginator.paginate_queryset(queryset, request)
+
+    serializer = ListPlanSerializer(page, many=True)
+    return paginator.get_paginated_response(serializer.data)
