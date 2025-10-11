@@ -37,10 +37,13 @@ def create_subscription_for_user(user, plan: Plan) -> UserSubscription:
     return subscription
 
 
-def create_basic_subscription_for_user(user, plan_tier:Tier) -> UserSubscription:
-    basic_plan = Plan.objects.filter(tier=plan_tier).order_by('created_at').first()
+def create_basic_subscription_for_user(user) -> UserSubscription:
+    if UserSubscription.objects.filter(user=user, plan__tier=Tier.BASIC).exists():
+        raise ValueError("You are already enrolled in the basic plan")
+
+    basic_plan = Plan.objects.filter(tier=Tier.BASIC).order_by("created_at").first()
     if basic_plan is None:
-        raise ValueError('Basic plan is not configured')
+        raise ValueError("Basic plan is not configured")
 
     return create_subscription_for_user(user, basic_plan)
 
