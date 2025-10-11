@@ -1,6 +1,5 @@
-from datetime import timezone
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.utils import timezone
+from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
@@ -47,5 +46,5 @@ def deactivate(request: Request):
     sub.deactivated_at = timezone.now()
     sub.save() 
 
-    return Response(status=status.HTTP_200_OK)
+    return Response({"message": f"Subscription successfully deactivated to plan: {sub.plan.name}"}, status=status.HTTP_200_OK)
 
