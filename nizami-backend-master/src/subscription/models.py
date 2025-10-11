@@ -1,11 +1,10 @@
 from django.db import models
 
-import os
 import uuid
 
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
+from django.db.models import Q, UniqueConstraint
+from django.core.exceptions import ValidationError
 
 from src.users.models import User
 from src.plan.models import Plan
@@ -21,3 +20,28 @@ class UserSubscription(models.Model):
     deactivated_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    
+
+    def clean(self):
+        if self.is_active and self.user_id:
+            qs = UserSubscription.objects.filter(user=self.user, is_active=True)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                raise ValidationError({
+                    'is_active': 'User already has an active subscription.'
+                })
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['user'],
+                condition=Q(is_active=True),
+                name='unique_active_subscription_per_user',
+            )
+        ]

@@ -4,6 +4,7 @@ from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.utils import timezone
 
+
 from src.plan.enums import InternalUtil, Tier
 from src.plan.models import Plan
 from src.subscription.models import UserSubscription
@@ -31,15 +32,13 @@ def create_subscription_for_user(user, plan: Plan) -> UserSubscription:
         is_active=True,
         expiry_date=expiry_date,
     )
-
-    subscription.full_clean()
     subscription.save()
 
     return subscription
 
 
-def create_basic_subscription_for_user(user) -> UserSubscription:
-    basic_plan = Plan.objects.filter(tier=Tier.BASIC).order_by('created_at').first()
+def create_basic_subscription_for_user(user, plan_tier:Tier) -> UserSubscription:
+    basic_plan = Plan.objects.filter(tier=plan_tier).order_by('created_at').first()
     if basic_plan is None:
         raise ValueError('Basic plan is not configured')
 

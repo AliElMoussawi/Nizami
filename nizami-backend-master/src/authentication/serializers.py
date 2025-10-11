@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from django.db import transaction
 from src.users.models import User
 
 
@@ -49,4 +50,5 @@ class RegisterSerializer(serializers.ModelSerializer):
     profile_image = serializers.ImageField(required=False, allow_null=True)
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        with transaction.atomic():
+            return User.objects.create_user(**validated_data)
