@@ -1,3 +1,4 @@
+from datetime import timezone
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.request import Request
@@ -31,4 +32,20 @@ def active(request: Request):
 
     serializer = UserSubscriptionSerializer(sub)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def deactivate(request: Request):
+    try:
+        sub = UserSubscription.objects.get(user=request.user, is_active=True)
+    except UserSubscription.DoesNotExist:
+        return Response({"detail": "No active subscription"}, status=status.HTTP_404_NOT_FOUND)
+    except UserSubscription.MultipleObjectsReturned:
+        return Response({"detail": "Multiple active subscriptions found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    sub.is_active = False
+    sub.deactivated_at = timezone.now()
+    sub.save() 
+
+    return Response(status=status.HTTP_200_OK)
 
