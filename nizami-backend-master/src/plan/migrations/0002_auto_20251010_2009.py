@@ -13,8 +13,8 @@ def create_initial_plans(apps, schema_editor):
         description='Free plan with 10 message credits to get started',
         price_cents=0,
         currency='USD',
-        interval_unit=None,
-        interval_count=None,
+        interval_unit='MONTH', #Need value here for dynamic client subscription record upon registering.
+        interval_count=1,
         is_active=True,
         credit_amount=10,
         credit_type='MESSAGES',
