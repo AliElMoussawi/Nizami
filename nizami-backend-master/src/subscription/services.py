@@ -1,0 +1,48 @@
+from datetime import datetime
+
+from dateutil.relativedelta import relativedelta
+from django.db import transaction
+from django.utils import timezone
+
+from src.plan.enums import InternalUtil, Tier
+from src.plan.models import Plan
+from src.subscription.models import UserSubscription
+
+
+def _compute_expiry_date(plan: Plan) -> datetime:
+    now = timezone.now()
+    interval_count = plan.interval_count or 1
+
+    if plan.interval_unit == InternalUtil.MONTH:
+        return now + relativedelta(months=interval_count)
+    if plan.interval_unit == InternalUtil.YEAR:
+        return now + relativedelta(years=interval_count)
+
+    raise ValueError('Unsupported plan interval unit')
+
+
+@transaction.atomic
+def create_subscription_for_user(user, plan: Plan) -> UserSubscription:
+    expiry_date = _compute_expiry_date(plan)
+
+    subscription = UserSubscription(
+        user=user,
+        plan=plan,
+        is_active=True,
+        expiry_date=expiry_date,
+    )
+
+    subscription.full_clean()
+    subscription.save()
+
+    return subscription
+
+
+def create_basic_subscription_for_user(user) -> UserSubscription:
+    basic_plan = Plan.objects.filter(tier=Tier.BASIC).order_by('created_at').first()
+    if basic_plan is None:
+        raise ValueError('Basic plan is not configured')
+
+    return create_subscription_for_user(user, basic_plan)
+
+
