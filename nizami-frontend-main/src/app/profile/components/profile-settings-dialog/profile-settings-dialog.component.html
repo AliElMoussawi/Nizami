@@ -35,6 +35,11 @@
             (onCancel)="close()"
           ></app-update-password-tab>
         }
+        @case (allTabs.Subscription) {
+          <app-subscription-tab
+            (onCancel)="close()"
+          ></app-subscription-tab>
+        }
       }
     </div>
   </div>

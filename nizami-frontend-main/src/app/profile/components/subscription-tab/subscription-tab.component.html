@@ -1,0 +1,113 @@
+<div class="flex flex-col gap-6">
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  } @else if (error()) {
+    <div class="flex flex-col items-center justify-center py-8 text-center">
+      <div class="text-red-500 mb-4">
+        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-grey6 mb-2">{{ 'subscription_error' | translate }}</h3>
+      <p class="text-grey5 mb-4">{{ error() }}</p>
+      <button 
+        (click)="loadActiveSubscription()"
+        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+      >
+        {{ 'retry' | translate }}
+      </button>
+    </div>
+  } @else if (activeSubscription()) {
+    <div class="bg-white rounded-xl border border-grey3 p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-semibold text-grey6">{{ 'current_subscription' | translate }}</h3>
+        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+          {{ 'active' | translate }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm font-medium text-grey5 block mb-1">{{ 'plan_name' | translate }}</label>
+            <p class="text-lg font-semibold text-grey6">{{ activeSubscription()?.plan?.name }}</p>
+          </div>
+          
+          <div>
+            <label class="text-sm font-medium text-grey5 block mb-1">{{ 'tier' | translate }}</label>
+            <p class="text-grey6 capitalize">{{ activeSubscription()?.plan?.tier }}</p>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-grey5 block mb-1">{{ 'price' | translate }}</label>
+            <p class="text-lg font-semibold text-grey6">
+              {{ formatPrice(activeSubscription()?.plan?.price_cents || 0, activeSubscription()?.plan?.currency || 'USD') }}
+              <span class="text-sm font-normal text-grey5">
+                / {{ formatInterval(activeSubscription()?.plan?.interval_count || 1, activeSubscription()?.plan?.interval_unit || 'month') }}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm font-medium text-grey5 block mb-1">{{ 'expiry_date' | translate }}</label>
+            <p class="text-grey6">{{ formatDate(activeSubscription()?.expiry_date || '') }}</p>
+          </div>
+
+          @if (activeSubscription()?.last_renewed) {
+            <div>
+              <label class="text-sm font-medium text-grey5 block mb-1">{{ 'last_renewed' | translate }}</label>
+              <p class="text-grey6">{{ formatDate(activeSubscription()?.last_renewed || '') }}</p>
+            </div>
+          }
+
+          <div>
+            <label class="text-sm font-medium text-grey5 block mb-1">{{ 'credit_amount' | translate }}</label>
+            <p class="text-grey6">
+              @if (activeSubscription()?.plan?.is_unlimited) {
+                {{ 'unlimited' | translate }}
+              } @else {
+                {{ activeSubscription()?.plan?.credit_amount }} {{ activeSubscription()?.plan?.credit_type }}
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+
+      @if (activeSubscription()?.plan?.description) {
+        <div class="mb-6">
+          <label class="text-sm font-medium text-grey5 block mb-2">{{ 'description' | translate }}</label>
+          <p class="text-grey6 bg-grey1 rounded-lg p-4">{{ activeSubscription()?.plan?.description }}</p>
+        </div>
+      }
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button 
+          (click)="openUpgradePlansDialog()"
+          class="view-upgrade-button flex-1 px-6 py-3 rounded-lg transition-colors font-medium"
+        >
+          {{ 'view_upgrade_plans' | translate }}
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+      <div class="text-grey4 mb-4">
+        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-grey6 mb-2">{{ 'no_active_subscription' | translate }}</h3>
+      <p class="text-grey5 mb-6">{{ 'no_subscription_description' | translate }}</p>
+      <button 
+        (click)="openUpgradePlansDialog()"
+        class="view-upgrade-button px-6 py-3 rounded-lg transition-colors font-medium"
+      >
+        {{ 'choose_plan' | translate }}
+      </button>
+    </div>
+  }
+</div>

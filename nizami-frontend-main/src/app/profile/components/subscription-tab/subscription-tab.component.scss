@@ -1,0 +1,56 @@
+// Subscription tab specific styles
+.subscription-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.upgrade-button {
+  transition: all 0.2s ease-in-out;
+  background-color: #3b82f6 !important; // Force primary color
+  color: white !important; // Force white text
+  border: none !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: #2563eb !important; // Force primary-dark
+  }
+  
+  &:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+.view-upgrade-button {
+  background-color: #000000 !important; // Green-500
+  color: white !important;
+  border: none !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  
+  &:hover {
+    background-color: #3b82f6 !important; // Green-600
+  }
+}
+
+.status-badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
