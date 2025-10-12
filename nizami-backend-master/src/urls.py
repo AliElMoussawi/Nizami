@@ -28,11 +28,15 @@ urlpatterns = [
     path('api/v1/admin/reference-documents/', include('src.reference_documents.urls')),
     path('api/v1/admin/dashboard/', include('src.dashboard.urls')),
     path('api/v1/admin/prompts/', include('src.prompts.urls')),
-    path('api/v1/admin/plans/', include('src.plan.admin_urls')),
-
     path('api/v1/chats/', include('src.chats.urls')),
+    #Plan
+    path('api/v1/admin/plans/', include('src.plan.admin_urls')),
     path('api/v1/plans/', include('src.plan.urls')),
+    #Payment
     path('api/v1/payment/', include('src.payment.urls')),
+    #Subscription
+    path('api/v1/subscriptions/', include('src.subscription.urls'))
+    
 ]
 
 if settings.DEBUG:
