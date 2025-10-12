@@ -41,6 +41,9 @@ def create_basic_subscription_for_user(user) -> UserSubscription:
     if UserSubscription.objects.filter(user=user, plan__tier=Tier.BASIC).exists():
         raise ValueError("You are already enrolled in the basic plan")
 
+    if UserSubscription.objects.filter(user=user).exists():
+        return ValueError("You are not eligible for the free plan - past subscriptions exist")
+        
     basic_plan = Plan.objects.filter(tier=Tier.BASIC).order_by("created_at").first()
     if basic_plan is None:
         raise ValueError("Basic plan is not configured")

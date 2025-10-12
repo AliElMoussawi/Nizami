@@ -25,9 +25,9 @@ def active(request: Request):
     try:
         sub = UserSubscription.objects.get(user=request.user, is_active=True)
     except UserSubscription.DoesNotExist:
-        return Response({"detail": "No active subscription"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "no_active_user_subscription"}, status=status.HTTP_404_NOT_FOUND)
     except UserSubscription.MultipleObjectsReturned:
-        return Response({"detail": "Multiple active subscriptions found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": "multiple_active_subscriptions_found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     serializer = UserSubscriptionSerializer(sub)
     return Response(serializer.data)
@@ -38,10 +38,11 @@ def deactivate(request: Request):
     try:
         sub = UserSubscription.objects.get(user=request.user, is_active=True)
     except UserSubscription.DoesNotExist:
-        return Response({"detail": "No active subscription"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "no_active_user_subscription"}, status=status.HTTP_404_NOT_FOUND)
     except UserSubscription.MultipleObjectsReturned:
-        return Response({"detail": "Multiple active subscriptions found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+        return Response({"error": "multiple_active_subscriptions_found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    if sub.expiry_date > timezone.now():
+        return Response({"error": "subscription_already_expired"}, status=status.HTTP_400_BAD_REQUEST)
     sub.is_active = False
     sub.deactivated_at = timezone.now()
     sub.save() 
