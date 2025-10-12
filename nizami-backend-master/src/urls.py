@@ -32,7 +32,7 @@ urlpatterns = [
 
     path('api/v1/chats/', include('src.chats.urls')),
     path('api/v1/plans/', include('src.plan.urls')),
-    
+    path('api/v1/payment/', include('src.payment.urls')),
 ]
 
 if settings.DEBUG:

@@ -81,7 +81,8 @@ INSTALLED_APPS = [
     'src.prompts',
     
     # Payment apps
-    'src.plan'
+    'src.plan',
+    'src.payment',
 ]
 
 MIDDLEWARE = [
@@ -254,10 +255,15 @@ CSRF_TRUSTED_ORIGINS = [
     'https://api.nizami.xob-webservices.com',
     'https://admin.nizami.xob-webservices.com',
     'https://nizami.xob-webservices.com',
-
+    'https://please-solved-leave-italiano.trycloudflare.com',
     'https://api.app.nizami.ai',
     'https://admin.app.nizami.ai',
     'https://app.nizami.ai',
     'https://www.admin.app.nizami.ai',
     'https://www.app.nizami.ai',
 ]
+
+MOYASAR_URL = env('MOYASAR_URL')
+MOYASAR_SECRET_KEY = env('MOYASAR_SECRET_KEY')
+MOYASAR_WEBHOOK_SECRET_KEY = env('MOYASAR_WEBHOOK_SECRET_KEY')
+
