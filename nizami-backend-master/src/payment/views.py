@@ -93,8 +93,8 @@ class SyncPaymentStatusView(APIView):
         payment_service = get_moyasar_payment_service()
         
         try:
-            result = payment_service.fetch_and_sync_payment(str(payment_id))
-            payment_serializer = PaymentDetailSerializer(result['payment'])
+            payment = payment_service.fetch_and_sync_payment(str(payment_id))
+            payment_serializer = PaymentDetailSerializer(payment)
             return Response(payment_serializer.data, status=HTTPStatus.OK)
         
         except Exception as e:

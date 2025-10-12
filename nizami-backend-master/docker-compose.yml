@@ -52,8 +52,10 @@ services:
   frontend:
     build:
       context: ../nizami-frontend-main
+      dockerfile: Dockerfile
       args:
         CONFIGURATION: development
+    image: nizami-frontend:${BUILD_VERSION:-latest}
     container_name: frontend
     hostname: frontend
     init: true
@@ -61,6 +63,7 @@ services:
       - "4201:80"
     depends_on:
       - web
+
 
 volumes:
   postgres_data:

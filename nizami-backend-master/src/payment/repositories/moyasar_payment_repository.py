@@ -134,8 +134,7 @@ class MoyasarPaymentRepository:
             payment: MoyasarPayment = MoyasarPayment.objects.get(id=payment_id)
             is_final_status = MoyasarPaymentStatus.is_final_status(payment.status)
             if is_final_status:
-                raise ValidationError(f"Payment {payment_id} cannot be updated, status is already in final state: {payment.status}")
-            
+                return payment          
             if 'source' in moyasar_data and moyasar_data['source']:
                 if payment.source:
                     self._update_payment_source(payment.source, moyasar_data['source'])

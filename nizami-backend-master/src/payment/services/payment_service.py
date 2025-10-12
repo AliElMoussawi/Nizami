@@ -135,11 +135,7 @@ class PaymentService:
         
         logger.info(f"Payment synced successfully: {payment_id}")
         
-        return {
-            'success': True,
-            'payment': payment,
-            'gateway_response': response,
-        }
+        return payment
     
     def fetch_and_sync_invoice(self, invoice_id: str) -> Dict[str, Any]:
         if not invoice_id:
