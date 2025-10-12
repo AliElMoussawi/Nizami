@@ -80,8 +80,10 @@ INSTALLED_APPS = [
     'src.dashboard',
     'src.prompts',
     
-    # Payment apps
-    'src.plan'
+    # Payment app
+    'src.plan',
+    #Subscription app
+    'src.subscription'
 ]
 
 MIDDLEWARE = [
