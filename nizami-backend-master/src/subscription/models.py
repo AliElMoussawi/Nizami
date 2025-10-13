@@ -8,13 +8,17 @@ from django.core.exceptions import ValidationError
 
 from src.users.models import User
 from src.plan.models import Plan
+from src.plan.enums import CreditType
 
 
 class UserSubscription(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions')
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
+    credit_amount = models.IntegerField(blank=True, null=True)
+    credit_type = models.CharField(max_length=50, choices=CreditType.choices)
+    is_unlimited = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(null=False, blank=False)
     last_renewed = models.DateTimeField(null=True, blank=True)
     deactivated_at = models.DateTimeField(null=True, blank=True)

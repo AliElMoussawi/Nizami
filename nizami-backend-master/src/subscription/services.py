@@ -31,6 +31,9 @@ def create_subscription_for_user(user, plan: Plan) -> UserSubscription:
         plan=plan,
         is_active=True,
         expiry_date=expiry_date,
+        credit_amount = plan.credit_amount,
+        credit_type = plan.credit_type,
+        is_unlimited= plan.is_unlimited
     )
     subscription.save()
 

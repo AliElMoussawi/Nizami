@@ -21,7 +21,8 @@ def history(request: Request):
 
 
 @api_view(['GET'])
-def active(request: Request):
+# API called on login and refresh - returns the current subscription credits, expiry date and everything...
+def current_subscription(request: Request):
     try:
         sub = UserSubscription.objects.get(user=request.user, is_active=True)
     except UserSubscription.DoesNotExist:

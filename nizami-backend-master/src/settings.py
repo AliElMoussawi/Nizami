@@ -83,7 +83,9 @@ INSTALLED_APPS = [
     # Payment app
     'src.plan',
     #Subscription app
-    'src.subscription'
+    'src.subscription',
+    #Ledger app
+    'src.ledger'
 ]
 
 MIDDLEWARE = [

@@ -35,6 +35,18 @@ def get_by_uuid(request: Request, uuid):
     serializer = ListPlanSerializer(plan)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def get_current_user_plan_default_configuration(request: Request):
+    try:
+        sub = request.user.subscriptions.filter(is_active=True).select_related('plan').get()
+    except UserSubscription.DoesNotExist:
+        return Response({"error": "no_active_user_subscription"}, status=status.HTTP_404_NOT_FOUND)
+    except UserSubscription.MultipleObjectsReturned:
+        return Response({"error": "multiple_active_subscriptions_found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    serializer = ListPlanSerializer(sub.plan)
+    return Response(serializer.data)
+
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAdminPermission])
