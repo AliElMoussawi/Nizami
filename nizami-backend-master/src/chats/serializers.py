@@ -5,6 +5,8 @@ from src.chats.flow import build_graph
 from src.chats.models import Chat, Message, MessageFile
 from src.chats.utils import truncate_to_complete_words
 
+from src.ledger.services import pre_message_processing_validate, decrement_credits_post_message
+
 
 class CreateChatSerializer(serializers.Serializer):
     first_text_message = serializers.CharField(required=True, write_only=True)
@@ -69,10 +71,11 @@ class CreateMessageSerializer(serializers.Serializer):
     language = serializers.CharField(required=False, read_only=True)
 
     def create(self, validated_data):
-        graph = build_graph()
-
         user = self.context['request'].user
         chat_id = validated_data.get('chat_id')
+        
+        user, subcription =pre_message_processing_validate(user=user)
+        graph = build_graph()
 
         # validate chat access for current user
         chat = Chat.objects.get(user=user, id=chat_id)
@@ -84,5 +87,5 @@ class CreateMessageSerializer(serializers.Serializer):
             'uuid': validated_data['uuid'],
             'chat_id': chat_id,
         })
-
+        decrement_credits_post_message(user=user, subscription=subcription)
         return output['system_message']

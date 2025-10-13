@@ -107,4 +107,12 @@
 	"Must be at least 8 characters.": "",
 	"Must contain one special character.": "",
 	"errors.failed_to_login": ""
+,
+	"errors.user_inactive": "Your account is inactive.",
+	"errors.subscription_not_found": "No active subscription found.",
+	"errors.subscription_multiple_active": "Multiple active subscriptions found.",
+	"errors.subscription_expired": "Your subscription has expired.",
+	"errors.subscription_inactive": "Your subscription is inactive.",
+	"errors.no_message_credits": "You have no remaining message credits.",
+	"errors.an_error_has_occured": "An error has occurred."
 }
