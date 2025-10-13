@@ -48,7 +48,6 @@ export class PlansTabComponent implements OnInit {
         this.loading = false;
       },
       error: (err: any) => {
-        console.error('[PLANS] Failed to load:', err);
         this.error = `Failed to load plans: ${err?.message || err?.status || 'Unknown error'}`;
         this.plans = [];
         this.loading = false;

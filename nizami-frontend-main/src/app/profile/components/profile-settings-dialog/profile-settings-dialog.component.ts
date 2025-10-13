@@ -34,12 +34,12 @@ export class ProfileSettingsDialogComponent {
       title: marker('profile'),
     },
     {
-      id: Tabs.Password,
-      title: marker('password'),
-    },
-    {
       id: Tabs.Plans,
       title: marker('plans'),
+    },
+    {
+      id: Tabs.Password,
+      title: marker('password'),
     },
   ];
 

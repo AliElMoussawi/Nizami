@@ -31,7 +31,9 @@
           ></app-personal-details-tab>
         }
         @case (allTabs.Plans) {
-          <app-plans-tab></app-plans-tab>
+          <app-plans-tab
+          (onCancel)="close()"
+          ></app-plans-tab>
         }
         @case (allTabs.Password) {
           <app-update-password-tab
