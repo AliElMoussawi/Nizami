@@ -17,7 +17,7 @@ class UserSubscription(models.Model):
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     credit_amount = models.IntegerField(blank=True, null=True)
-    credit_type = models.CharField(max_length=50, choices=CreditType.choices)
+    credit_type = models.CharField(max_length=50, choices=CreditType.choices, default=CreditType.MESSAGES)
     is_unlimited = models.BooleanField(default=False)
     expiry_date = models.DateTimeField(null=False, blank=False)
     last_renewed = models.DateTimeField(null=True, blank=True)
