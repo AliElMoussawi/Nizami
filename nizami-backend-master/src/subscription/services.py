@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.utils import timezone
 
-
+from src.users.models import User
 from src.plan.enums import InternalUtil, Tier
 from src.plan.models import Plan
 from src.subscription.models import UserSubscription
@@ -36,6 +36,18 @@ def create_subscription_for_user(user, plan: Plan) -> UserSubscription:
 
     return subscription
 
+@transaction.atomic
+def upgrade_user_subscription_plan(user, plan: Plan) -> UserSubscription:
+    # Get all active user subscriptions
+    active_subscriptions = UserSubscription.objects.filter(user=user, is_active=True)
+    
+    if active_subscriptions.exists():
+        now = timezone.now()
+        active_subscriptions.update(
+            is_active=False,
+            deactivated_at=now
+        )
+    return create_subscription_for_user(user=user, plan=plan)
 
 def create_basic_subscription_for_user(user) -> UserSubscription:
     if UserSubscription.objects.filter(user=user, plan__tier=Tier.BASIC).exists():
@@ -51,3 +63,8 @@ def create_basic_subscription_for_user(user) -> UserSubscription:
     return create_subscription_for_user(user, basic_plan)
 
 
+def upgrade_user_subscription_user_id_and_plan_id(user_id, plan_uuid):
+    user = User.objects.get(id=user_id)
+    plan = Plan.objects.get(uuid=plan_uuid)
+    subscription = upgrade_user_subscription_plan(user=user, plan=plan)
+    return subscription
