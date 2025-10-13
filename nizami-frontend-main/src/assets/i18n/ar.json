@@ -159,5 +159,6 @@
 	"cancelled": "ملغي",
 	"subscription_expired_title": "انتهت صلاحية اشتراكك",
 	"subscription_expired_message": "اشتراكك لم يعد نشطاً. قم بالتجديد للاستمرار في استخدام الخدمة.",
-	"renew_subscription": "تجديد الاشتراك"
+	"renew_subscription": "تجديد الاشتراك",
+	"error_occurred": "حدث خطأ"
 }

@@ -159,5 +159,6 @@
 	"cancelled": "Cancelled",
 	"subscription_expired_title": "Your Subscription Has Expired",
 	"subscription_expired_message": "Your subscription is no longer active. Renew to continue using the service.",
-	"renew_subscription": "Renew Subscription"
+	"renew_subscription": "Renew Subscription",
+	"error_occurred": "Error Occurred"
 }

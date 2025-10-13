@@ -52,14 +52,25 @@ export class CurrentPlanTabComponent implements OnInit {
         this.loading = false;
       },
       error: (err: any) => {
-        // No subscription at all
+        this.loading = false;
+        
+        // HTTP status 0 means backend is unreachable
+        if (err.status === 0) {
+          this.error = 'Unable to connect to the server. Please check your connection and try again.';
+          this.subscription = null;
+          return;
+        }
+        
+        // 404 means no subscription at all (not an error)
         if (err.status === 404) {
           this.error = null;
           this.subscription = null;
-        } else {
-          this.error = `Failed to load subscription: ${err?.message || err?.status || 'Unknown error'}`;
+          return;
         }
-        this.loading = false;
+        
+        // Other errors
+        this.error = `Failed to load subscription: ${err?.error?.message || err?.message || 'Unknown error'}`;
+        this.subscription = null;
       }
     });
   }
