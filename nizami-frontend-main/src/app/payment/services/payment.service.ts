@@ -18,12 +18,12 @@ export class PaymentService {
     return this.http.get<Plan>(`${this.baseUrl}/plans/${planId}`);
   }
 
-  listPlans(): Observable<Plan[]> {
-    const url = `${this.baseUrl}/plans/`;
+  listAvailableUpgradePlans(): Observable<Plan[]> {
+    const url = `${this.baseUrl}/plans/available-for-upgrade`;
   
     return this.http.get<PaginatedResponse<Plan>>(url).pipe(
       map(response => {
-        console.log('[PaymentService] listPlans response:', response);
+        console.log('[PaymentService] listAvailableUpgradePlans response:', response);
         
         // Handle if response is null or undefined
         if (!response) {

@@ -42,7 +42,7 @@ export class PlansTabComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.paymentService.listPlans().subscribe({
+    this.paymentService.listAvailableUpgradePlans().subscribe({
       next: (plans: Plan[]) => {
         this.plans = Array.isArray(plans) ? plans : [];
         this.loading = false;

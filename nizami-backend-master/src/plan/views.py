@@ -86,7 +86,7 @@ def available_for_upgrade(request: Request):
     active_subscription = (
             UserSubscription.objects
             .filter(user=request.user, is_active=True)
-            .select_related('plan')
+            .select_related('plan').order_by()
             .first()
         )
     if active_subscription and active_subscription.plan and active_subscription.plan.tier:

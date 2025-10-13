@@ -12,7 +12,7 @@ describe('PlansTabComponent', () => {
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    paymentServiceSpy = jasmine.createSpyObj('PaymentService', ['listPlans']);
+    paymentServiceSpy = jasmine.createSpyObj('PaymentService', ['listAvailableUpgradePlans']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
@@ -35,22 +35,22 @@ describe('PlansTabComponent', () => {
     const mockPlans: Plan[] = [
       { uuid: '1', name: 'Basic', price_cents: 1000, currency: 'USD' } as Plan
     ];
-    paymentServiceSpy.listPlans.and.returnValue(of(mockPlans));
+    paymentServiceSpy.listAvailableUpgradePlans.and.returnValue(of(mockPlans));
 
     component.ngOnInit();
 
-    expect(paymentServiceSpy.listPlans).toHaveBeenCalled();
+    expect(paymentServiceSpy.listAvailableUpgradePlans).toHaveBeenCalled();
     expect(component.plans).toEqual(mockPlans);
     expect(component.loading).toBeFalse();
     expect(component.error).toBeNull();
   });
 
   it('should handle error when loading plans fails', () => {
-    paymentServiceSpy.listPlans.and.returnValue(throwError(() => new Error('Network error')));
+    paymentServiceSpy.listAvailableUpgradePlans.and.returnValue(throwError(() => new Error('Network error')));
 
     component.ngOnInit();
 
-    expect(paymentServiceSpy.listPlans).toHaveBeenCalled();
+    expect(paymentServiceSpy.listAvailableUpgradePlans).toHaveBeenCalled();
     expect(component.error).toContain('Failed to load plans');
     expect(component.loading).toBeFalse();
     expect(component.plans.length).toBe(0);
