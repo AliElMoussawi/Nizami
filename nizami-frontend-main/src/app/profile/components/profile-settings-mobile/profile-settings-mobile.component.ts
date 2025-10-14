@@ -3,6 +3,7 @@ import {AccountDetailsTabComponent} from '../account-details-tab/account-details
 import {UpdatePasswordTabComponent} from '../update-password-tab/update-password-tab.component';
 import {PersonalDetailsTabComponent} from '../personal-details-tab/personal-details-tab.component';
 import {PlansTabComponent} from '../plans-tab/plans-tab.component';
+import {CurrentPlanTabComponent} from '../current-plan-tab/current-plan-tab.component';
 import {NgIcon} from '@ng-icons/core';
 import {Location} from '@angular/common';
 import {ButtonToggleComponent} from '../../../common/components/button-toggle/button-toggle.component';
@@ -17,6 +18,7 @@ import {marker} from '@colsen1991/ngx-translate-extract-marker';
     UpdatePasswordTabComponent,
     PersonalDetailsTabComponent,
     PlansTabComponent,
+    CurrentPlanTabComponent,
     NgIcon,
     ButtonToggleComponent,
     ButtonToggleGroupComponent,
@@ -36,6 +38,10 @@ export class ProfileSettingsMobileComponent {
     {
       id: Tabs.Personal,
       title: marker('profile'),
+    },
+    {
+      id: Tabs.CurrentPlan,
+      title: marker('current_plan'),
     },
     {
       id: Tabs.Plans,
@@ -78,6 +84,7 @@ export interface Tab {
 export enum Tabs {
   AccountDetails = 'account-details',
   Personal = 'personal',
+  CurrentPlan = 'current-plan',
   Password = 'password',
   Plans = 'plans',
 }
