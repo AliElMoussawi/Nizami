@@ -1,6 +1,6 @@
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-
+from django.db import transaction
 import logging
 
 
@@ -51,14 +51,14 @@ def pre_message_processing_validate(user:User):
             'detail': 'No remaining message credits.',
         })
         
-    return user, subscription
+    return True
         
 
 
-
-def decrement_credits_post_message(user:User, subscription:UserSubscription):
+@transaction.atomic
+def decrement_credits_post_message(user:User):
     try:
-        
+        subscription = UserSubscription.objects.get(user=user, is_active=True)
         if user is None or subscription is None:
             raise ValidationError({
                 'code': SubscriptionValidationCode.GENERAL_ERROR,
@@ -67,14 +67,14 @@ def decrement_credits_post_message(user:User, subscription:UserSubscription):
         
         #unlimited plan -> do nothing for credits
         if subscription.is_unlimited :
-            return
+            return True
         
         if subscription.credit_type == CreditType.MESSAGES and subscription.credit_amount > 0:
             subscription.credit_amount -= 1
             subscription.save()
-            return
-        
+            
+        return True
     except Exception as e:
         logger.error(f"User id: {user.id} - error: {e}")
-        return
+        return False
     
