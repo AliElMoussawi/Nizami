@@ -1,120 +1,116 @@
-<div class="min-h-screen bg-gradient-to-b from-green201 to-grey201">
-  <div class="flex flex-col">
-    <!-- Logo Header -->
-    <div class="p-4 pt-8 xl:px-10 xl:pt-10">
-      <a routerLink="/chat">
-        <img src="/assets/icons/logo.svg" alt="Nizami" class="h-8 xl:h-10">
-      </a>
-    </div>
+<div class="h-screen bg-gradient-to-b from-green201 to-grey201 flex flex-col overflow-hidden">
+  <!-- Logo Header -->
+  <div class="flex-shrink-0 p-3 pt-4 xl:px-8 xl:pt-6">
+    <a routerLink="/chat">
+      <img src="/assets/icons/logo.svg" alt="Nizami" class="h-7 xl:h-8">
+    </a>
+  </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 px-4 pb-8 xl:px-10 xl:pb-10">
-      <div class="max-w-5xl mx-auto">
-        <!-- Loading -->
-        @if (loading) {
-          <div class="flex justify-center items-center min-h-[60vh]">
-            <app-spinner></app-spinner>
-          </div>
-        }
+  <!-- Main Content -->
+  <div class="flex-1 px-3 pb-4 xl:px-8 xl:pb-6 overflow-y-auto">
+    <div class="max-w-6xl mx-auto h-full flex items-center">
+      <!-- Loading -->
+      @if (loading) {
+        <div class="flex justify-center items-center w-full">
+          <app-spinner></app-spinner>
+        </div>
+      }
 
-        <!-- Error -->
-        @if (error && !loading) {
-          <div class="bg-red1 border border-red2 rounded-lg p-4 max-w-2xl mx-auto">
-            <app-error>
-              {{ error }}
-            </app-error>
-          </div>
-        }
+      <!-- Error -->
+      @if (error && !loading) {
+        <div class="bg-red1 border border-red2 rounded-lg p-4 max-w-2xl mx-auto">
+          <app-error>
+            {{ error }}
+          </app-error>
+        </div>
+      }
 
-        <!-- Payment Form -->
-        @if (plan && !loading) {
-          <div class="bg-white rounded-3xl shadow-lg p-6 xl:p-10">
-            <div class="flex flex-col gap-8">
-              <!-- Header Section -->
-              <div class="flex flex-col gap-2 text-center xl:text-start">
-                <h1 class="text-3xl font-bold text-grey6">{{ 'complete_payment' | translate }}</h1>
-                <p class="text-grey5 text-sm">{{ 'secure_payment_description' | translate }}</p>
-              </div>
+      <!-- Payment Form -->
+      @if (plan && !loading) {
+        <div class="bg-white rounded-2xl xl:rounded-3xl shadow-lg p-4 xl:p-6 w-full">
+          <div class="flex flex-col gap-4 xl:gap-5">
+            <!-- Header Section -->
+            <div class="flex flex-col gap-1 text-center xl:text-start">
+              <h1 class="text-xl xl:text-2xl font-bold text-grey6">{{ 'complete_payment' | translate }}</h1>
+              <p class="text-grey5 text-xs xl:text-sm">{{ 'secure_payment_description' | translate }}</p>
+            </div>
 
-              <hr class="text-grey1">
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6">
+              <!-- Left Column - Plan Details -->
+              <div class="flex flex-col gap-3">
+                <h2 class="text-base xl:text-lg font-bold text-grey6">{{ 'order_summary' | translate }}</h2>
 
-              <!-- Content Grid -->
-              <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                <!-- Left Column - Plan Details -->
-                <div class="flex flex-col gap-6">
-                  <h2 class="text-xl font-bold text-grey6">{{ 'order_summary' | translate }}</h2>
-
-                  <!-- Plan Details Card -->
-                  <div class="bg-white border border-grey1 rounded-lg p-6 shadow-sm">
-                    <div class="flex flex-col gap-4">
-                      <!-- Plan Header -->
-                      <div class="flex flex-col gap-2">
-                        <div class="flex flex-row items-center gap-2 flex-wrap">
-                          <h3 class="text-lg font-bold text-grey6">{{ plan.name }}</h3>
-                          <span class="px-2 py-1 bg-purple2 text-blue1 text-xs font-semibold rounded">
-                            {{ plan.tier }}
-                          </span>
-                        </div>
-                        <p class="text-grey5 text-sm">{{ plan.description }}</p>
+                <!-- Plan Details Card -->
+                <div class="bg-white border border-grey1 rounded-lg p-4 shadow-sm">
+                  <div class="flex flex-col gap-3">
+                    <!-- Plan Header -->
+                    <div class="flex flex-col gap-1.5">
+                      <div class="flex flex-row items-center gap-2 flex-wrap">
+                        <h3 class="text-base font-bold text-grey6">{{ plan.name }}</h3>
+                        <span class="px-2 py-0.5 bg-purple2 text-blue1 text-xs font-semibold rounded">
+                          {{ plan.tier }}
+                        </span>
                       </div>
+                      <p class="text-grey5 text-xs xl:text-sm">{{ plan.description }}</p>
+                    </div>
 
-                      <hr class="text-grey1">
+                    <hr class="text-grey1">
 
-                      <!-- Features -->
-                      <div class="flex flex-col gap-3">
-                        <h4 class="text-sm font-semibold text-grey6">{{ 'included_features' | translate }}</h4>
-                        <div class="flex flex-col gap-2 text-sm text-grey6">
-                          @if (plan.is_unlimited) {
-                            <div class="flex flex-row gap-2 items-center">
-                              <span class="text-blue1 font-semibold">✓</span>
-                              <span>{{ 'unlimited_credits' | translate }}</span>
-                            </div>
-                          }
-                          @if (!plan.is_unlimited && plan.credit_amount) {
-                            <div class="flex flex-row gap-2 items-center">
-                              <span class="text-blue1 font-semibold">✓</span>
-                              <span>{{ plan.credit_amount }} {{ plan.credit_type | lowercase }}</span>
-                            </div>
-                          }
-                          @if (plan.rollover_allowed) {
-                            <div class="flex flex-row gap-2 items-center">
-                              <span class="text-blue1 font-semibold">✓</span>
-                              <span>{{ 'rollover_allowed' | translate }}</span>
-                            </div>
-                          }
-                        </div>
-                      </div>
-
-                      <hr class="text-grey1">
-
-                      <!-- Pricing -->
-                      <div class="flex flex-col gap-2">
-                        <div class="flex flex-row justify-between items-baseline">
-                          <span class="text-grey6 font-semibold">{{ 'total_amount' | translate }}</span>
-                          <span class="text-3xl font-bold text-grey6">
-                            {{ (plan.price_cents / 100).toFixed(2) }} {{ plan.currency }}
-                          </span>
-                        </div>
-                        @if (plan.interval_unit) {
-                          <div class="text-sm text-grey5">
-                            {{ 'billed' | translate }} {{ plan.interval_unit.toLowerCase() }}
+                    <!-- Features -->
+                    <div class="flex flex-col gap-2">
+                      <h4 class="text-xs xl:text-sm font-semibold text-grey6">{{ 'included_features' | translate }}</h4>
+                      <div class="flex flex-col gap-1.5 text-xs xl:text-sm text-grey6">
+                        @if (plan.is_unlimited) {
+                          <div class="flex flex-row gap-2 items-center">
+                            <span class="text-blue1 font-semibold">✓</span>
+                            <span>{{ 'unlimited_credits' | translate }}</span>
+                          </div>
+                        }
+                        @if (!plan.is_unlimited && plan.credit_amount) {
+                          <div class="flex flex-row gap-2 items-center">
+                            <span class="text-blue1 font-semibold">✓</span>
+                            <span>{{ plan.credit_amount }} {{ plan.credit_type | lowercase }}</span>
+                          </div>
+                        }
+                        @if (plan.rollover_allowed) {
+                          <div class="flex flex-row gap-2 items-center">
+                            <span class="text-blue1 font-semibold">✓</span>
+                            <span>{{ 'rollover_allowed' | translate }}</span>
                           </div>
                         }
                       </div>
                     </div>
+
+                    <hr class="text-grey1">
+
+                    <!-- Pricing -->
+                    <div class="flex flex-col gap-1">
+                      <div class="flex flex-row justify-between items-baseline">
+                        <span class="text-grey6 font-semibold text-sm">{{ 'total_amount' | translate }}</span>
+                        <span class="text-2xl xl:text-3xl font-bold text-grey6">
+                          {{ (plan.price_cents / 100).toFixed(2) }} {{ plan.currency }}
+                        </span>
+                      </div>
+                      @if (plan.interval_unit) {
+                        <div class="text-xs xl:text-sm text-grey5">
+                          {{ 'billed' | translate }} {{ plan.interval_unit.toLowerCase() }}
+                        </div>
+                      }
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                <!-- Right Column - Payment Form -->
-                <div class="flex flex-col gap-6">
-                  <h2 class="text-xl font-bold text-grey6">{{ 'payment_details' | translate }}</h2>
-                  <div class="mysr-form"></div>
-                </div>
+              <!-- Right Column - Payment Form -->
+              <div class="flex flex-col gap-3">
+                <h2 class="text-base xl:text-lg font-bold text-grey6">{{ 'payment_details' | translate }}</h2>
+                <div class="mysr-form"></div>
               </div>
             </div>
           </div>
-        }
-      </div>
+        </div>
+      }
     </div>
   </div>
 </div>

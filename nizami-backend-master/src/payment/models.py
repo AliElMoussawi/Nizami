@@ -1,4 +1,4 @@
-from enum import unique
+from src.subscription.models import UserSubscription
 from django.db import models, transaction
 from django.utils import timezone
 from django.conf import settings
@@ -162,3 +162,22 @@ class MoyasarWebhookEvent(models.Model):
     class Meta:
         ordering = ["-created_at"]
         default_permissions = ('add', 'change', 'delete', 'view')
+
+class PaymentUserSubscription(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_subscription = models.OneToOneField(
+        UserSubscription,
+        on_delete=models.CASCADE,
+        related_name='payment_link'
+    )
+    payment = models.OneToOneField(
+        MoyasarPayment,
+        on_delete=models.CASCADE,
+        related_name='subscription_link'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    def __str__(self):
+        return f"Payment {self.payment.id} -> Subscription {self.user_subscription.uuid}"
