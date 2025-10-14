@@ -1,34 +1,30 @@
-# Build stage
+# Stage 1: Build Angular app
 FROM node:20-alpine AS build
 
-# Accept build configuration as argument (default to production)
+# Accept build configuration as argument (defaults to production)
 ARG CONFIGURATION=production
 
 WORKDIR /app
 
-# Copy package files
+# Copy dependency files and install (cached separately)
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy project files
+# Copy project source
 COPY . .
 
-# Build the Angular app with the specified configuration
+# Build Angular app for the given configuration
 RUN npm run build -- --configuration ${CONFIGURATION}
 
-# Production stage
+# Stage 2: Serve with Nginx
 FROM nginx:alpine
 
-# Copy built files from build stage
-COPY --from=build /app/dist/nizami-frontend/browser /usr/share/nginx/html
+# Copy build output (adjust folder name if no "browser" subfolder exists)
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration
+# Custom Nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
-

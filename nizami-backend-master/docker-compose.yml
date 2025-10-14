@@ -1,6 +1,7 @@
 services:
   db:
     image: 'ankane/pgvector:latest'
+    init: true
     environment:
       POSTGRES_DB: nizami_db
       POSTGRES_USER: nizami_user
@@ -22,7 +23,8 @@ services:
     platform: linux/amd64
     container_name: web
     hostname: web
-    command: [ "sh", "-c", "python manage.py init_vector_extension && python manage.py migrate && python manage.py runserver 0.0.0.0:8009" ]
+    init: true
+    command: [ "sh", "-c", "python manage.py init_vector_extension && python manage.py migrate && exec python manage.py runserver 0.0.0.0:8009" ]
     env_file:
       - .env
     volumes:
@@ -41,6 +43,7 @@ services:
         CONFIGURATION: development
     container_name: admin-panel
     hostname: admin-panel
+    init: true
     ports:
       - "4200:80"
     depends_on:
@@ -49,14 +52,18 @@ services:
   frontend:
     build:
       context: ../nizami-frontend-main
+      dockerfile: Dockerfile
       args:
         CONFIGURATION: development
+    image: nizami-frontend:${BUILD_VERSION:-latest}
     container_name: frontend
     hostname: frontend
+    init: true
     ports:
       - "4201:80"
     depends_on:
       - web
+
 
 volumes:
   postgres_data:

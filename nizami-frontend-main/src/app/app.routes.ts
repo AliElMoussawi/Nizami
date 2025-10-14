@@ -9,6 +9,9 @@ import {ResetPasswordComponent} from './auth/components/reset-password/reset-pas
 import {
   ProfileSettingsMobileComponent
 } from './profile/components/profile-settings-mobile/profile-settings-mobile.component';
+import {PaymentComponent} from './payment/components/payment/payment.component';
+import {PaymentSuccessComponent} from './payment/components/payment-success/payment-success.component';
+import {PaymentCallbackComponent} from './payment/components/payment-callback/payment-callback.component';
 
 export const routes: Routes = [
   {
@@ -44,6 +47,20 @@ export const routes: Routes = [
   {
     path: 'profile-settings',
     component: ProfileSettingsMobileComponent,
+    canActivate: [AuthenticatedGuard],
+  },
+  {
+    path: 'payment/success',
+    component: PaymentSuccessComponent,
+    canActivate: [AuthenticatedGuard],
+  },
+  {
+    path: 'payment/callback',
+    component: PaymentCallbackComponent,
+  },
+  {
+    path: 'payment/:planId',
+    component: PaymentComponent,
     canActivate: [AuthenticatedGuard],
   },
   {
