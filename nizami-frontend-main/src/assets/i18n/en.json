@@ -112,7 +112,7 @@
 	"errors.subscription_expired": "Your subscription has expired.",
 	"errors.subscription_inactive": "Your subscription is inactive.",
 	"errors.no_message_credits": "You have no remaining message credits.",
-	"errors.an_error_has_occured": "An error has occurred."
+	"errors.an_error_has_occured": "An error has occurred.",
 	"errors.failed_to_login": "",
 	"plans": "Plans",
 	"loading_plans": "Loading plans...",

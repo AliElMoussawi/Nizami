@@ -112,7 +112,7 @@
 	"errors.subscription_expired": "انتهت صلاحية اشتراكك.",
 	"errors.subscription_inactive": "اشتراكك غير نشط.",
 	"errors.no_message_credits": "لا توجد أرصدة رسائل متبقية.",
-	"errors.an_error_has_occured": "حدث خطأ ما."
+	"errors.an_error_has_occured": "حدث خطأ ما.",
 	"errors.failed_to_login": "لم يتم تسجيل الدخول، حاول مرة أخرى",
 	"plans": "الخطط",
 	"loading_plans": "جاري تحميل الخطط...",
