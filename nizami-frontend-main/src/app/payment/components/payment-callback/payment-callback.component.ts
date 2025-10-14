@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-payment-callback',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './payment-callback.component.html',
   styleUrls: ['./payment-callback.component.scss']
 })

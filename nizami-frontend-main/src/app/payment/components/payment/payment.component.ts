@@ -98,6 +98,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
           callback_url: `${baseUrl}/payment/callback`,
           supported_networks: ['visa', 'mastercard', 'mada'],
           methods: ['creditcard'],
+          credit_card:{
+            save_card: true
+          },
           metadata: {
             user_id: userId.toString(),
             plan_id: this.plan!.uuid

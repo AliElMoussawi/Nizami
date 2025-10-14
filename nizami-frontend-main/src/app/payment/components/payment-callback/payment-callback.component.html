@@ -1,19 +1,37 @@
-<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-  <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-    <div class="mb-6">
-      <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center animate-pulse">
-        <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-      </div>
+<div class="min-h-screen bg-gradient-to-b from-green201 to-grey201">
+  <div class="flex flex-col">
+    <!-- Logo Header -->
+    <div class="p-4 pt-8 xl:px-10 xl:pt-10">
+      <a routerLink="/chat">
+        <img src="/assets/icons/logo.svg" alt="Nizami" class="h-8 xl:h-10">
+      </a>
     </div>
-    
-    <h1 class="text-2xl font-bold text-gray-800 mb-2">Processing Payment...</h1>
-    <p class="text-gray-600 mb-6">Please wait while we confirm your payment.</p>
-    
-    <div *ngIf="message" class="text-sm text-gray-500">
-      {{ message }}
+
+    <!-- Main Content -->
+    <div class="flex-1 px-4 pb-8 xl:px-10 xl:pb-10 flex items-center justify-center">
+      <div class="max-w-xl w-full">
+        <div class="bg-white rounded-3xl shadow-lg p-6 xl:p-8">
+          <div class="flex flex-col items-center text-center gap-5">
+            <!-- Processing Icon -->
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-pulse">
+              <svg class="w-10 h-10 text-blue1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            
+            <!-- Processing Message -->
+            <div class="flex flex-col gap-1">
+              <h2 class="text-xl font-semibold text-grey6">{{ 'processing_payment' | translate }}</h2>
+              <p class="text-grey5 text-sm">{{ 'processing_payment_message' | translate }}</p>
+            </div>
+
+            <!-- Additional Message if Available -->
+            <div *ngIf="message" class="w-full p-4 bg-grey2 rounded-lg">
+              <p class="text-xs text-grey5">{{ message }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-
