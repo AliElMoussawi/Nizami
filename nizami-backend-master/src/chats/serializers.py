@@ -74,7 +74,7 @@ class CreateMessageSerializer(serializers.Serializer):
         user = self.context['request'].user
         chat_id = validated_data.get('chat_id')
         
-        user, subcription =pre_message_processing_validate(user=user)
+        user, subcription = pre_message_processing_validate(user=user)
         graph = build_graph()
 
         # validate chat access for current user

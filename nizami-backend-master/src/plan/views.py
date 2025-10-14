@@ -36,7 +36,7 @@ def get_by_uuid(request: Request, uuid):
     return Response(serializer.data)
 
 @api_view(['GET'])
-def get_current_user_plan_default_configuration(request: Request):
+def user_raw_plan(request: Request):
     try:
         sub = request.user.subscriptions.filter(is_active=True).select_related('plan').get()
     except UserSubscription.DoesNotExist:

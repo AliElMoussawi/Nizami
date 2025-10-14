@@ -1,20 +1,16 @@
-from datetime import datetime
-
-from dateutil.relativedelta import relativedelta
-from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+import logging
 
-from src.plan.enums import InternalUtil, Tier, CreditType
+
+from src.plan.enums import CreditType
 from src.plan.models import Plan
 from src.subscription.models import UserSubscription
 from src.users.models import User
 from src.ledger.enums import SubscriptionValidationCode
 
-
-
-
+logger = logging.getLogger(__name__)
 
 def pre_message_processing_validate(user:User):
     ''' We do not check if the plan of a user is deactivate by the admin - 
@@ -61,19 +57,24 @@ def pre_message_processing_validate(user:User):
 
 
 def decrement_credits_post_message(user:User, subscription:UserSubscription):
-    if user is None or subscription is None:
-        raise ValidationError({
-            'code': SubscriptionValidationCode.GENERAL_ERROR,
-            'detail': 'Post message decrement - user or subscription is None',
-        })
-    
-    #unlimited plan -> do nothing for credits
-    if subscription.is_unlimited :
-        return
-    
-    if not subscription.is_unlimited and subscription.credit_type == CreditType.MESSAGES and subscription.credit_amount > 0:
-        subscription.credit_amount -= 1
-        subscription.save()
-        return
+    try:
         
+        if user is None or subscription is None:
+            raise ValidationError({
+                'code': SubscriptionValidationCode.GENERAL_ERROR,
+                'detail': 'Post message decrement - user or subscription is None',
+            })
+        
+        #unlimited plan -> do nothing for credits
+        if subscription.is_unlimited :
+            return
+        
+        if subscription.credit_type == CreditType.MESSAGES and subscription.credit_amount > 0:
+            subscription.credit_amount -= 1
+            subscription.save()
+            return
+        
+    except Exception as e:
+        logger.error(f"User id: {user.id} - error: {e}")
+        return
     
