@@ -48,14 +48,7 @@ def pre_message_processing_validate(user:User):
             'detail': 'Subscription has expired.',
         })
 
-    # 2- Check if subscription is active
-    if not subscription.is_active:
-        raise ValidationError({
-            'code': SubscriptionValidationCode.SUBSCRIPTION_INACTIVE,
-            'detail': 'Subscription is inactive.',
-        })
-
-    # 3- Check if we still have credits for messages for limited plans - explicit checking credit_type because what if we added other types
+    # 2- Check if we still have credits for messages for limited plans - explicit checking credit_type because what if we added other types
     if not subscription.is_unlimited and subscription.credit_type == CreditType.MESSAGES and subscription.credit_amount <= 0:
         raise ValidationError({
             'code': SubscriptionValidationCode.NO_MESSAGE_CREDITS,
