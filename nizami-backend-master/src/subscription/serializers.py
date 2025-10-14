@@ -14,11 +14,15 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
             'user',
             'plan',
             'is_active',
+            'credit_amount',
+            'credit_type',
+            'is_unlimited',
             'expiry_date',
             'last_renewed',
             'deactivated_at',
             'created_at',
             'updated_at',
+         
         ]
         read_only_fields = fields
 
