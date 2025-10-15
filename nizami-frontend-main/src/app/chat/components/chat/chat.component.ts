@@ -17,7 +17,7 @@ import {NgClass, NgStyle} from '@angular/common';
 import {HistoryChatsService} from '../../services/history-chats.service';
 import {marker} from '@colsen1991/ngx-translate-extract-marker';
 import {TranslateService} from '@ngx-translate/core';
-import {detectLanguage} from '../../../common/utils';
+import {detectLanguage, extractErrorFromResponse} from '../../../common/utils';
 
 
 @UntilDestroy()
@@ -108,7 +108,14 @@ export class ChatComponent {
         takeUntil(this.stop$),
         untilDestroyed(this),
         catchError((err) => {
-          this.error.set(this.translate.instant(marker('errors.failed_creating_chat')));
+          const extracted = extractErrorFromResponse(err);
+          if (typeof extracted === 'string' && extracted.startsWith('errors.')) {
+            this.error.set(this.translate.instant(marker(extracted)));
+          } else if (typeof extracted === 'string' && extracted.trim().length > 0) {
+            this.error.set(extracted);
+          } else {
+            this.error.set(this.translate.instant(marker('errors.failed_creating_chat')));
+          }
           this.isDisabled.set(false);
           this.isGeneratingResponse.set(false);
 
@@ -286,7 +293,14 @@ export class ChatComponent {
         untilDestroyed(this),
         takeUntil(this.stop$),
         catchError((err) => {
-          this.error.set(this.translate.instant(marker('errors.failed_generating_response')));
+          const extracted = extractErrorFromResponse(err);
+          if (typeof extracted === 'string' && extracted.startsWith('errors.')) {
+            this.error.set(this.translate.instant(marker(extracted)));
+          } else if (typeof extracted === 'string' && extracted.trim().length > 0) {
+            this.error.set(extracted);
+          } else {
+            this.error.set(this.translate.instant(marker('errors.failed_generating_response')));
+          }
           this.isDisabled.set(false);
           this.isGeneratingResponse.set(false);
 
