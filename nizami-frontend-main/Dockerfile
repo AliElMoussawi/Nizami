@@ -20,8 +20,7 @@ RUN npm run build -- --configuration ${CONFIGURATION}
 FROM nginx:alpine
 
 # Copy build output (adjust folder name if no "browser" subfolder exists)
-COPY --from=build /app/dist /usr/share/nginx/html
-
+COPY --from=build /app/dist/nizami-frontend/browser /usr/share/nginx/html
 # Custom Nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
