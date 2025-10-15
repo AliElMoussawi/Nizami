@@ -18,7 +18,7 @@ function normalizeBackendCodeToI18nKey(rawCode: string | undefined): string | nu
     return rawCode;
   }
 
-  // Take last enum segment if provided like: SubscriptionValidationCode.SUBSCRIPTION_EXPIRED
+  // Take last enum segment if provided like: Namespace.CODE_NAME
   const lastSegment = rawCode.includes('.') ? rawCode.split('.').pop()! : rawCode;
 
   // Convert to snake_case lower
@@ -30,24 +30,15 @@ function normalizeBackendCodeToI18nKey(rawCode: string | undefined): string | nu
   return `errors.${normalized}`;
 }
 
-export function extractSubscriptionErrorKey(error: any): string | null {
-  if (!(error instanceof HttpErrorResponse)) {
-    return null;
-  }
+// Generic extractor: maps structured backend error payloads to i18n keys
+// Expected DRF payload shape: { code?: string; detail?: string } but works with others too
+export function extractErrorKey(error: any): string | null {
+  if (!(error instanceof HttpErrorResponse)) return null;
 
   const payload = error.error as any;
   const code = payload?.code as string | undefined;
-  const detail = (payload?.detail as string | undefined)?.toLowerCase();
-
-  const normalizedKey = normalizeBackendCodeToI18nKey(code);
-  if (normalizedKey) return normalizedKey;
-
-  // Some backend paths may omit `code` for expired subscriptions – infer from detail
-  if (detail?.includes('expired')) {
-    return 'errors.subscription_expired';
-  }
-
-  return null;
+  const key = normalizeBackendCodeToI18nKey(code);
+  return key;
 }
 
 export function convertToFormData(data: any): FormData {
@@ -72,10 +63,8 @@ export function convertToFormData(data: any): FormData {
 export function extractErrorFromResponse(error: any) {
   if (error instanceof HttpErrorResponse) {
     // Prefer structured backend codes that we can translate on the UI
-    const subscriptionKey = extractSubscriptionErrorKey(error);
-    if (subscriptionKey) {
-      return subscriptionKey;
-    }
+    const i18nKey = extractErrorKey(error);
+    if (i18nKey) return i18nKey;
 
     // If backend sent a human-readable detail, show it as-is
     const detail = (error.error?.detail as string | undefined);
