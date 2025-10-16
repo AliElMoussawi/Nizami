@@ -115,6 +115,7 @@
 	"errors.an_error_has_occured": "حدث خطأ ما.",
 	"errors.failed_to_login": "لم يتم تسجيل الدخول، حاول مرة أخرى",
 	"plans": "الخطط",
+  "payments": "المدفوعات",
 	"loading_plans": "جاري تحميل الخطط...",
 	"subscribe": "اشترك",
 	"unlimited_credits": "رصيد غير محدود",
@@ -167,5 +168,14 @@
 	"subscription_expired_title": "انتهت صلاحية اشتراكك",
 	"subscription_expired_message": "اشتراكك لم يعد نشطاً. قم بالتجديد للاستمرار في استخدام الخدمة.",
 	"renew_subscription": "تجديد الاشتراك",
-	"error_occurred": "حدث خطأ"
+	"error_occurred": "حدث خطأ",
+	"page": "الصفحة",
+	"status": "الحالة",
+	"amount": "المبلغ",
+	"currency": "العملة",
+	"date": "التاريخ",
+	"source": "المصدر",
+	"previous": "السابق",
+	"loading": "جاري التحميل...",
+	"failed_to_load_payments": "فشل تحميل المدفوعات"
 }

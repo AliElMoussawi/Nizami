@@ -3,6 +3,8 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.request import Request
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -15,6 +17,7 @@ from .serializers.moyasar_serializers import (
 from .services.moyasar_payment_service import get_moyasar_payment_service
 from .models import UserPaymentSource, MoyasarPayment
 from src.common.generic_api_gateway import WebhookProcessingStatus
+from src.common.pagination import PerPagePagination
 
 import logging
 logger = logging.getLogger(__name__)
@@ -52,19 +55,24 @@ class MoyasarWebhookView(APIView):
             return Response(result, status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
-class PaymentListView(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def list_payments(request: Request):
+    user_id = str(request.user.id)
 
-    def get(self, request):
-        user_id = str(request.user.id)
-        
-        payments = MoyasarPayment.objects.filter(
-            metadata__customer_id=user_id
-        ).select_related('source', 'invoice').order_by('-created_at')
-        
-        serializer = PaymentDetailSerializer(payments, many=True)
-        return Response(serializer.data, status=HTTPStatus.OK)
+    queryset = (
+        MoyasarPayment.objects
+        .filter(metadata__customer_id=user_id)
+        .select_related('source', 'invoice')
+        .order_by('-created_at')
+    )
+
+    paginator = PerPagePagination()
+    page = paginator.paginate_queryset(queryset, request)
+
+    serializer = PaymentDetailSerializer(page, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 
 class PaymentDetailView(APIView):

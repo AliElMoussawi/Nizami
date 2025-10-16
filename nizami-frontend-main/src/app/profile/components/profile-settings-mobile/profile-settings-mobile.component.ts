@@ -4,6 +4,7 @@ import {UpdatePasswordTabComponent} from '../update-password-tab/update-password
 import {PersonalDetailsTabComponent} from '../personal-details-tab/personal-details-tab.component';
 import {PlansTabComponent} from '../plans-tab/plans-tab.component';
 import {CurrentPlanTabComponent} from '../current-plan-tab/current-plan-tab.component';
+import {PaymentsTabComponent} from '../payments-tab/payments-tab.component';
 import {NgIcon} from '@ng-icons/core';
 import {Location} from '@angular/common';
 import {ButtonToggleComponent} from '../../../common/components/button-toggle/button-toggle.component';
@@ -19,6 +20,7 @@ import {marker} from '@colsen1991/ngx-translate-extract-marker';
     PersonalDetailsTabComponent,
     PlansTabComponent,
     CurrentPlanTabComponent,
+    PaymentsTabComponent,
     NgIcon,
     ButtonToggleComponent,
     ButtonToggleGroupComponent,
@@ -48,9 +50,13 @@ export class ProfileSettingsMobileComponent {
       title: marker('plans'),
     },
     {
+      id: Tabs.Payments,
+      title: marker('payments'),
+    },
+    {
       id: Tabs.Password,
       title: marker('password'),
-    },
+    }
   ];
 
   constructor(
@@ -87,4 +93,5 @@ export enum Tabs {
   CurrentPlan = 'current-plan',
   Password = 'password',
   Plans = 'plans',
+  Payments = 'payments',
 }

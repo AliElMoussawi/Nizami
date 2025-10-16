@@ -1,0 +1,81 @@
+<div class="flex flex-col max-h-fit">
+  <div class="w-full flex flex-col gap-6">
+
+    <div class="flex flex-row items-center justify-between">
+      <h3 class="text-grey6 font-bold text-sm">{{ 'payments' | translate }}</h3>
+      <div class="flex flex-row gap-2 items-center">
+        <span class="text-xs text-grey5">{{ 'page' | translate }} {{ localPage() }} / {{ localLastPage() }}</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <div class="grid grid-cols-12 text-grey6 text-xs font-semibold">
+        <div class="col-span-3">{{ 'status' | translate }}</div>
+        <div class="col-span-2">{{ 'amount' | translate }}</div>
+        <div class="col-span-2">{{ 'currency' | translate }}</div>
+        <div class="col-span-3">{{ 'date' | translate }}</div>
+        <div class="col-span-2">{{ 'source' | translate }}</div>
+      </div>
+
+      <hr class="text-grey1 -mx-7 xl:mx-0">
+
+      @if (loading()) {
+        <div class="py-4 text-sm text-grey5">{{ 'loading' | translate }}</div>
+      } @else if (error()) {
+        <div class="py-4 text-sm text-red-500">{{ error() | translate }}</div>
+      } @else if (payments().length === 0) {
+        <div class="py-4 text-sm text-grey5">{{ 'no_results_found' | translate }}</div>
+      } @else {
+        @for (p of displayedPayments(); track p.id) {
+          <div class="grid grid-cols-12 items-center text-sm text-grey5">
+            <div class="col-span-3 capitalize">
+              <span class="px-2 py-1 rounded-full text-xs"
+                    [ngClass]="{
+                      'bg-green-100 text-green-700': p.status === 'paid',
+                      'bg-yellow-100 text-yellow-800': p.status === 'initiated' || p.status === 'authorized' || p.status === 'captured' || p.status ==='verified',
+                      'bg-red-100 text-red-700': p.status === 'failed' || p.status === 'voided' || p.status === 'refunded'
+                    }">
+                {{ p.status }}
+              </span>
+            </div>
+            <div class="col-span-2">{{ p.amount_format || p.amount }}</div>
+            <div class="col-span-2 uppercase">{{ p.currency }}</div>
+            <div class="col-span-3">{{ p.created_at | date: 'medium' }}</div>
+            <div class="col-span-2">
+              @if (p.source) {
+                <span>{{ (p.source.company || p.source.type) }} •••• {{ p.source.last_four }}</span>
+              } @else {
+                <span>-</span>
+              }
+            </div>
+          </div>
+          <hr class="text-grey1 -mx-7 xl:mx-0">
+        }
+      }
+    </div>
+
+    <div class="flex flex-row items-center justify-between">
+      <app-outline-button type="button" (onClick)="prevClicked()" [disabled]="(currentPage() <= 1 && localPage() <= 1)">
+        {{ 'previous' | translate }}
+      </app-outline-button>
+      <app-outline-button type="button" (onClick)="nextClicked()" [disabled]="(currentPage() >= lastPage() && localPage() >= localLastPage())">
+        {{ 'next' | translate }}
+      </app-outline-button>
+    </div>
+
+    <hr class="text-grey1 -mx-7 xl:mx-0">
+
+    <span class="flex-1 hidden xl:block"></span>
+
+    <div class="flex flex-row self-end gap-2 xl:gap-4 mb-1">
+      <app-outline-button
+        (onClick)="onCancel.emit()"
+        type="button"
+      >
+        {{ 'close' | translate }}
+      </app-outline-button>
+    </div>
+  </div>
+</div>
+
+

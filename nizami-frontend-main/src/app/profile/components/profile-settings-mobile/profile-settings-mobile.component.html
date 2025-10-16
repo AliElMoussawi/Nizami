@@ -43,6 +43,11 @@
               (onCancel)="close()"
             ></app-plans-tab>
           }
+          @case (allTabs.Payments) {
+            <app-payments-tab
+              (onCancel)="close()"
+            ></app-payments-tab>
+          }
           @case (allTabs.Password) {
             <app-update-password-tab
               (onCancel)="close()"

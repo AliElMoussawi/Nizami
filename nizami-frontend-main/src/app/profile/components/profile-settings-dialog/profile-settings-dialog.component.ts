@@ -5,6 +5,7 @@ import {UpdatePasswordTabComponent} from '../update-password-tab/update-password
 import {PersonalDetailsTabComponent} from '../personal-details-tab/personal-details-tab.component';
 import {PlansTabComponent} from '../plans-tab/plans-tab.component';
 import {CurrentPlanTabComponent} from '../current-plan-tab/current-plan-tab.component';
+import {PaymentsTabComponent} from '../payments-tab/payments-tab.component';
 import {DialogRef} from '@angular/cdk/dialog';
 import {TranslatePipe} from '@ngx-translate/core';
 import {marker} from '@colsen1991/ngx-translate-extract-marker';
@@ -18,6 +19,7 @@ import {marker} from '@colsen1991/ngx-translate-extract-marker';
     PersonalDetailsTabComponent,
     PlansTabComponent,
     CurrentPlanTabComponent,
+    PaymentsTabComponent,
     TranslatePipe,
   ],
   templateUrl: './profile-settings-dialog.component.html',
@@ -42,6 +44,10 @@ export class ProfileSettingsDialogComponent {
     {
       id: Tabs.Plans,
       title: marker('plans'),
+    },
+    {
+      id: Tabs.Payments,
+      title: marker('payments'),
     },
     {
       id: Tabs.Password,
@@ -79,4 +85,5 @@ export enum Tabs {
   CurrentPlan = 'current-plan',
   Password = 'password',
   Plans = 'plans',
+  Payments = 'payments',
 }

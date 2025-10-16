@@ -115,6 +115,7 @@
 	"errors.an_error_has_occured": "An error has occurred.",
 	"errors.failed_to_login": "",
 	"plans": "Plans",
+  "payments": "Payments",
 	"loading_plans": "Loading plans...",
 	"subscribe": "Subscribe",
 	"unlimited_credits": "Unlimited credits",
@@ -167,5 +168,14 @@
 	"subscription_expired_title": "Your Subscription Has Expired",
 	"subscription_expired_message": "Your subscription is no longer active. Renew to continue using the service.",
 	"renew_subscription": "Renew Subscription",
-	"error_occurred": "Error Occurred"
+  "error_occurred": "Error Occurred",
+  "page": "Page",
+  "status": "Status",
+  "amount": "Amount",
+  "currency": "Currency",
+  "date": "Date",
+  "source": "Source",
+  "previous": "Previous",
+  "loading": "Loading...",
+  "failed_to_load_payments": "Failed to load payments"
 }

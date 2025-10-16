@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     MoyasarWebhookView,
-    PaymentListView,
+    list_payments,
     PaymentDetailView,
     SyncPaymentStatusView,
     UserPaymentSourceListView,
@@ -9,7 +9,7 @@ from .views import (
 )
 
 urlpatterns = [
-    path('', PaymentListView.as_view(), name='payment-list'),
+    path('', list_payments, name='payment-list'),
     path('<uuid:payment_id>/', PaymentDetailView.as_view(), name='payment-detail'),
     path('<uuid:payment_id>/sync/', SyncPaymentStatusView.as_view(), name='sync-payment'),
     

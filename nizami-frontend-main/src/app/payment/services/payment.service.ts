@@ -5,6 +5,7 @@ import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Plan } from '../models/plan.model';
 import { PaginatedResponse } from '../models/paginated-response.model';
+import { Payment } from '../models/payment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,12 @@ export class PaymentService {
 
   getPlan(planId: string): Observable<Plan> {
     return this.http.get<Plan>(`${this.baseUrl}/plans/${planId}`);
+  }
+
+  listPayments(page = 1, per_page = 5): Observable<PaginatedResponse<Payment>> {
+    const url = `${this.baseUrl}/payment/`;
+    const params = { page, per_page } as any;
+    return this.http.get<PaginatedResponse<Payment>>(url, { params });
   }
 
   listAvailableUpgradePlans(): Observable<Plan[]> {
