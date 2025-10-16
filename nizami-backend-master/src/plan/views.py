@@ -7,7 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Plan
 from src.subscription.models import UserSubscription
 from src.plan.enums import Tier
-from .serializers import ListPlanSerializer
+from .serializers import ListPlanSerializer, CreateUpdatePlanSerializer
 from src.common.permissions import IsAdminPermission
 from src.common.pagination import PerPagePagination
 
@@ -30,10 +30,57 @@ def get_by_uuid(request: Request, uuid):
     try:
         plan = Plan.objects.get(uuid=uuid, is_deleted=False)
     except Plan.DoesNotExist:
-        return Response({"error": "Plan not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "plan_not_found"}, status=status.HTTP_404_NOT_FOUND)
 
     serializer = ListPlanSerializer(plan)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAdminPermission])
+def admin_list(request: Request):
+    queryset = Plan.objects.all().order_by('-created_at')
+
+    paginator = PerPagePagination()
+    page = paginator.paginate_queryset(queryset, request)
+
+    serializer = ListPlanSerializer(page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAdminPermission])
+def admin_create(request: Request):
+    serializer = CreateUpdatePlanSerializer(data=request.data)
+    if serializer.is_valid():
+        plan = serializer.save()
+        return Response(ListPlanSerializer(plan).data, status=status.HTTP_201_CREATED)
+    return Response({
+        "error": "validation_error",
+        "errors": serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH', 'PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAdminPermission])
+def admin_update(request: Request, uuid):
+    try:
+        plan = Plan.objects.get(uuid=uuid)
+    except Plan.DoesNotExist:
+        return Response({"error": "plan_not_found"}, status=status.HTTP_404_NOT_FOUND)
+
+    partial = request.method == 'PATCH'
+    serializer = CreateUpdatePlanSerializer(plan, data=request.data, partial=partial)
+    if serializer.is_valid():
+        plan = serializer.save()
+        return Response(ListPlanSerializer(plan).data)
+    return Response({
+        "error": "validation_error",
+        "errors": serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def user_raw_plan(request: Request):
@@ -59,10 +106,10 @@ def deactivate(request: Request):
     try:
         plan = Plan.objects.get(uuid=plan_uuid)
     except Plan.DoesNotExist:
-        return Response({"error": "Plan not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "plan_not_found"}, status=status.HTTP_404_NOT_FOUND)
 
     if plan.is_deleted:
-        return Response({"error": f"Plan already deactivated: {plan.name}"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "plan_already_deactivated"}, status=status.HTTP_400_BAD_REQUEST)
 
     plan.is_deleted = True
     plan.save(update_fields=["is_deleted", "updated_at"])
@@ -84,7 +131,7 @@ def activate(request: Request):
         return Response({"error": "Plan not found"}, status=status.HTTP_404_NOT_FOUND)
 
     if not plan.is_deleted:
-        return Response({"error": f"Plan already activated: {plan.name}"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "plan_already_activated"}, status=status.HTTP_400_BAD_REQUEST)
 
     plan.is_deleted = False
     plan.save(update_fields=["is_deleted","updated_at"])
