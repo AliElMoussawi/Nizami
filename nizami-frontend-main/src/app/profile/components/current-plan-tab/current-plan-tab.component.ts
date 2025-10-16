@@ -1,4 +1,4 @@
-import { Component, OnInit, Optional } from '@angular/core';
+import { Component, OnInit, Optional, output } from '@angular/core';
 import { CommonModule, DatePipe, LowerCasePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { UserSubscription } from '../../models/subscription.model';
 import { SpinnerComponent } from '../../../common/components/spinner/spinner.component';
 import { ErrorComponent } from '../../../common/components/error/error.component';
 import { ButtonComponent } from '../../../common/components/button/button.component';
+import { OutlineButtonComponent } from '../../../common/components/outline-button/outline-button.component';
 
 @Component({
   selector: 'app-current-plan-tab',
@@ -19,12 +20,14 @@ import { ButtonComponent } from '../../../common/components/button/button.compon
     DatePipe,
     SpinnerComponent,
     ErrorComponent,
-    ButtonComponent
+    ButtonComponent,
+    OutlineButtonComponent
   ],
   templateUrl: './current-plan-tab.component.html',
   styleUrls: ['./current-plan-tab.component.scss']
 })
 export class CurrentPlanTabComponent implements OnInit {
+  onCancel = output();
   subscription: UserSubscription | null = null;
   loading = true;
   error: string | null = null;

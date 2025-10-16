@@ -102,4 +102,17 @@
       {{ 'no_plans_available' | translate }}
     </div>
   }
+
+  <hr class="text-grey1 -mx-7 xl:mx-0">
+
+  <span class="flex-1 hidden xl:block"></span>
+
+  <div class="flex flex-row self-end gap-2 xl:gap-4 mb-1">
+    <app-outline-button
+      (onClick)="onCancel.emit()"
+      type="button"
+    >
+      {{ 'close' | translate }}
+    </app-outline-button>
+  </div>
 </div>

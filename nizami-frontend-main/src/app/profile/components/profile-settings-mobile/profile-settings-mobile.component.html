@@ -36,7 +36,9 @@
             ></app-personal-details-tab>
           }
           @case (allTabs.CurrentPlan) {
-            <app-current-plan-tab></app-current-plan-tab>
+            <app-current-plan-tab
+              (onCancel)="close()"
+            ></app-current-plan-tab>
           }
           @case (allTabs.Plans) {
             <app-plans-tab

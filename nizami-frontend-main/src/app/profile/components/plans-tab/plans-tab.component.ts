@@ -1,4 +1,4 @@
-import { Component, OnInit, Optional } from '@angular/core';
+import { Component, OnInit, Optional, output } from '@angular/core';
 import { CommonModule, LowerCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -8,6 +8,7 @@ import { Plan } from '../../../payment/models/plan.model';
 import { SpinnerComponent } from '../../../common/components/spinner/spinner.component';
 import { ButtonComponent } from '../../../common/components/button/button.component';
 import { ErrorComponent } from '../../../common/components/error/error.component';
+import { OutlineButtonComponent } from '../../../common/components/outline-button/outline-button.component';
 
 @Component({
   selector: 'app-plans-tab',
@@ -18,12 +19,14 @@ import { ErrorComponent } from '../../../common/components/error/error.component
     LowerCasePipe,
     SpinnerComponent,
     ButtonComponent,
-    ErrorComponent
+    ErrorComponent,
+    OutlineButtonComponent
   ],
   templateUrl: './plans-tab.component.html',
   styleUrls: ['./plans-tab.component.scss']
 })
 export class PlansTabComponent implements OnInit {
+  onCancel = output();
   plans: Plan[] = [];
   loading = true;
   error: string | null = null;
