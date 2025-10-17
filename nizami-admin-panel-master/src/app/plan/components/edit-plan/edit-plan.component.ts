@@ -25,6 +25,7 @@ export class EditPlanComponent {
   tiers = [
     { value: 'BASIC', label: 'Basic' },
     { value: 'PLUS', label: 'Plus' },
+    { value: 'ADVANCED_PLUS', label: 'Advanced Plus' },
     { value: 'PREMIUM_MONTHLY', label: 'Premium-Monthly' },
     { value: 'PREMIUM_YEARLY', label: 'Premium-Yearly' },
   ];
@@ -119,7 +120,20 @@ export class EditPlanComponent {
     this.isSubmitting = true;
     this.plans.update(this.uuid, this.buildPayload()).subscribe({
       next: () => this.toastr.success('Plan updated'),
-      error: () => { this.toastr.error('Failed to update plan'); this.isSubmitting = false; },
+      error: (error) => {
+        this.isSubmitting = false;
+        if (error.error?.errors) {
+          // Handle validation errors from backend
+          Object.keys(error.error.errors).forEach(field => {
+            const control = this.form.get(field);
+            if (control) {
+              control.setErrors({ serverError: error.error.errors[field] });
+            }
+          });
+        } else {
+          this.toastr.error('Failed to update plan');
+        }
+      },
     });
   }
 }

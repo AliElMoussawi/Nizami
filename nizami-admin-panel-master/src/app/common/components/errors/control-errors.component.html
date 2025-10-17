@@ -10,4 +10,10 @@
       This field must be an email address
     </app-error>
   }
+
+  @if (control().hasError('serverError')) {
+    <app-error>
+      {{ control().getError('serverError') }}
+    </app-error>
+  }
 }

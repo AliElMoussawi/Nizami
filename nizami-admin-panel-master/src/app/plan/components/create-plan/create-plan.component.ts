@@ -26,6 +26,7 @@ export class CreatePlanComponent {
   tiers = [
     { value: 'BASIC', label: 'Basic' },
     { value: 'PLUS', label: 'Plus' },
+    { value: 'ADVANCED_PLUS', label: 'Advanced Plus' },
     { value: 'PREMIUM_MONTHLY', label: 'Premium-Monthly' },
     { value: 'PREMIUM_YEARLY', label: 'Premium-Yearly' },
   ];
@@ -108,9 +109,19 @@ export class CreatePlanComponent {
         this.toastr.success('Plan created');
         this.router.navigate(['/plans']);
       },
-      error: () => {
-        this.toastr.error('Failed to create plan');
+      error: (error) => {
         this.isSubmitting = false;
+        if (error.error?.errors) {
+          // Handle validation errors from backend
+          Object.keys(error.error.errors).forEach(field => {
+            const control = this.form.get(field);
+            if (control) {
+              control.setErrors({ serverError: error.error.errors[field] });
+            }
+          });
+        } else {
+          this.toastr.error('Failed to create plan');
+        }
       }
     });
   }
