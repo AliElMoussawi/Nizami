@@ -1,0 +1,120 @@
+<app-template>
+  <div class="flex flex-col gap-9 pt-8 pb-24 pr-2 w-full h-full overflow-auto">
+    <div class="text-3xl font-bold">Edit Plan</div>
+
+    <form [formGroup]="form" class="bg-white rounded-3xl shadow-lg px-10 py-8 w-full max-w-4xl self-center flex flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <app-input label="Name*" placeholder="Name" formControlName="name">
+          <app-control-errors [control]="form.controls.name"></app-control-errors>
+        </app-input>
+
+        <div class="flex flex-col gap-1">
+          <div class="text-start text-sm font-medium ">Tier</div>
+          <div
+            class="
+             w-full border-grey1 border
+             rounded-lg flex flex-row gap-2 bg-white
+              placeholder:bg-white autofill:bg-white items-stretch
+          "
+            [ngClass]="{
+              'ring-4 ring-indigo2 border-red2 focus-within:ring-4 focus-within:ring-indigo2 focus-within:border-red2': form.controls.tier.invalid && (form.controls.tier.dirty || form.controls.tier.touched),
+              'focus-within:ring-4 focus-within:ring-indigo1 focus-within:border-purple1': !(form.controls.tier.invalid && (form.controls.tier.dirty || form.controls.tier.touched)),
+            }"
+          >
+            <mat-select
+              class="w-full p-2 rounded-lg outline-none"
+              formControlName="tier"
+              placeholder="Tier"
+              panelClass="w-full"
+            >
+              <mat-option *ngFor="let t of tiers" [value]="t.value">{{ t.label }}</mat-option>
+            </mat-select>
+          </div>
+          <app-control-errors [control]="form.controls.tier"></app-control-errors>
+        </div>
+
+        <app-input label="Price (cents)*" placeholder="0" formControlName="price_cents" type="number">
+          <app-control-errors [control]="form.controls.price_cents"></app-control-errors>
+        </app-input>
+
+        <div class="flex flex-col gap-1">
+          <div class="text-start text-sm font-medium ">Currency*</div>
+          <div class="w-full border-grey1 border rounded-lg flex flex-row gap-2 bg-white items-stretch">
+            <mat-select class="w-full p-2 rounded-lg outline-none" formControlName="currency" placeholder="Currency" panelClass="w-full">
+              <mat-option *ngFor="let c of currencyOptions" [value]="c.value">{{ c.label }}</mat-option>
+            </mat-select>
+          </div>
+          <app-control-errors [control]="form.controls.currency"></app-control-errors>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <div class="text-start text-sm font-medium ">Interval Unit</div>
+          <div
+            class="
+             w-full border-grey1 border
+             rounded-lg flex flex-row gap-2 bg-white
+              placeholder:bg-white autofill:bg-white items-stretch
+          "
+          >
+            <mat-select
+              class="w-full p-2 rounded-lg outline-none"
+              formControlName="interval_unit"
+              placeholder="Interval Unit"
+              panelClass="w-full"
+            >
+              <mat-option [value]="null">None</mat-option>
+              <mat-option *ngFor="let i of intervalUnits" [value]="i.value">{{ i.label }}</mat-option>
+            </mat-select>
+          </div>
+        </div>
+
+        <app-input label="Interval Count" placeholder="1" formControlName="interval_count" type="number">
+          <app-control-errors [control]="form.controls.interval_count"></app-control-errors>
+        </app-input>
+
+        <div class="flex flex-col gap-1">
+          <div class="text-start text-sm font-medium ">Credit Type</div>
+          <div
+            class="
+             w-full border-grey1 border
+             rounded-lg flex flex-row gap-2 bg-white
+              placeholder:bg-white autofill:bg-white items-stretch
+          "
+            [ngClass]="{
+              'ring-4 ring-indigo2 border-red2 focus-within:ring-4 focus-within:ring-indigo2 focus-within:border-red2': form.controls.credit_type.invalid && (form.controls.credit_type.dirty || form.controls.credit_type.touched),
+              'focus-within:ring-4 focus-within:ring-indigo1 focus-within:border-purple1': !(form.controls.credit_type.invalid && (form.controls.credit_type.dirty || form.controls.credit_type.touched)),
+            }"
+          >
+            <mat-select
+              class="w-full p-2 rounded-lg outline-none"
+              formControlName="credit_type"
+              placeholder="Credit Type"
+              panelClass="w-full"
+            >
+              <mat-option *ngFor="let ct of creditTypes" [value]="ct.value">{{ ct.label }}</mat-option>
+            </mat-select>
+          </div>
+          <app-control-errors [control]="form.controls.credit_type"></app-control-errors>
+        </div>
+
+        <app-input label="Credit Amount" placeholder="0" formControlName="credit_amount" type="number">
+          <app-control-errors [control]="form.controls.credit_amount"></app-control-errors>
+        </app-input>
+      </div>
+
+      <app-input label="Description" placeholder="Description" formControlName="description"></app-input>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <app-checkbox label="Unlimited" formControlName="is_unlimited"></app-checkbox>
+        <app-checkbox label="Rollover allowed" formControlName="rollover_allowed"></app-checkbox>
+      </div>
+
+      <div class="flex flex-row gap-5 mt-4 justify-end">
+        <app-flat-button type="button" (onClick)="form.reset()">Reset</app-flat-button>
+        <app-button [disabled]="form.invalid || isSubmitting" (click)="submit()">Save</app-button>
+      </div>
+    </form>
+  </div>
+</app-template>
+
+

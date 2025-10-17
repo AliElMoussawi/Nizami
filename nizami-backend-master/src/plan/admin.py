@@ -12,7 +12,7 @@ class PlanAdmin(admin.ModelAdmin):
         'credit_type',
         'credit_amount',
         'is_unlimited',
-        'is_active',
+        'is_deleted',
         'created_at'
     )
     list_filter = (

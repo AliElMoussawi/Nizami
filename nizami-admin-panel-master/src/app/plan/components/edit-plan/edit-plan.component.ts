@@ -1,0 +1,126 @@
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {TemplateComponent} from '../../../common/components/template/template.component';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {PlansService} from '../../services/plans.service';
+import {ActivatedRoute} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
+import {InputComponent} from '../../../common/components/input/input.component';
+import {ControlErrorsComponent} from '../../../common/components/errors/control-errors.component';
+import {ButtonComponent} from '../../../common/components/button/button.component';
+import {FlatButtonComponent} from '../../../common/components/flat-button/flat-button.component';
+import {CheckboxComponent} from '../../../common/components/checkbox/checkbox.component';
+import {MatSelect} from '@angular/material/select';
+import {MatOption} from '@angular/material/core';
+// Removed MatFormField and MatLabel as we no longer use mat-form-field wrapper
+
+@Component({
+  selector: 'app-edit-plan',
+  standalone: true,
+  imports: [TemplateComponent, CommonModule, ReactiveFormsModule, FormsModule, InputComponent, ControlErrorsComponent, ButtonComponent, FlatButtonComponent, CheckboxComponent, MatSelect, MatOption],
+  templateUrl: './edit-plan.component.html',
+  styleUrl: './edit-plan.component.scss'
+})
+export class EditPlanComponent {
+  tiers = [
+    { value: 'BASIC', label: 'Basic' },
+    { value: 'PLUS', label: 'Plus' },
+    { value: 'PREMIUM', label: 'Premium' },
+  ];
+
+  creditTypes = [
+    { value: 'MESSAGES', label: 'Messages' },
+  ];
+
+  intervalUnits = [
+    { value: 'MONTH', label: 'Month' },
+    { value: 'YEAR', label: 'Year' },
+  ];
+
+  currencyOptions = [
+    { value: 'USD', label: 'US Dollar' },
+    { value: 'SAR', label: 'Saudi Riyal' },
+  ];
+  form = new FormGroup({
+    name: new FormControl<string | null>(null, [Validators.required]),
+    tier: new FormControl<string | null>(null, [Validators.required]),
+    description: new FormControl<string | null>(null),
+    price_cents: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    currency: new FormControl<string>('USD', [Validators.required]),
+    interval_unit: new FormControl<string | null>(null),
+    interval_count: new FormControl<number | null>(null, [Validators.min(1)]),
+    credit_amount: new FormControl<number | null>(null, [Validators.min(0)]),
+    credit_type: new FormControl<string | null>(null, [Validators.required]),
+    is_unlimited: new FormControl<boolean>(false),
+    rollover_allowed: new FormControl<boolean>(false),
+  });
+
+  uuid!: string;
+  isSubmitting = false;
+
+  constructor(private plans: PlansService, private route: ActivatedRoute, private toastr: ToastrService) {
+    this.uuid = this.route.snapshot.paramMap.get('uuid')!;
+    this.load();
+  }
+
+  ngOnInit() {
+    // Toggle logic: unlimited disables and clears credit fields
+    this.form.controls.is_unlimited.valueChanges.subscribe((unlimited) => {
+      const creditAmount = this.form.controls.credit_amount;
+      const creditType = this.form.controls.credit_type;
+      if (unlimited) {
+        creditAmount.setValue(null);
+        creditType.setValue(null);
+        creditAmount.disable({ emitEvent: false });
+        creditType.disable({ emitEvent: false });
+      } else {
+        creditAmount.enable({ emitEvent: false });
+        creditType.enable({ emitEvent: false });
+      }
+    });
+
+    // Apply initial disable state after load if needed
+    const isUnlimited = this.form.controls.is_unlimited.value as boolean;
+    if (isUnlimited) {
+      this.form.controls.credit_amount.disable({ emitEvent: false });
+      this.form.controls.credit_type.disable({ emitEvent: false });
+    }
+  }
+
+  private load() {
+    this.plans.get(this.uuid).subscribe({
+      next: (plan) => {
+        this.form.patchValue(plan as any);
+        // Respect unlimited state upon data load
+        if (this.form.controls.is_unlimited.value) {
+          this.form.controls.credit_amount.disable({ emitEvent: false });
+          this.form.controls.credit_type.disable({ emitEvent: false });
+        } else {
+          this.form.controls.credit_amount.enable({ emitEvent: false });
+          this.form.controls.credit_type.enable({ emitEvent: false });
+        }
+      },
+      error: () => this.toastr.error('Failed to load plan'),
+    });
+  }
+
+  private buildPayload() {
+    const raw = this.form.value as any;
+    const payload: any = { ...raw };
+    Object.keys(payload).forEach((k) => {
+      if (payload[k] === null) delete payload[k];
+    });
+    return payload;
+  }
+
+  submit() {
+    if (this.form.invalid || this.isSubmitting) return;
+    this.isSubmitting = true;
+    this.plans.update(this.uuid, this.buildPayload()).subscribe({
+      next: () => this.toastr.success('Plan updated'),
+      error: () => { this.toastr.error('Failed to update plan'); this.isSubmitting = false; },
+    });
+  }
+}
+
+

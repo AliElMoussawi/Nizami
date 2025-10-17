@@ -63,7 +63,7 @@ def admin_create(request: Request):
     }, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['PATCH', 'PUT'])
+@api_view(['GET', 'PATCH', 'PUT'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAdminPermission])
 def admin_update(request: Request, uuid):
@@ -71,6 +71,9 @@ def admin_update(request: Request, uuid):
         plan = Plan.objects.get(uuid=uuid)
     except Plan.DoesNotExist:
         return Response({"error": "plan_not_found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response(ListPlanSerializer(plan).data)
 
     partial = request.method == 'PATCH'
     serializer = CreateUpdatePlanSerializer(plan, data=request.data, partial=partial)

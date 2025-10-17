@@ -43,4 +43,4 @@ class CreateUpdatePlanSerializer(serializers.ModelSerializer):
             'is_unlimited',
             'rollover_allowed',
         ]
-        read_only_fields = ['uuid']
+        read_only_fields = ['uuid', 'is_active', 'is_deleted']

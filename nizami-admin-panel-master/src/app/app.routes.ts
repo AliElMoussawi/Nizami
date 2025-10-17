@@ -17,8 +17,29 @@ import {
   EditReferenceDocumentComponent
 } from './reference-documents/components/edit-reference-document/edit-reference-document.component';
 import {PromptsComponent} from './prompts/components/prompts/prompts.component';
+import {PlansComponent} from './plan/components/plans/plans.component';
+import {CreatePlanComponent} from './plan/components/create-plan/create-plan.component';
+import {EditPlanComponent} from './plan/components/edit-plan/edit-plan.component';
 
 export const routes: Routes = [
+  {
+    path: 'plans',
+    children: [
+      {
+        path: 'create',
+        component: CreatePlanComponent,
+      },
+      {
+        path: ':uuid/edit',
+        component: EditPlanComponent,
+      },
+      {
+        path: '',
+        component: PlansComponent,
+      },
+    ],
+    canActivateChild: [AuthenticatedGuard],
+  },
   {
     path: 'login',
     component: LoginComponent,

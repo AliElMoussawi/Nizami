@@ -15,7 +15,7 @@ class Plan(models.Model):
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
     credit_amount = models.IntegerField(blank=True, null=True)
-    credit_type = models.CharField(max_length=50, choices=CreditType.choices)
+    credit_type = models.CharField(max_length=50, choices=CreditType.choices, blank=True, null=True)
     is_unlimited = models.BooleanField(default=False)
     rollover_allowed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
