@@ -26,7 +26,8 @@ export class CreatePlanComponent {
   tiers = [
     { value: 'BASIC', label: 'Basic' },
     { value: 'PLUS', label: 'Plus' },
-    { value: 'PREMIUM', label: 'Premium' },
+    { value: 'PREMIUM_MONTHLY', label: 'Premium-Monthly' },
+    { value: 'PREMIUM_YEARLY', label: 'Premium-Yearly' },
   ];
 
   creditTypes = [

@@ -38,14 +38,29 @@ def create_initial_plans(apps, schema_editor):
         rollover_allowed=False
     )
     
-    # Premium Plan - $100 for unlimited questions
+    # Premium Plans - Monthly and Yearly
     Plan.objects.create(
-        name='Premium Plan',
-        tier='PREMIUM',
-        description='Premium plan with unlimited message credits',
-        price_cents=10000,  # $100.00
+        name='Premium-Monthly',
+        tier='PREMIUM_MONTHLY',
+        description='Premium plan (monthly) with unlimited message credits',
+        price_cents=10000,  # $100.00 monthly
         currency='USD',
         interval_unit='MONTH',
+        interval_count=1,
+        is_active=True,
+        credit_amount=None,
+        credit_type='MESSAGES',
+        is_unlimited=True,
+        rollover_allowed=False
+    )
+
+    Plan.objects.create(
+        name='Premium-Yearly',
+        tier='PREMIUM_YEARLY',
+        description='Premium plan (yearly) with unlimited message credits',
+        price_cents=100000,  # $1000.00 yearly
+        currency='USD',
+        interval_unit='YEAR',
         interval_count=1,
         is_active=True,
         credit_amount=None,
