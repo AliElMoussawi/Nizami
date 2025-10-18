@@ -1,0 +1,75 @@
+// Subscription component styles
+.table-section {
+  .table {
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    th {
+      background-color: #f9fafb;
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    tr:hover {
+      background-color: #f9fafb;
+    }
+  }
+}
+
+// Status badges
+.status-badge {
+  &.active {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  &.inactive {
+    @apply bg-red-100 text-red-800;
+  }
+}
+
+// User info styling
+.user-info {
+  .user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .initials {
+      color: #6b7280;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Plan info styling
+.plan-info {
+  .plan-name {
+    font-weight: 500;
+    color: #111827;
+  }
+  
+  .plan-tier {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+}
+
+// Credits styling
+.credits-unlimited {
+  color: #059669;
+  font-weight: 500;
+}

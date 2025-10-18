@@ -8,8 +8,6 @@ urlpatterns = [
     path('user-raw-plan', user_raw_plan, name='subscribed_plan_default_activation'),
     path('activate', activate, name='activate-plan-admin'),
     path('deactivate', deactivate, name='deactivate-plan-admin'),
-    
-
 ]
 
 

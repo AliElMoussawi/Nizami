@@ -74,11 +74,9 @@ def deactivate(request: Request):
     sub.deactivated_at = timezone.now()
     sub.save() 
 
-    # Send subscription cancellation email
     try:
         send_subscription_cancelled_email(request.user, sub, sub.plan)
     except Exception as e:
-        # Log the error but don't fail the cancellation
         print(f"Failed to send subscription cancellation email: {e}")
 
     return Response({

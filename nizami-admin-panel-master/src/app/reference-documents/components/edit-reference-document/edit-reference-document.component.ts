@@ -10,9 +10,7 @@ import {ReferenceDocumentsService} from '../../services/reference-documents.serv
 import {DIALOG_DATA, DialogRef} from '@angular/cdk/dialog';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ControlErrorsComponent} from '../../../common/components/errors/control-errors.component';
-import {CountryPickerComponent} from '../../../common/components/country-picker/country-picker.component';
 import {extractErrorFromResponse} from '../../../common/utils';
-import {MatOption, MatSelect} from '@angular/material/select';
 import {LanguageSelectComponent} from '../../../common/components/language-select/language-select.component';
 
 @UntilDestroy()
@@ -24,9 +22,6 @@ import {LanguageSelectComponent} from '../../../common/components/language-selec
     FlatButtonComponent,
     InputComponent,
     ControlErrorsComponent,
-    CountryPickerComponent,
-    MatSelect,
-    MatOption,
     LanguageSelectComponent
   ],
   templateUrl: './edit-reference-document.component.html',

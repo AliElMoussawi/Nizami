@@ -20,6 +20,9 @@ import {PromptsComponent} from './prompts/components/prompts/prompts.component';
 import {PlansComponent} from './plan/components/plans/plans.component';
 import {CreatePlanComponent} from './plan/components/create-plan/create-plan.component';
 import {EditPlanComponent} from './plan/components/edit-plan/edit-plan.component';
+import {SubscriptionsComponent} from './subscriptions/components/subscriptions/subscriptions.component';
+import {CreateSubscriptionComponent} from './subscriptions/components/create-subscription/create-subscription.component';
+import {EditSubscriptionComponent} from './subscriptions/components/edit-subscription/edit-subscription.component';
 
 export const routes: Routes = [
   {
@@ -102,6 +105,24 @@ export const routes: Routes = [
       {
         path: '',
         component: PromptsComponent,
+      },
+    ],
+    canActivateChild: [AuthenticatedGuard],
+  },
+  {
+    path: 'subscriptions',
+    children: [
+      {
+        path: 'create',
+        component: CreateSubscriptionComponent,
+      },
+      {
+        path: ':uuid/edit',
+        component: EditSubscriptionComponent,
+      },
+      {
+        path: '',
+        component: SubscriptionsComponent,
       },
     ],
     canActivateChild: [AuthenticatedGuard],

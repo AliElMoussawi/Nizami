@@ -143,7 +143,7 @@ def activate(request: Request):
 
 @api_view(['GET'])
 def available_for_upgrade(request: Request):
-    exclude_tiers = [Tier.BASIC]
+    exclude_tiers = [Tier.BASIC, Tier.ADVANCED_PLUS]
 
     active_subscription = (
             UserSubscription.objects

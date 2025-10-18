@@ -5,7 +5,7 @@ class Tier(models.TextChoices):
     PLUS =  'PLUS', 'Plus'
     PREMIUM_MONTHLY = 'PREMIUM_MONTHLY', 'Premium-Monthly'
     PREMIUM_YEARLY = 'PREMIUM_YEARLY', 'Premium-Yearly'
-    ADVANCED_PLUS = 'ADVANCED_PLUS', 'Advanced Plus'
+    ADVANCED_PLUS = 'ADVANCED_PLUS', 'Advanced plus'
 
 class InternalUtil(models.TextChoices):
     MONTH = 'MONTH', 'Month'

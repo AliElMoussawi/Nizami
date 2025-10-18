@@ -9,13 +9,10 @@ import {ButtonComponent} from '../../../common/components/button/button.componen
 import {FlatButtonComponent} from '../../../common/components/flat-button/flat-button.component';
 import {InputComponent} from '../../../common/components/input/input.component';
 import {ControlErrorsComponent} from '../../../common/components/errors/control-errors.component';
-import {CountryPickerComponent} from '../../../common/components/country-picker/country-picker.component';
 import {FileDragZoneComponent} from '../file-drag-zone/file-drag-zone.component';
 import {convertToFormData, extractErrorFromResponse} from '../../../common/utils';
 import {DialogRef} from '@angular/cdk/dialog';
 import {HttpErrorResponse} from '@angular/common/http';
-import {MatOption} from '@angular/material/core';
-import {MatSelect} from '@angular/material/select';
 import {LanguageSelectComponent} from '../../../common/components/language-select/language-select.component';
 
 @UntilDestroy()
@@ -27,10 +24,7 @@ import {LanguageSelectComponent} from '../../../common/components/language-selec
     ButtonComponent,
     FlatButtonComponent,
     InputComponent,
-    CountryPickerComponent,
     FileDragZoneComponent,
-    MatOption,
-    MatSelect,
     LanguageSelectComponent,
   ],
   templateUrl: './create-reference-document.component.html',

@@ -5,6 +5,8 @@ from .models import Plan
 
 
 class ListPlanSerializer(serializers.ModelSerializer):
+    price = serializers.SerializerMethodField()
+    
     class Meta:
         model = Plan
         fields = [
@@ -13,6 +15,7 @@ class ListPlanSerializer(serializers.ModelSerializer):
             'tier',
             'description',
             'price_cents',
+            'price',
             'currency',
             'interval_unit',
             'interval_count',
@@ -23,6 +26,9 @@ class ListPlanSerializer(serializers.ModelSerializer):
             'is_unlimited',
             'rollover_allowed',
         ]
+    
+    def get_price(self, obj):
+        return obj.price_cents / 100.0  # Convert cents to dollars
 
 
 class CreateUpdatePlanSerializer(serializers.ModelSerializer):

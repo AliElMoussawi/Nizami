@@ -1,0 +1,137 @@
+// Edit subscription component styles
+.subscription-info {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  
+  .info-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    font-size: 0.875rem;
+    
+    .info-item {
+      .label {
+        font-weight: 500;
+        color: #6b7280;
+      }
+      
+      .value {
+        margin-left: 0.5rem;
+        
+        &.uuid {
+          font-family: 'Courier New', monospace;
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+}
+
+.form-container {
+  .form-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 2px solid #e5e7eb;
+  }
+}
+
+// Form field styling
+.form-field {
+  .field-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    
+    .required {
+      color: #ef4444;
+    }
+  }
+  
+  .field-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    
+    &:focus {
+      outline: none;
+      ring: 2px;
+      ring-color: #3b82f6;
+      border-color: transparent;
+    }
+    
+    &.error {
+      border-color: #ef4444;
+    }
+  }
+  
+  .field-error {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc2626;
+  }
+}
+
+// Checkbox styling
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  
+  input[type="checkbox"] {
+    height: 1rem;
+    width: 1rem;
+    color: #2563eb;
+    border-color: #d1d5db;
+    border-radius: 0.25rem;
+    
+    &:focus {
+      ring: 2px;
+      ring-color: #3b82f6;
+    }
+  }
+  
+  label {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+  }
+}
+
+// Action buttons
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+// Loading state
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+  color: #6b7280;
+}
+
+// Error state
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+  color: #dc2626;
+}

@@ -38,11 +38,9 @@ def create_subscription_for_user(user, plan: Plan) -> UserSubscription:
     )
     subscription.save()
 
-    # Send subscription success email
     try:
         send_subscription_success_email(user, subscription, plan)
     except Exception as e:
-        # Log the error but don't fail the subscription creation
         print(f"Failed to send subscription success email: {e}")
 
     return subscription
