@@ -9,6 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from src.subscription.models import UserSubscription
 from src.subscription.serializers import UserSubscriptionSerializer
 from src.common.pagination import PerPagePagination
+from src.common.utils import send_subscription_cancelled_email
 
 
 @api_view(['GET'])
@@ -72,6 +73,13 @@ def deactivate(request: Request):
     sub.is_active = False
     sub.deactivated_at = timezone.now()
     sub.save() 
+
+    # Send subscription cancellation email
+    try:
+        send_subscription_cancelled_email(request.user, sub, sub.plan)
+    except Exception as e:
+        # Log the error but don't fail the cancellation
+        print(f"Failed to send subscription cancellation email: {e}")
 
     return Response({
         "message": f"Subscription to plan '{sub.plan.name}' has been cancelled",

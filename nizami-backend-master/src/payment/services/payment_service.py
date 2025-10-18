@@ -14,6 +14,7 @@ from ..serializers.moyasar_serializers import (
 from src.subscription.services import upgrade_user_subscription_user_id_and_plan_id
 from src.common.generic_api_gateway import WebhookProcessingStatus, validate_and_log_response
 from src.users.models import User
+from src.common.utils import send_payment_success_email, send_payment_failure_email
 
 logger = logging.getLogger(__name__)
 
@@ -285,8 +286,27 @@ class PaymentService:
                 payment.save()
                 logger.info(f"Linked invoice {invoice.id} to payment {payment.id}")
 
-            store_user_payment_source(payment)
-            create_subscription_from_payment(payment)
+            # Handle payment based on status
+            if payment.status == MoyasarPaymentStatus.PAID:
+                store_user_payment_source(payment)
+                create_subscription_from_payment(payment)
+                
+                # Send payment success email
+                try:
+                    if payment.metadata and payment.metadata.get('user_id'):
+                        user = User.objects.get(id=payment.metadata['user_id'])
+                        send_payment_success_email(user, payment)
+                except Exception as e:
+                    logger.error(f"Failed to send payment success email: {e}")
+                    
+            elif payment.status == MoyasarPaymentStatus.FAILED:
+                # Send payment failure email
+                try:
+                    if payment.metadata and payment.metadata.get('user_id'):
+                        user = User.objects.get(id=payment.metadata['user_id'])
+                        send_payment_failure_email(user, payment)
+                except Exception as e:
+                    logger.error(f"Failed to send payment failure email: {e}")
             
             logger.info(f"Webhook event processed successfully: {event_data['id']}")
             

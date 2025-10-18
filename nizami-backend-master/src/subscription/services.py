@@ -8,6 +8,7 @@ from src.users.models import User
 from src.plan.enums import InternalUtil, Tier
 from src.plan.models import Plan
 from src.subscription.models import UserSubscription
+from src.common.utils import send_subscription_success_email, send_subscription_cancelled_email
 
 
 def _compute_expiry_date(plan: Plan) -> datetime:
@@ -36,6 +37,13 @@ def create_subscription_for_user(user, plan: Plan) -> UserSubscription:
         is_unlimited= plan.is_unlimited
     )
     subscription.save()
+
+    # Send subscription success email
+    try:
+        send_subscription_success_email(user, subscription, plan)
+    except Exception as e:
+        # Log the error but don't fail the subscription creation
+        print(f"Failed to send subscription success email: {e}")
 
     return subscription
 
