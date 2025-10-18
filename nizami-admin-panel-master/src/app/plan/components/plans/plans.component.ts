@@ -32,7 +32,6 @@ export class PlansComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('actions') actions!: TemplateRef<ActionsComponent>;
 
   searchText: string | null = null;
-  statusFilter: boolean | null = null; // null=all, false=active, true=deleted
   private searchDebounce$ = new Subject<string>();
   private allPlans: PlanModel[] = [];
   private tableClickHandler?: (e: Event) => void;
@@ -46,7 +45,6 @@ export class PlansComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeDataTable();
-    this.loadAll();
     // Debounced frontend-triggered reload
     this.searchDebounce$.pipe(debounceTime(300)).subscribe(() => this.applyFilters());
   }
@@ -59,6 +57,8 @@ export class PlansComponent implements OnInit, AfterViewInit, OnDestroy {
         this.tableContainer = dt.table().container() as HTMLElement;
         this.tableClickHandler = (e: Event) => this.onTableClick(e);
         this.tableContainer.addEventListener('click', this.tableClickHandler!);
+        // Load data after table is initialized
+        this.loadAll();
       });
     }, 20);
   }
@@ -75,6 +75,7 @@ export class PlansComponent implements OnInit, AfterViewInit, OnDestroy {
   onSearchChange(value: string) {
     this.searchDebounce$.next(value ?? '');
   }
+
 
   redraw() {
     setTimeout(() => this.applyFilters());
@@ -166,13 +167,13 @@ export class PlansComponent implements OnInit, AfterViewInit, OnDestroy {
     const term = (this.searchText ?? '').toLowerCase().trim();
     let rows = this.allPlans;
     if (term) rows = rows.filter(p => (p.name ?? '').toLowerCase().includes(term));
-    if (this.statusFilter !== null) rows = rows.filter(p => !!p.is_deleted === this.statusFilter);
 
     this.dtElement?.dtInstance?.then((dt: any) => {
-      dt.clear();
-      dt.rows.add(rows);
-      dt.draw(false);
-      // No per-row re-binding needed
+      if (dt && dt.clear && dt.rows && dt.rows.add && dt.draw) {
+        dt.clear();
+        dt.rows.add(rows);
+        dt.draw(false);
+      }
     });
   }
 
