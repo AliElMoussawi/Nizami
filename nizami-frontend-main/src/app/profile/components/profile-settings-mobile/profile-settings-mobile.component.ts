@@ -73,6 +73,10 @@ export class ProfileSettingsMobileComponent {
     this.selectedTabId.set(tab.id);
   }
 
+  switchToPlansTab() {
+    this.selectedTabId.set(Tabs.Plans);
+  }
+
   close() {
     this.location.back();
   }

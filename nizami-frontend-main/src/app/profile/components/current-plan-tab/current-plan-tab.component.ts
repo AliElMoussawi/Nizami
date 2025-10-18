@@ -28,6 +28,7 @@ import { OutlineButtonComponent } from '../../../common/components/outline-butto
 })
 export class CurrentPlanTabComponent implements OnInit {
   onCancel = output();
+  onUpgrade = output();
   subscription: UserSubscription | null = null;
   loading = true;
   error: string | null = null;
@@ -110,6 +111,11 @@ export class CurrentPlanTabComponent implements OnInit {
     return !this.subscription.is_active || this.isExpired(this.subscription.expiry_date);
   }
 
+  isFreePlan(): boolean {
+    if (!this.subscription?.plan) return false;
+    return this.subscription.plan.tier === 'BASIC';
+  }
+
   renewSubscription(): void {
     if (!this.subscription?.plan?.uuid) return;
     
@@ -120,6 +126,11 @@ export class CurrentPlanTabComponent implements OnInit {
     
     // Navigate to payment page with the same plan
     this.router.navigate(['/payment', this.subscription.plan.uuid]);
+  }
+
+  upgradeSubscription(): void {
+    // Emit event to parent to switch to plans tab
+    this.onUpgrade.emit();
   }
 
   openCancelConfirmation(): void {

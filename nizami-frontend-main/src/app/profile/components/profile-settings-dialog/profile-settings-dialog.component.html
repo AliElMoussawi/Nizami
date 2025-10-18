@@ -33,6 +33,7 @@
         @case (allTabs.CurrentPlan) {
           <app-current-plan-tab
             (onCancel)="close()"
+            (onUpgrade)="switchToPlansTab()"
           ></app-current-plan-tab>
         }
         @case (allTabs.Plans) {

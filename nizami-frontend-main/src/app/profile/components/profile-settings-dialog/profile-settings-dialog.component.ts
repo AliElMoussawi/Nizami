@@ -69,6 +69,10 @@ export class ProfileSettingsDialogComponent {
     this.selectedTabId.set(tab.id);
   }
 
+  switchToPlansTab() {
+    this.selectedTabId.set(Tabs.Plans);
+  }
+
   close() {
     this.dialogRef.close();
   }
