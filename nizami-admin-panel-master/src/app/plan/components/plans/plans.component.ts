@@ -199,7 +199,14 @@ export class PlansComponent implements OnInit, AfterViewInit, OnDestroy {
         // Immediately reload data from backend and show a single success toast
         this.loadAll('Plan activated');
       },
-      error: () => this.toastr.error('Failed to activate'),
+      error: (error) => {
+        // Handle specific error cases
+        if (error.error?.error === 'duplicate_tier_active') {
+          this.toastr.error(error.error.message || 'Cannot activate plan: Another plan with the same tier is already active');
+        } else {
+          this.toastr.error('Failed to activate plan');
+        }
+      },
     });
   }
   onDeactivate(plan: PlanModel) {
