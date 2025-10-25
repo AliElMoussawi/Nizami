@@ -1,6 +1,6 @@
 import {Component, OnInit, output, signal} from '@angular/core';
 import {DatePipe, NgClass} from '@angular/common';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {OutlineButtonComponent} from '../../../common/components/outline-button/outline-button.component';
 import {PaymentService} from '../../../payment/services/payment.service';
 import {PaginatedResponse} from '../../../payment/models/paginated-response.model';
@@ -29,7 +29,10 @@ export class PaymentsTabComponent implements OnInit {
   loading = signal<boolean>(false);
   error = signal<string>('');
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(
+    private paymentService: PaymentService,
+    private translate: TranslateService
+  ) {}
 
   ngOnInit(): void {
     this.loadPage(1);
@@ -86,6 +89,38 @@ export class PaymentsTabComponent implements OnInit {
     if (this.currentPage() > 1) {
       this.loadPage(this.currentPage() - 1, -1); // go to last local page of previous backend page
     }
+  }
+
+  /**
+   * Get translated payment status
+   */
+  getPaymentStatus(status: string): string {
+    const translationKey = `payment_status.${status.toLowerCase()}`;
+    const translation = this.translate.instant(translationKey);
+    
+    // If translation doesn't exist, return the original status
+    if (translation === translationKey) {
+      return status;
+    }
+    
+    return translation;
+  }
+
+  /**
+   * Get translated payment method/company
+   */
+  getPaymentMethod(method: string): string {
+    if (!method) return '-';
+    
+    const translationKey = `payment_method.${method.toLowerCase()}`;
+    const translation = this.translate.instant(translationKey);
+    
+    // If translation doesn't exist, return the original method
+    if (translation === translationKey) {
+      return method;
+    }
+    
+    return translation;
   }
 }
 

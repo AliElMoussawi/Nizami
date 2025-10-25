@@ -18,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
             'job_title',
             'company_name',
             'role',
+            'language',
             'date_joined',
             'is_active',
             'full_name',
@@ -76,7 +77,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UpdateProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'country', 'date_of_birth', 'profile_image', 'job_title', 'company_name']
+        fields = ['first_name', 'last_name', 'country', 'date_of_birth', 'profile_image', 'job_title', 'company_name', 'language']
 
     profile_image = serializers.ImageField(required=False, allow_null=True)
 
@@ -92,6 +93,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
             'profile_image',
             'job_title',
             'company_name',
+            'language',
         ]
 
     profile_image = serializers.ImageField(required=False, allow_null=True)

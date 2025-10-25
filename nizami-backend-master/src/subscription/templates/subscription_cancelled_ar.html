@@ -1,0 +1,235 @@
+<!-- emails/subscription_cancelled_ar.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إلغاء الاشتراك - نظامي</title>
+    <style>
+        body {
+            font-family: "Bahij TheSansArabic", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #F1FFF4, #F8F5FF);
+            color: #3A4558;
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #C0E8D4;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #3A4558;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+            font-family: "Bahij TheSansArabic", sans-serif;
+        }
+
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #3A4558;
+        }
+
+        .content p {
+            margin-bottom: 16px;
+        }
+
+        .cancellation-details {
+            background-color: #E8F6ED;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-right: 4px solid #079953;
+        }
+
+        .cancellation-details h3 {
+            margin-top: 0;
+            color: #067B43;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .cancellation-details ul {
+            margin: 0;
+            padding-right: 0;
+            list-style: none;
+        }
+
+        .cancellation-details li {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #C0E8D4;
+        }
+
+        .cancellation-details li:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #3A4558;
+            display: inline-block;
+            width: 120px;
+        }
+
+        .detail-value {
+            color: #7C7C7C;
+        }
+
+        .highlight-box {
+            background-color: #F4F4FF;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid #C0E8D4;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            font-weight: 500;
+            color: #3A4558;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #079953;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #07a559;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #7C7C7C;
+            text-align: center;
+            border-top: 1px solid #C0E8D4;
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-links a {
+            color: #079953;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 16px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .detail-label {
+                width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://app.nizami.ai/assets/icons/logo.svg" alt="نظامي" class="logo">
+        <h1>تم إلغاء الاشتراك</h1>
+    </div>
+    
+    <div class="content">
+        <p>عزيزي/عزيزتي {{ user.first_name }} {{ user.last_name }}،</p>
+        <p>نأسف لرحيلك! تم إلغاء اشتراكك بنجاح.</p>
+        
+        <div class="cancellation-details">
+            <h3>تفاصيل الإلغاء</h3>
+            <ul>
+                <li>
+                    <span class="detail-label">الخطة:</span>
+                    <span class="detail-value">{{ plan.name }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">تاريخ الإلغاء:</span>
+                    <span class="detail-value">{{ subscription.deactivated_at|date:"d F Y" }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">الوصول متاح حتى:</span>
+                    <span class="detail-value">{{ subscription.expiry_date|date:"d F Y" }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="highlight-box">
+            <p>سيبقى حسابك نشطاً حتى {{ subscription.expiry_date|date:"d F Y" }}، لذا يمكنك الاستمرار في استخدام جميع الميزات المميزة حتى ذلك التاريخ.</p>
+        </div>
+
+        <p>بعد هذا التاريخ، سيتم تخفيض حسابك إلى الخطة الأساسية مع ميزات محدودة.</p>
+        <p>إذا غيرت رأيك، يمكنك دائماً إعادة تفعيل اشتراكك أو الترقية إلى خطة مختلفة في أي وقت.</p>
+        
+        <div class="cta-section">
+            <a href="https://app.nizami.ai/profile-settings?tab=plans" class="cta-button">عرض الخطط المتاحة</a>
+        </div>
+
+        <p>نود أن نسمع رأيك حول تجربتك مع نظامي. لا تتردد في التواصل معنا إذا كان لديك أي أسئلة أو اقتراحات.</p>
+        <p>شكراً لكونك جزءاً من مجتمع نظامي!</p>
+        <p>مع أطيب التحيات،<br>فريق نظامي</p>
+    </div>
+    
+    <div class="footer">
+        <div class="social-links">
+            <a href="https://nizami.ai">زيارة الموقع</a>
+            <a href="mailto:support@nizami.ai">اتصل بالدعم</a>
+        </div>
+        <p>&copy; {{ current_year }} نظامي. جميع الحقوق محفوظة.</p>
+        <p>مساعدك القانوني الذكي الموثوق</p>
+    </div>
+</div>
+</body>
+</html>

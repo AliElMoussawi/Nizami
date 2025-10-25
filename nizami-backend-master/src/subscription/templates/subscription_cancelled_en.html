@@ -1,0 +1,234 @@
+<!-- emails/subscription_cancelled.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Cancelled - Nizami</title>
+    <style>
+        body {
+            font-family: "Bahij TheSansArabic", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #F1FFF4, #F8F5FF);
+            color: #3A4558;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #C0E8D4;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #3A4558;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+            font-family: "Bahij TheSansArabic", sans-serif;
+        }
+
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #3A4558;
+        }
+
+        .content p {
+            margin-bottom: 16px;
+        }
+
+        .cancellation-details {
+            background-color: #E8F6ED;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-left: 4px solid #079953;
+        }
+
+        .cancellation-details h3 {
+            margin-top: 0;
+            color: #067B43;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .cancellation-details ul {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .cancellation-details li {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #C0E8D4;
+        }
+
+        .cancellation-details li:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #3A4558;
+            display: inline-block;
+            width: 120px;
+        }
+
+        .detail-value {
+            color: #7C7C7C;
+        }
+
+        .highlight-box {
+            background-color: #F4F4FF;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid #C0E8D4;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            font-weight: 500;
+            color: #3A4558;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #079953;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #07a559;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #7C7C7C;
+            text-align: center;
+            border-top: 1px solid #C0E8D4;
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-links a {
+            color: #079953;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 16px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .detail-label {
+                width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://app.nizami.ai/assets/icons/logo.svg" alt="Nizami" class="logo">
+        <h1>Subscription Cancelled</h1>
+    </div>
+    
+    <div class="content">
+        <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+        <p>We're sorry to see you go! Your subscription has been successfully cancelled.</p>
+        
+        <div class="cancellation-details">
+            <h3>Cancellation Details</h3>
+            <ul>
+                <li>
+                    <span class="detail-label">Plan:</span>
+                    <span class="detail-value">{{ plan.name }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">Cancelled On:</span>
+                    <span class="detail-value">{{ subscription.deactivated_at|date:"F d, Y" }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">Access Until:</span>
+                    <span class="detail-value">{{ subscription.expiry_date|date:"F d, Y" }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="highlight-box">
+            <p>Your account will remain active until {{ subscription.expiry_date|date:"F d, Y" }}, so you can continue using all premium features until then.</p>
+        </div>
+
+        <p>After this date, your account will be downgraded to the basic plan with limited features.</p>
+        <p>If you change your mind, you can always reactivate your subscription or upgrade to a different plan at any time.</p>
+        
+        <div class="cta-section">
+            <a href="https://app.nizami.ai/profile-settings?tab=plans" class="cta-button">View Available Plans</a>
+        </div>
+
+        <p>We'd love to hear your feedback about your experience with Nizami. Please don't hesitate to reach out if you have any questions or suggestions.</p>
+        <p>Thank you for being part of the Nizami community!</p>
+        <p>Best regards,<br>The Nizami Team</p>
+    </div>
+    
+    <div class="footer">
+        <div class="social-links">
+            <a href="https://nizami.ai">Visit Website</a>
+            <a href="mailto:support@nizami.ai">Contact Support</a>
+        </div>
+        <p>&copy; {{ current_year }} Nizami. All rights reserved.</p>
+        <p>Your trusted AI legal assistant</p>
+    </div>
+</div>
+</body>
+</html>

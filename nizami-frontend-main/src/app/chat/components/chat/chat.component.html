@@ -62,3 +62,11 @@
   </div>
 
 </div>
+
+<!-- Credit Error Popup -->
+<app-credit-error-popup
+  [isVisible]="showCreditErrorPopup()"
+  [errorMessage]="creditErrorMessage()"
+  (onClose)="closeCreditErrorPopup()"
+  (onGoToPlans)="goToPlansFromPopup()"
+></app-credit-error-popup>

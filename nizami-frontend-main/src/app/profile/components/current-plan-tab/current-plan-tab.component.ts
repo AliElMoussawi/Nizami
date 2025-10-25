@@ -6,7 +6,6 @@ import { DialogRef } from '@angular/cdk/dialog';
 import { SubscriptionService } from '../../services/subscription.service';
 import { UserSubscription } from '../../models/subscription.model';
 import { SpinnerComponent } from '../../../common/components/spinner/spinner.component';
-import { ErrorComponent } from '../../../common/components/error/error.component';
 import { ButtonComponent } from '../../../common/components/button/button.component';
 import { OutlineButtonComponent } from '../../../common/components/outline-button/outline-button.component';
 
@@ -19,7 +18,6 @@ import { OutlineButtonComponent } from '../../../common/components/outline-butto
     LowerCasePipe,
     DatePipe,
     SpinnerComponent,
-    ErrorComponent,
     ButtonComponent,
     OutlineButtonComponent
   ],
@@ -55,26 +53,9 @@ export class CurrentPlanTabComponent implements OnInit {
         this.subscription = subscription;
         this.loading = false;
       },
-      error: (err: any) => {
+      error: () => {
+        this.error = 'failed_to_load_subscription';
         this.loading = false;
-        
-        // HTTP status 0 means backend is unreachable
-        if (err.status === 0) {
-          this.error = 'Unable to connect to the server. Please check your connection and try again.';
-          this.subscription = null;
-          return;
-        }
-        
-        // 404 means no subscription at all (not an error)
-        if (err.status === 404) {
-          this.error = null;
-          this.subscription = null;
-          return;
-        }
-        
-        // Other errors
-        this.error = `Failed to load subscription: ${err?.error?.message || err?.message || 'Unknown error'}`;
-        this.subscription = null;
       }
     });
   }

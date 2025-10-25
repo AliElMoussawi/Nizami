@@ -46,9 +46,10 @@ class PaymentGatewayInterface(ABC):
         token: Optional[str] = None,
         save_card: bool = False,
         apply_coupon: bool = False,
-        customer_email: Optional[str] = None,
-        customer_id: Optional[str] = None,
-        cart_id: Optional[str] = None
+        user_email: Optional[str] = None,
+        user_id: Optional[str] = None,
+        cart_id: Optional[str] = None,
+        plan_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         pass
 

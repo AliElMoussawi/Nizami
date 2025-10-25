@@ -18,6 +18,7 @@ import {HistoryChatsService} from '../../services/history-chats.service';
 import {marker} from '@colsen1991/ngx-translate-extract-marker';
 import {TranslateService} from '@ngx-translate/core';
 import {detectLanguage, extractErrorFromResponse} from '../../../common/utils';
+import {CreditErrorPopupComponent} from '../../../common/components/credit-error-popup/credit-error-popup.component';
 
 
 @UntilDestroy()
@@ -31,6 +32,7 @@ import {detectLanguage, extractErrorFromResponse} from '../../../common/utils';
     MobileChatSideBarComponent,
     NgClass,
     NgStyle,
+    CreditErrorPopupComponent,
   ],
   providers: [
     MessagesService,
@@ -59,6 +61,8 @@ export class ChatComponent {
   isGeneratingResponse = signal<boolean>(false);
   error = signal<string | null>(null);
   submittingMessage = signal<MessageModel | null>(null);
+  showCreditErrorPopup = signal<boolean>(false);
+  creditErrorMessage = signal<string>('');
 
   stop$ = new Subject<void>();
 
@@ -294,6 +298,27 @@ export class ChatComponent {
         takeUntil(this.stop$),
         catchError((err) => {
           const extracted = extractErrorFromResponse(err);
+          
+          // Define all ledger enum error types that should show popup
+          const popupErrorTypes = [
+            'errors.user_inactive',
+            'errors.subscription_not_found',
+            'errors.subscription_multiple_active',
+            'errors.subscription_expired',
+            'errors.subscription_inactive',
+            'errors.no_message_credits'
+          ];
+          
+          // Check if it's a ledger error and show popup instead of inline error
+          if (typeof extracted === 'string' && popupErrorTypes.includes(extracted)) {
+            this.creditErrorMessage.set(this.translate.instant(marker(extracted)));
+            this.showCreditErrorPopup.set(true);
+            this.isDisabled.set(false);
+            this.isGeneratingResponse.set(false);
+            return EMPTY;
+          }
+          
+          // Handle other errors normally
           if (typeof extracted === 'string' && extracted.startsWith('errors.')) {
             this.error.set(this.translate.instant(marker(extracted)));
           } else if (typeof extracted === 'string' && extracted.trim().length > 0) {
@@ -363,5 +388,15 @@ export class ChatComponent {
 
   private refreshMessages() {
     this.messages.set([]);
+  }
+
+  // Credit error popup handlers
+  closeCreditErrorPopup() {
+    this.showCreditErrorPopup.set(false);
+  }
+
+  goToPlansFromPopup() {
+    this.showCreditErrorPopup.set(false);
+    // Navigation is handled in the popup component
   }
 }

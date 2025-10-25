@@ -73,11 +73,18 @@ def load_aspose_license():
     pass
 
 
+def get_email_template(template_name, user_language='ar'):
+    if user_language == 'ar':
+        return f'{template_name}_ar.html'
+    return f'{template_name}_en.html'
+
+
 def send_subscription_success_email(user, subscription, plan):
-    subject = 'Subscription Successful - JP Ai'
+    template_name = get_email_template('subscription_success', user.language)
+    subject = 'Subscription Successful - Nizami' if user.language == 'en' else 'اشتراك ناجح - نظامي'
 
     message = render_to_string(
-        'subscription_success.html',
+        template_name,
         context={
             'user': user,
             'subscription': subscription,
@@ -97,10 +104,11 @@ def send_subscription_success_email(user, subscription, plan):
 
 
 def send_subscription_cancelled_email(user, subscription, plan):
-    subject = 'Subscription Cancelled - JP Ai'
+    template_name = get_email_template('subscription_cancelled', user.language)
+    subject = 'Subscription Cancelled - Nizami' if user.language == 'en' else 'تم إلغاء الاشتراك - نظامي'
 
     message = render_to_string(
-        'subscription_cancelled.html',
+        template_name,
         context={
             'user': user,
             'subscription': subscription,
@@ -120,10 +128,11 @@ def send_subscription_cancelled_email(user, subscription, plan):
 
 
 def send_payment_success_email(user, payment):
-    subject = 'Payment Successful - JP Ai'
+    template_name = get_email_template('payment_success', user.language)
+    subject = 'Payment Successful - Nizami' if user.language == 'en' else 'دفع ناجح - نظامي'
 
     message = render_to_string(
-        'payment_success.html',
+        template_name,
         context={
             'user': user,
             'payment': payment,
@@ -142,10 +151,11 @@ def send_payment_success_email(user, payment):
 
 
 def send_payment_failure_email(user, payment):
-    subject = 'Payment Failed - JP Ai'
+    template_name = get_email_template('payment_failure', user.language)
+    subject = 'Payment Failed - Nizami' if user.language == 'en' else 'فشل الدفع - نظامي'
 
     message = render_to_string(
-        'payment_failure.html',
+        template_name,
         context={
             'user': user,
             'payment': payment,
