@@ -34,14 +34,15 @@ def send_welcome_with_password_message(user, password):
         }
     )
 
-    send_mail(
-        subject,
-        None,
-        settings.EMAIL_FROM_ADDRESS,
-        [user.email],
+    send_email(
+        subject=subject,
+        message=None,
+        from_email=settings.EMAIL_FROM_ADDRESS,
+        to=[user.email],
         fail_silently=False,
         html_message=message
     )
+
 
 
 def send_welcome_mail(user):
@@ -57,14 +58,15 @@ def send_welcome_mail(user):
         }
     )
 
-    send_mail(
-        subject,
-        None,
-        settings.EMAIL_FROM_ADDRESS,
-        [user.email],
+    send_email(
+        subject=subject,
+        message=None,
+        from_email=settings.EMAIL_FROM_ADDRESS,
+        to=[user.email],
         fail_silently=False,
         html_message=message
     )
+
 
 
 def load_aspose_license():
@@ -99,14 +101,15 @@ def send_subscription_success_email(user, subscription, plan):
         }
     )
 
-    send_mail(
-        subject,
-        None,
-        settings.EMAIL_FROM_ADDRESS,
-        [user.email],
+    send_email(
+        subject=subject,
+        message=None,
+        from_email=settings.EMAIL_FROM_ADDRESS,
+        to=[user.email],
         fail_silently=False,
         html_message=message
     )
+
 
 
 def send_subscription_cancelled_email(user, subscription, plan):
@@ -126,14 +129,15 @@ def send_subscription_cancelled_email(user, subscription, plan):
         }
     )
 
-    send_mail(
-        subject,
-        None,
-        settings.EMAIL_FROM_ADDRESS,
-        [user.email],
+    send_email(
+        subject=subject,
+        message=None,
+        from_email=settings.EMAIL_FROM_ADDRESS,
+        to=[user.email],
         fail_silently=False,
         html_message=message
     )
+
 
 
 def send_payment_success_email(user, payment):
@@ -155,11 +159,11 @@ def send_payment_success_email(user, payment):
         }
     )
 
-    send_mail(
-        subject,
-        None,
-        settings.EMAIL_FROM_ADDRESS,
-        [user.email],
+    send_email(
+        subject=subject,
+        message=None,
+        from_email=settings.EMAIL_FROM_ADDRESS,
+        to=[user.email],
         fail_silently=False,
         html_message=message
     )
@@ -184,11 +188,11 @@ def send_payment_failure_email(user, payment):
         }
     )
 
-    send_mail(
-        subject,
-        None,
-        settings.EMAIL_FROM_ADDRESS,
-        [user.email],
+    send_email(
+        subject=subject,
+        message=None,
+        from_email=settings.EMAIL_FROM_ADDRESS,
+        to=[user.email],
         fail_silently=False,
         html_message=message
     )
@@ -196,3 +200,15 @@ def send_payment_failure_email(user, payment):
 
 def chunk_array(arr, chunk_size):
     return [arr[i:i + chunk_size] for i in range(0, len(arr), chunk_size)]
+
+
+
+def send_email(subject, html_message, from_email, to, message=None, fail_silently=False):
+    send_mail(
+        subject,
+        message,
+        from_email,
+        to,
+        fail_silently=fail_silently,
+        html_message=html_message
+    )

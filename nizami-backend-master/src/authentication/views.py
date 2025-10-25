@@ -1,6 +1,5 @@
 from django.contrib.auth import password_validation, update_session_auth_hash
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
 from rest_framework import status
@@ -15,7 +14,7 @@ from src.users.serializers import UserSerializer, ProfileSerializer, UpdateProfi
 from .serializers import PasswordResetSerializer, UpdatePasswordSerializer, RegisterSerializer
 from .. import settings
 from ..common.throttles import ForgotPasswordThrottle
-from ..common.utils import send_welcome_mail
+from ..common.utils import send_email, send_welcome_mail
 from ..users.models import User
 
 
@@ -94,13 +93,13 @@ def forgot_password(request):
         }
     )
 
-    send_mail(
-        subject,
-        None,
-        settings.EMAIL_FROM_ADDRESS,
-        [email],
+    send_email(
+        subject=subject,
+        html_message=message,
+        from_email=settings.EMAIL_FROM_ADDRESS,
+        to=[email],
         fail_silently=False,
-        html_message=message
+        message=None,
     )
 
     return Response({"message": "Password reset email sent!"}, status=status.HTTP_200_OK)
