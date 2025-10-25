@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy the rest of the application
 COPY . /app
-RUN python src/manage.py collectstatic --noinput
+#RUN python src/manage.py collectstatic --noinput
 
 EXPOSE 8000
 

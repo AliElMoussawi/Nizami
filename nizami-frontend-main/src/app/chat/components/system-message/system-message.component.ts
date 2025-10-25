@@ -10,7 +10,6 @@ import {MessagesService} from '../../services/messages.service';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {take} from 'rxjs';
 import {SafeHtmlPipe} from '../../../common/pipes/safe-html.pipe';
-import {NgClass} from '@angular/common';
 
 @UntilDestroy()
 @Component({
@@ -20,8 +19,7 @@ import {NgClass} from '@angular/common';
     ChatSystemProfileComponent,
     NgxTypedWriterComponent,
     UserMessageFileComponent,
-    SafeHtmlPipe,
-    NgClass
+    SafeHtmlPipe
   ],
   templateUrl: './system-message.component.html',
   styleUrl: './system-message.component.scss'

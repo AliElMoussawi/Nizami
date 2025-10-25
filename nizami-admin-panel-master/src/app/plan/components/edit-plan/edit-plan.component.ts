@@ -25,9 +25,7 @@ export class EditPlanComponent {
   tiers = [
     { value: 'BASIC', label: 'Basic' },
     { value: 'PLUS', label: 'Plus' },
-    { value: 'ADVANCED_PLUS', label: 'Advanced Plus' },
-    { value: 'PREMIUM_MONTHLY', label: 'Premium-Monthly' },
-    { value: 'PREMIUM_YEARLY', label: 'Premium-Yearly' },
+    { value: 'PREMIUM', label: 'Premium' },
   ];
 
   creditTypes = [

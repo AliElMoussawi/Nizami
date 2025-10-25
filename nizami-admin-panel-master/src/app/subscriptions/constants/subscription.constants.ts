@@ -13,17 +13,13 @@ export const CREDIT_TYPE_LABELS = {
 export const PLAN_TIERS = {
   BASIC: 'BASIC',
   PLUS: 'PLUS',
-  PREMIUM_MONTHLY: 'PREMIUM_MONTHLY',
-  PREMIUM_YEARLY: 'PREMIUM_YEARLY',
-  ADVANCED_PLUS: 'ADVANCED_PLUS',
+  PREMIUM: 'PREMIUM',
 } as const;
 
 export const PLAN_TIER_LABELS = {
   [PLAN_TIERS.BASIC]: 'Basic',
   [PLAN_TIERS.PLUS]: 'Plus',
-  [PLAN_TIERS.PREMIUM_MONTHLY]: 'Premium-Monthly',
-  [PLAN_TIERS.PREMIUM_YEARLY]: 'Premium-Yearly',
-  [PLAN_TIERS.ADVANCED_PLUS]: 'Advanced Plus',
+  [PLAN_TIERS.PREMIUM]: 'Premium-Monthly',
 } as const;
 
 export const INTERVAL_UNITS = {
