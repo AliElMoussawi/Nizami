@@ -233,7 +233,7 @@
     </div>
     
     <div class="content">
-        <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+        <p>Dear {{ user_first_name }} {{ user_last_name }},</p>
         <p>Congratulations! Your subscription has been successfully activated. You now have access to all the premium features of Nizami.</p>
         
         <div class="plan-details">
@@ -241,23 +241,23 @@
             <ul>
                 <li>
                     <span class="detail-label">Plan:</span>
-                    <span class="detail-value">{{ plan.name }}</span>
+                    <span class="detail-value">{{ plan_name }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Billing Cycle:</span>
-                    <span class="detail-value">{{ plan.interval_unit|title }}</span>
+                    <span class="detail-value">{{ plan_interval_unit|title }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Price:</span>
-                    <span class="detail-value">${{ plan.price }}</span>
+                    <span class="detail-value">${{ plan_price_cents|floatformat:2 }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Credits:</span>
-                    <span class="detail-value">{{ plan.credit_amount }} {{ plan.credit_type|lower }}</span>
+                    <span class="detail-value">{{ plan_credit_amount }} {{ plan_credit_type|lower }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Expires:</span>
-                    <span class="detail-value">{{ subscription.expiry_date|date:"F d, Y" }}</span>
+                    <span class="detail-value">{{ subscription_expiry_date|date:"F d, Y" }}</span>
                 </li>
             </ul>
         </div>

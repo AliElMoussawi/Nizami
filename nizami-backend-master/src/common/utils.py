@@ -1,5 +1,3 @@
-import os
-
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -28,7 +26,9 @@ def send_welcome_with_password_message(user, password):
         'welcome_with_password.html',
         context={
             'app_url': settings.FRONTEND_DOMAIN,
-            'user': user,
+            'user_first_name': user.first_name,
+            'user_last_name': user.last_name,
+            'user_email': user.email,
             'password': password,
             'current_year': timezone.now().year,
         }
@@ -50,7 +50,9 @@ def send_welcome_mail(user):
     message = render_to_string(
         'welcome.html',
         context={
-            'user': user,
+            'user_first_name': user.first_name,
+            'user_last_name': user.last_name,
+            'user_email': user.email,
             'current_year': timezone.now().year,
         }
     )
@@ -86,9 +88,13 @@ def send_subscription_success_email(user, subscription, plan):
     message = render_to_string(
         template_name,
         context={
-            'user': user,
-            'subscription': subscription,
-            'plan': plan,
+            'user_first_name': user.first_name,
+            'user_last_name': user.last_name,
+            'user_email': user.email,
+            'subscription_expiry_date': subscription.expiry_date,
+            'plan_name': plan.name,
+            'plan_price_cents': plan.price_cents,
+            'plan_interval_unit': plan.interval_unit,
             'current_year': timezone.now().year,
         }
     )
@@ -110,9 +116,12 @@ def send_subscription_cancelled_email(user, subscription, plan):
     message = render_to_string(
         template_name,
         context={
-            'user': user,
-            'subscription': subscription,
-            'plan': plan,
+            'user_first_name': user.first_name,
+            'user_last_name': user.last_name,
+            'user_email': user.email,
+            'subscription_expiry_date': subscription.expiry_date,
+            'subscription_deactivated_at': subscription.deactivated_at,
+            'plan_name': plan.name,
             'current_year': timezone.now().year,
         }
     )
@@ -134,8 +143,14 @@ def send_payment_success_email(user, payment):
     message = render_to_string(
         template_name,
         context={
-            'user': user,
-            'payment': payment,
+            'user_first_name': user.first_name,
+            'user_last_name': user.last_name,
+            'user_email': user.email,
+            'payment_amount': payment.amount,
+            'payment_status': payment.status,
+            'payment_method': payment.source.type if payment.source else None,
+            'transaction_id': payment.id,
+            'payment_created_at': payment.created_at,
             'current_year': timezone.now().year,
         }
     )
@@ -157,8 +172,14 @@ def send_payment_failure_email(user, payment):
     message = render_to_string(
         template_name,
         context={
-            'user': user,
-            'payment': payment,
+            'user_first_name': user.first_name,
+            'user_last_name': user.last_name,
+            'user_email': user.email,
+            'payment_amount': payment.amount,
+            'payment_status': payment.status,
+            'payment_method': payment.source.type if payment.source else None,
+            'transaction_id': payment.id,
+            'payment_created_at': payment.created_at,
             'current_year': timezone.now().year,
         }
     )

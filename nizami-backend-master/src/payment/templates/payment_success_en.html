@@ -207,7 +207,7 @@
     </div>
     
     <div class="content">
-        <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+        <p>Dear {{ user_first_name }} {{ user_last_name }},</p>
         <p>Great news! Your payment has been processed successfully. Thank you for your purchase!</p>
         
         <div class="payment-details">
@@ -215,23 +215,23 @@
             <ul>
                 <li>
                     <span class="detail-label">Amount:</span>
-                    <span class="detail-value">${{ payment.amount }}</span>
+                    <span class="detail-value">${{ payment_amount }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Payment Method:</span>
-                    <span class="detail-value">{{ payment.payment_method }}</span>
+                    <span class="detail-value">{{ payment_method }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Transaction ID:</span>
-                    <span class="detail-value">{{ payment.transaction_id }}</span>
+                    <span class="detail-value">{{ transaction_id }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Date:</span>
-                    <span class="detail-value">{{ payment.created_at|date:"F d, Y" }}</span>
+                    <span class="detail-value">{{ payment_created_at|date:"F d, Y" }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Status:</span>
-                    <span class="detail-value">{{ payment.status|title }}</span>
+                    <span class="detail-value">{{ payment_status|title }}</span>
                 </li>
             </ul>
         </div>
