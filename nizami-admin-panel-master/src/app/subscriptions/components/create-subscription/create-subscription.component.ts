@@ -35,14 +35,7 @@ import {CREDIT_TYPES} from '../../constants/subscription.constants';
   styleUrl: './create-subscription.component.scss'
 })
 export class CreateSubscriptionComponent implements OnInit {
-  subscriptionForm: FormGroup<{
-    user_email: FormControl<string>;
-    plan: FormControl<string>;
-    credit_amount: FormControl<number | null>;
-    credit_type: FormControl<string>;
-    is_unlimited: FormControl<boolean>;
-    expiry_date: FormControl<string>;
-  }>;
+  subscriptionForm: FormGroup;
   isLoading = false;
   plans: Plan[] = [];
   selectedPlan: Plan | null = null;
@@ -93,7 +86,7 @@ export class CreateSubscriptionComponent implements OnInit {
 
   }
 
-  onPlanSelectionChange(planUuid: string) {
+  onPlanSelectionChange(planUuid: string | null) {
     if (!planUuid) {
       this.selectedPlan = null;
       this.resetFormToDefaults();

@@ -27,13 +27,7 @@ import {FlatButtonComponent} from '../../../common/components/flat-button/flat-b
   styleUrl: './edit-subscription.component.scss'
 })
 export class EditSubscriptionComponent implements OnInit {
-  subscriptionForm: FormGroup<{
-    is_active: FormControl<boolean>;
-    credit_amount: FormControl<number | null>;
-    credit_type: FormControl<string>;
-    is_unlimited: FormControl<boolean>;
-    expiry_date: FormControl<string>;
-  }>;
+  subscriptionForm: FormGroup;
   isLoading = false;
   subscription: UserSubscriptionModel | null = null;
   subscriptionUuid: string = '';
@@ -117,8 +111,16 @@ export class EditSubscriptionComponent implements OnInit {
         formData.expiry_date = new Date(formData.expiry_date).toISOString();
       }
 
+      // Filter out null values to match UpdateSubscriptionRequest interface
+      const updateData: any = {};
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== null && formData[key] !== undefined) {
+          updateData[key] = formData[key];
+        }
+      });
+
       this.subscriptionsService
-        .updateSubscription(this.subscriptionUuid, formData)
+        .updateSubscription(this.subscriptionUuid, updateData)
         .pipe(
           take(1),
           untilDestroyed(this),

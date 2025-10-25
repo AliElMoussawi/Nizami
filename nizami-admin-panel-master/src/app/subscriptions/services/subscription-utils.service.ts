@@ -29,13 +29,6 @@ export class SubscriptionUtilsService {
   }
 
   /**
-   * Check if plan is advanced tier
-   */
-  isAdvancedPlan(plan: Plan): boolean {
-    return plan.tier === 'ADVANCED_PLUS';
-  }
-
-  /**
    * Get plan price in dollars
    */
   getPlanPriceInDollars(plan: Plan): number {
