@@ -61,7 +61,6 @@ class MoyasarGateway(APIGateway, PaymentGatewayInterface):
         currency: str,
         description: str,
         callback_url: str,
-        # optional card or token fields
         card_name: str = None,
         card_number: str = None,
         card_month: int = None,
@@ -71,9 +70,10 @@ class MoyasarGateway(APIGateway, PaymentGatewayInterface):
         token: str = None,
         save_card: bool = False,
         apply_coupon: bool = False,
-        customer_email: str = None,
-        customer_id: str = None,
-        cart_id: str = None
+        user_email: str = None,
+        user_id: str = None,
+        cart_id: str = None,
+        plan_id: str = None
         ):
         payment_path = "payments"
         payment_url = self.build_url(uri=payment_path)
@@ -111,8 +111,9 @@ class MoyasarGateway(APIGateway, PaymentGatewayInterface):
             "source": source,
             "metadata": {
                 "cart_id": cart_id,
-                "customer_email": customer_email,
-                "customer_id": customer_id
+                "user_email": user_email,
+                "user_id": user_id,
+                "plan_id": plan_id
             },
             "apply_coupon": apply_coupon
         }

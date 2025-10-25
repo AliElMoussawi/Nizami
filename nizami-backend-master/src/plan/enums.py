@@ -3,9 +3,7 @@ from django.db import models
 class Tier(models.TextChoices):
     BASIC = 'BASIC', 'Basic'
     PLUS =  'PLUS', 'Plus'
-    PREMIUM_MONTHLY = 'PREMIUM_MONTHLY', 'Premium-Monthly'
-    PREMIUM_YEARLY = 'PREMIUM_YEARLY', 'Premium-Yearly'
-    ADVANCED_PLUS = 'ADVANCED_PLUS', 'Advanced plus'
+    PREMIUM = 'PREMIUM', 'Premium'
 
 class InternalUtil(models.TextChoices):
     MONTH = 'MONTH', 'Month'

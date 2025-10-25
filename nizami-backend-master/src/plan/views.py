@@ -143,16 +143,7 @@ def activate(request: Request):
 
 @api_view(['GET'])
 def available_for_upgrade(request: Request):
-    exclude_tiers = [Tier.BASIC, Tier.ADVANCED_PLUS]
-
-    active_subscription = (
-            UserSubscription.objects
-            .filter(user=request.user, is_active=True)
-            .select_related('plan').order_by()
-            .first()
-        )
-    if active_subscription and active_subscription.plan and active_subscription.plan.tier:
-        exclude_tiers.append(active_subscription.plan.tier)
+    exclude_tiers = [Tier.BASIC]
 
     queryset = (
         Plan.objects

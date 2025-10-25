@@ -63,7 +63,7 @@ def list_payments(request: Request):
 
     queryset = (
         MoyasarPayment.objects
-        .filter(metadata__customer_id=user_id)
+        .filter(metadata__user_id=user_id)
         .select_related('source', 'invoice')
         .order_by('-created_at')
     )

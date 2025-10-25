@@ -6,25 +6,7 @@
 
   <!-- Error -->
   @if (error && !loading) {
-    <div class="bg-red1 border border-red2 rounded-lg p-4">
-      <div class="flex flex-col gap-3">
-        <div class="flex flex-row gap-2 items-start">
-          <svg class="w-5 h-5 text-red2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <div class="flex flex-col gap-1 flex-grow">
-            <span class="text-sm font-semibold text-red3">{{ 'error_occurred' | translate }}</span>
-            <span class="text-xs text-red2">{{ error }}</span>
-          </div>
-        </div>
-        <button
-          (click)="loadActiveSubscription()"
-          class="px-4 py-2 text-sm font-medium text-red2 border border-red2 rounded-lg hover:bg-red1 transition-colors"
-        >
-          {{ 'try_again' | translate }}
-        </button>
-      </div>
-    </div>
+    <div class="py-4 text-sm text-red-500">{{ error | translate }}</div>
   }
 
   <!-- Active Subscription -->

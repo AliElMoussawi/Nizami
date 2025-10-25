@@ -8,7 +8,7 @@ from src.users.models import User
 from src.plan.enums import InternalUtil, Tier
 from src.plan.models import Plan
 from src.subscription.models import UserSubscription
-from src.common.utils import send_subscription_success_email, send_subscription_cancelled_email
+from src.common.utils import send_subscription_success_email
 
 
 def _compute_expiry_date(plan: Plan) -> datetime:
@@ -38,11 +38,6 @@ def create_subscription_for_user(user, plan: Plan) -> UserSubscription:
     )
     subscription.save()
 
-    try:
-        send_subscription_success_email(user, subscription, plan)
-    except Exception as e:
-        print(f"Failed to send subscription success email: {e}")
-
     return subscription
 
 @transaction.atomic
@@ -56,7 +51,12 @@ def upgrade_user_subscription_plan(user, plan: Plan) -> UserSubscription:
             is_active=False,
             deactivated_at=now
         )
-    return create_subscription_for_user(user=user, plan=plan)
+    subscription = create_subscription_for_user(user=user, plan=plan)
+    try:
+        send_subscription_success_email(user, subscription, plan)
+    except Exception as e:
+        print(f"Failed to send subscription success email: {e}")
+    return subscription
 
 def create_basic_subscription_for_user(user) -> UserSubscription:
     if UserSubscription.objects.filter(user=user, plan__tier=Tier.BASIC).exists():
@@ -70,7 +70,6 @@ def create_basic_subscription_for_user(user) -> UserSubscription:
         raise ValueError("Basic plan is not configured")
 
     return create_subscription_for_user(user, basic_plan)
-
 
 def upgrade_user_subscription_user_id_and_plan_id(user_id, plan_uuid):
     user = User.objects.get(id=user_id)

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule, LowerCasePipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PaymentService } from '../../services/payment.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Plan } from '../../models/plan.model';
@@ -35,7 +35,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private paymentService: PaymentService,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit() {
@@ -113,6 +114,23 @@ export class PaymentComponent implements OnInit, OnDestroy {
         this.error = 'Failed to load payment form. Please refresh and try again.';
       }
     }, 100);
+  }
+
+  /**
+   * Get translated billing interval
+   */
+  getBillingInterval(interval: string | null): string {
+    if (!interval) return '';
+    
+    const translationKey = `billing_interval.${interval.toLowerCase()}`;
+    const translation = this.translate.instant(translationKey);
+    
+    // If translation doesn't exist, return the original interval
+    if (translation === translationKey) {
+      return interval;
+    }
+    
+    return translation;
   }
 }
 

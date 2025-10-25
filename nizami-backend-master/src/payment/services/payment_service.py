@@ -180,9 +180,10 @@ class PaymentService:
         token: Optional[str] = None,
         save_card: bool = False,
         apply_coupon: bool = False,
-        customer_email: Optional[str] = None,
-        customer_id: Optional[str] = None,
-        cart_id: Optional[str] = None
+        user_email: Optional[str] = None,
+        user_id: Optional[str] = None,
+        cart_id: Optional[str] = None,
+        plan_id : Optional[str] = None
     ) -> Dict[str, Any]:
         response = self.gateway.create_payment(
             payment_source_type=payment_source_type,
@@ -200,9 +201,10 @@ class PaymentService:
             token=token,
             save_card=save_card,
             apply_coupon=apply_coupon,
-            customer_email=customer_email,
-            customer_id=customer_id,
-            cart_id=cart_id
+            user_email=user_email,
+            user_id=user_id,
+            cart_id=cart_id,
+            plan_id=plan_id,
         )
         
         validated_data = validate_and_log_response(

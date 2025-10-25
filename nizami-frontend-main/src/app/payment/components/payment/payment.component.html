@@ -94,7 +94,7 @@
                       </div>
                       @if (plan.interval_unit) {
                         <div class="text-xs xl:text-sm text-grey5">
-                          {{ 'billed' | translate }} {{ plan.interval_unit.toLowerCase() }}
+                          {{ 'billed' | translate }} {{ getBillingInterval(plan.interval_unit) }}
                         </div>
                       }
                     </div>

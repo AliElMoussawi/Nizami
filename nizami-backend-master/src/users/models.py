@@ -19,3 +19,4 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=[('admin', 'Admin'), ('user', 'User')], default='user')
     company_name = models.CharField(max_length=100, null=True)
     profile_image = models.FileField(null=True, upload_to=unique_file_path)
+    language = models.CharField(max_length=10, choices=[('en', 'English'), ('ar', 'Arabic')], default='ar')

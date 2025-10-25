@@ -31,7 +31,12 @@ def history(request: Request):
 # API called on login and refresh - returns the current subscription credits, expiry date and everything...
 def current_subscription(request: Request):
     try:
-        sub = UserSubscription.objects.get(user=request.user, is_active=True)
+        # Get subscription that hasn't expired yet (active or deactivated)
+        sub = UserSubscription.objects.filter(
+            user=request.user, 
+            expiry_date__gte=timezone.now()
+        ).latest('created_at')
+        
     except UserSubscription.DoesNotExist:
         return Response({"error": "no_active_user_subscription"}, status=status.HTTP_404_NOT_FOUND)
     except UserSubscription.MultipleObjectsReturned:

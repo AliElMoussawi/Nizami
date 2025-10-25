@@ -29,12 +29,17 @@ export class PaymentCallbackComponent implements OnInit {
         this.router.navigate(['/payment/success'], { 
           queryParams: { paymentId } 
         });
-      } else {
-        setTimeout(() => {
-          this.router.navigate(['/chat']);
-        }, 3000);
       }
+      // For failed payments, stay on the page and let user manually navigate
     });
+  }
+
+  goToChat() {
+    this.router.navigate(['/chat']);
+  }
+
+  goToPlans() {
+    this.router.navigate(['/profile-settings'], { queryParams: { tab: 'plans' } });
   }
 }
 

@@ -10,7 +10,9 @@
     <!-- Main Content -->
     <div class="flex-1 px-4 pb-8 xl:px-10 xl:pb-10 flex items-center justify-center">
       <div class="max-w-xl w-full">
-        <div class="bg-white rounded-3xl shadow-lg p-6 xl:p-8">
+        
+        <!-- Processing State (for successful payments) -->
+        <div *ngIf="status === 'paid'" class="bg-white rounded-3xl shadow-lg p-6 xl:p-8">
           <div class="flex flex-col items-center text-center gap-5">
             <!-- Processing Icon -->
             <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-pulse">
@@ -24,10 +26,66 @@
               <h2 class="text-xl font-semibold text-grey6">{{ 'processing_payment' | translate }}</h2>
               <p class="text-grey5 text-sm">{{ 'processing_payment_message' | translate }}</p>
             </div>
+          </div>
+        </div>
 
-            <!-- Additional Message if Available -->
-            <div *ngIf="message" class="w-full p-4 bg-grey2 rounded-lg">
-              <p class="text-xs text-grey5">{{ message }}</p>
+        <!-- Failed Payment State (show error clearly) -->
+        <div *ngIf="status === 'failed'" class="bg-white rounded-3xl shadow-lg p-6 xl:p-8">
+          <div class="flex flex-col items-center text-center gap-5">
+            <!-- Error Icon -->
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+              <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            
+            <!-- Error Message -->
+            <div class="flex flex-col gap-1">
+              <h2 class="text-xl font-semibold text-grey6">{{ 'payment_failed' | translate }}</h2>
+              <p class="text-grey5 text-sm">{{ 'payment_failed_message' | translate }}</p>
+            </div>
+
+            <!-- Error Details -->
+            <div *ngIf="message" class="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p class="text-sm text-red-700 font-medium">{{ message }}</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col-reverse xl:flex-row justify-center gap-4 w-full">
+              <button
+                class="px-6 py-3 bg-white text-grey6 hover:bg-grey1 border border-grey1 rounded-lg font-medium transition-colors"
+                (click)="goToChat()"
+              >
+                {{ 'go_to_chat' | translate }}
+              </button>
+
+              <button
+                class="px-6 py-3 bg-blue1 hover:bg-purple5 text-white rounded-lg font-medium flex flex-row gap-3 items-center justify-center transition-colors"
+                (click)="goToPlans()"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+                {{ 'try_again' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Default Processing State (for other statuses) -->
+        <div *ngIf="status !== 'paid' && status !== 'failed'" class="bg-white rounded-3xl shadow-lg p-6 xl:p-8">
+          <div class="flex flex-col items-center text-center gap-5">
+            <!-- Processing Icon -->
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center animate-pulse">
+              <svg class="w-10 h-10 text-blue1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            
+            <!-- Processing Message -->
+            <div class="flex flex-col gap-1">
+              <h2 class="text-xl font-semibold text-grey6">{{ 'processing_payment' | translate }}</h2>
+              <p class="text-grey5 text-sm">{{ 'processing_payment_message' | translate }}</p>
             </div>
           </div>
         </div>

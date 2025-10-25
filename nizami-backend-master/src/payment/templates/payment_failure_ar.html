@@ -1,0 +1,304 @@
+<!-- emails/payment_failure_ar.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فشل الدفع - نظامي</title>
+    <style>
+        body {
+            font-family: "Bahij TheSansArabic", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #F1FFF4, #F8F5FF);
+            color: #3A4558;
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #C0E8D4;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #3A4558;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+            font-family: "Bahij TheSansArabic", sans-serif;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #FFF1F1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 3px solid #F04438;
+        }
+
+        .error-icon svg {
+            width: 40px;
+            height: 40px;
+            color: #F04438;
+        }
+
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #3A4558;
+        }
+
+        .content p {
+            margin-bottom: 16px;
+        }
+
+        .payment-details {
+            background-color: #FFF1F1;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-right: 4px solid #F04438;
+        }
+
+        .payment-details h3 {
+            margin-top: 0;
+            color: #B32318;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .payment-details ul {
+            margin: 0;
+            padding-right: 0;
+            list-style: none;
+        }
+
+        .payment-details li {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #ffdfdc;
+        }
+
+        .payment-details li:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #3A4558;
+            display: inline-block;
+            width: 140px;
+        }
+
+        .detail-value {
+            color: #7C7C7C;
+        }
+
+        .highlight-box {
+            background-color: #F4F4FF;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid #C0E8D4;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            font-weight: 500;
+            color: #3A4558;
+        }
+
+        .troubleshooting-list {
+            background-color: #F8F5FF;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid #C0E8D4;
+        }
+
+        .troubleshooting-list h4 {
+            color: #3A4558;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .troubleshooting-list ul {
+            margin: 0;
+            padding-right: 20px;
+        }
+
+        .troubleshooting-list li {
+            color: #7C7C7C;
+            margin-bottom: 8px;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #079953;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #07a559;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #7C7C7C;
+            text-align: center;
+            border-top: 1px solid #C0E8D4;
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-links a {
+            color: #079953;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 16px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .detail-label {
+                width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://app.nizami.ai/assets/icons/logo.svg" alt="نظامي" class="logo">
+        <div class="error-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+        </div>
+        <h1>فشل الدفع </h1>
+    </div>
+    
+    <div class="content">
+        <p>عزيزي/عزيزتي {{ user.first_name }} {{ user.last_name }}،</p>
+        <p>واجهنا مشكلة في معالجة دفعتك. لا تقلق - هذا يحدث أحياناً وعادة ما يكون من السهل حله.</p>
+        
+        <div class="payment-details">
+            <h3>تفاصيل الدفع</h3>
+            <ul>
+                <li>
+                    <span class="detail-label">المبلغ:</span>
+                    <span class="detail-value">${{ payment.amount }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">طريقة الدفع:</span>
+                    <span class="detail-value">{{ payment.payment_method }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">رقم المعاملة:</span>
+                    <span class="detail-value">{{ payment.transaction_id }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">التاريخ:</span>
+                    <span class="detail-value">{{ payment.created_at|date:"d F Y" }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">الحالة:</span>
+                    <span class="detail-value">{{ payment.status|title }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">الخطأ:</span>
+                    <span class="detail-value">{{ payment.failure_reason|default:"فشل في معالجة الدفع" }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="highlight-box">
+            <p>لإكمال اشتراكك، يرجى تجربة الخطوات التالية لحل مشكلة الدفع.</p>
+        </div>
+
+        <div class="troubleshooting-list">
+            <h4>ما يمكنك فعله:</h4>
+            <ul>
+                <li>تأكد من أن طريقة الدفع لديك تحتوي على أموال كافية</li>
+                <li>تحقق من صحة معلومات الفوترة</li>
+                <li>جرب استخدام طريقة دفع مختلفة</li>
+                <li>اتصل ببنكك إذا استمرت المشكلة</li>
+                <li>تأكد من أن بطاقتك تدعم المشتريات عبر الإنترنت</li>
+            </ul>
+        </div>
+
+        <div class="cta-section">
+            <a href="https://app.nizami.ai/profile-settings?tab=plans" class="cta-button">جرب الدفع مرة أخرى</a>
+        </div>
+
+        <p>يمكنك إعادة محاولة الدفع من خلال تسجيل الدخول إلى حسابك والذهاب إلى قسم الفوترة. إذا استمرت المشاكل، يرجى التواصل مع فريق الدعم لدينا وسنكون سعداء لمساعدتك.</p>
+        <p>شكراً لصبرك!</p>
+        <p>مع أطيب التحيات،<br>فريق نظامي</p>
+    </div>
+    
+    <div class="footer">
+        <div class="social-links">
+            <a href="https://nizami.ai">زيارة الموقع</a>
+            <a href="mailto:support@nizami.ai">اتصل بالدعم</a>
+        </div>
+        <p>&copy; {{ current_year }} نظامي. جميع الحقوق محفوظة.</p>
+        <p>مساعدك القانوني الذكي الموثوق</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!-- emails/subscription_success.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Successful - Nizami</title>
+    <style>
+        body {
+            font-family: "Bahij TheSansArabic", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #F1FFF4, #F8F5FF);
+            color: #3A4558;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #C0E8D4;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #3A4558;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+            font-family: "Bahij TheSansArabic", sans-serif;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #E8F6ED;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 3px solid #079953;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            color: #079953;
+        }
+
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #3A4558;
+        }
+
+        .content p {
+            margin-bottom: 16px;
+        }
+
+        .plan-details {
+            background-color: #E8F6ED;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-left: 4px solid #079953;
+        }
+
+        .plan-details h3 {
+            margin-top: 0;
+            color: #067B43;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .plan-details ul {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .plan-details li {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #C0E8D4;
+        }
+
+        .plan-details li:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #3A4558;
+            display: inline-block;
+            width: 120px;
+        }
+
+        .detail-value {
+            color: #7C7C7C;
+        }
+
+        .highlight-box {
+            background-color: #F4F4FF;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid #C0E8D4;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            font-weight: 500;
+            color: #3A4558;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #079953;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #07a559;
+        }
+
+        .features-list {
+            background-color: #F8F5FF;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid #C0E8D4;
+        }
+
+        .features-list h4 {
+            color: #3A4558;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .features-list ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .features-list li {
+            color: #7C7C7C;
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #7C7C7C;
+            text-align: center;
+            border-top: 1px solid #C0E8D4;
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-links a {
+            color: #079953;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 16px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .detail-label {
+                width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://app.nizami.ai/assets/icons/logo.svg" alt="Nizami" class="logo">
+        <div class="success-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <h1>Subscription Successful! 🎉</h1>
+    </div>
+    
+    <div class="content">
+        <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+        <p>Congratulations! Your subscription has been successfully activated. You now have access to all the premium features of Nizami.</p>
+        
+        <div class="plan-details">
+            <h3>Your Subscription Details</h3>
+            <ul>
+                <li>
+                    <span class="detail-label">Plan:</span>
+                    <span class="detail-value">{{ plan.name }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">Billing Cycle:</span>
+                    <span class="detail-value">{{ plan.interval_unit|title }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">Price:</span>
+                    <span class="detail-value">${{ plan.price }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">Credits:</span>
+                    <span class="detail-value">{{ plan.credit_amount }} {{ plan.credit_type|lower }}</span>
+                </li>
+                <li>
+                    <span class="detail-label">Expires:</span>
+                    <span class="detail-value">{{ subscription.expiry_date|date:"F d, Y" }}</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="highlight-box">
+            <p>You can now start using all the advanced features available in your plan. Welcome to the premium Nizami experience!</p>
+        </div>
+
+        <div class="features-list">
+            <h4>What you can do now:</h4>
+            <ul>
+                <li>Access unlimited legal consultations</li>
+                <li>Get personalized legal advice</li>
+                <li>Download legal documents</li>
+                <li>Priority customer support</li>
+                <li>Advanced AI-powered insights</li>
+            </ul>
+        </div>
+
+        <div class="cta-section">
+            <a href="https://app.nizami.ai/chat" class="cta-button">Start Your First Chat</a>
+        </div>
+
+        <p>If you have any questions or need assistance, our support team is here to help.</p>
+        <p>Thank you for choosing Nizami!</p>
+        <p>Best regards,<br>The Nizami Team</p>
+    </div>
+    
+    <div class="footer">
+        <div class="social-links">
+            <a href="https://nizami.ai">Visit Website</a>
+            <a href="mailto:support@nizami.ai">Contact Support</a>
+        </div>
+        <p>&copy; {{ current_year }} Nizami. All rights reserved.</p>
+        <p>Your trusted AI legal assistant</p>
+    </div>
+</div>
+</body>
+</html>

@@ -11,6 +11,7 @@ import {ButtonToggleComponent} from '../../../common/components/button-toggle/bu
 import {ButtonToggleGroupComponent} from '../../../common/components/button-toggle-group/button-toggle-group.component';
 import {TranslatePipe} from '@ngx-translate/core';
 import {marker} from '@colsen1991/ngx-translate-extract-marker';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-profile-settings-mobile',
@@ -61,8 +62,15 @@ export class ProfileSettingsMobileComponent {
 
   constructor(
     private location: Location,
+    private route: ActivatedRoute,
   ) {
-    this.selectedTabId.set(Tabs.AccountDetails);
+    // Check for tab query parameter
+    const tabParam = this.route.snapshot.queryParams['tab'];
+    if (tabParam && Object.values(Tabs).includes(tabParam as Tabs)) {
+      this.selectedTabId.set(tabParam as Tabs);
+    } else {
+      this.selectedTabId.set(Tabs.AccountDetails);
+    }
   }
 
   get allTabs(): typeof Tabs {
