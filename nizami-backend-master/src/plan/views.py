@@ -136,6 +136,24 @@ def activate(request: Request):
     if not plan.is_deleted:
         return Response({"error": "plan_already_activated"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Check if there's already an active plan with the same tier
+    existing_active_plan = Plan.objects.filter(
+        tier=plan.tier,
+        is_deleted=False,
+        is_active=True
+    ).exclude(uuid=plan.uuid).first()
+
+    if existing_active_plan:
+        return Response({
+            "error": "duplicate_tier_active",
+            "message": f"Cannot activate plan '{plan.name}' because there is already an active plan with the same tier ({plan.tier}): '{existing_active_plan.name}'",
+            "existing_plan": {
+                "name": existing_active_plan.name,
+                "tier": existing_active_plan.tier,
+                "uuid": str(existing_active_plan.uuid)
+            }
+        }, status=status.HTTP_400_BAD_REQUEST)
+
     plan.is_deleted = False
     plan.save(update_fields=["is_deleted","updated_at"])
     return Response({"message": f"Plan successfully activated: {plan.name}"}, status=status.HTTP_200_OK)

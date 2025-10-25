@@ -96,7 +96,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const baseUrl = environment.production ? 'https://app.nizami.ai' : 'http://localhost:4203';
+    const baseUrl = environment.production ? 'https://app.nizami.ai' : 'http://localhost:4201';
 
     setTimeout(() => {
       try {
