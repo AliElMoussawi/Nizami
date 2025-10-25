@@ -43,7 +43,7 @@
             <div class="col-span-3">{{ p.created_at | date: 'medium' }}</div>
             <div class="col-span-2">
               @if (p.source) {
-                <span>{{ getPaymentMethod(p.source.company || p.source.type) }} •••• {{ p.source.last_four }}</span>
+                <span>{{ getPaymentMethod(p.source.company || p.source.type || '') }} •••• {{ p.source.last_four }}</span>
               } @else {
                 <span>-</span>
               }
