@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/v1/plans/', include('src.plan.urls')),
     #Payment
     path('api/v1/payment/', include('src.payment.urls')),
+    path('api/v1/admin/payments/', include('src.payment.admin_urls')),
     #Subscription
     path('api/v1/subscriptions/', include('src.subscription.urls')),
     path('api/v1/admin/subscriptions/', include('src.subscription.admin_urls'))

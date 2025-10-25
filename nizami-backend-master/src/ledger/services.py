@@ -262,7 +262,7 @@ def _attempt_subscription_renewal(subscription: UserSubscription) -> bool:
         
         if synced_payment and synced_payment.status == MoyasarPaymentStatus.PAID:
             logger.info(f"Payment successful for user {subscription.user.id}, creating new subscription")
-            _create_renewed_subscription(subscription)
+           # _create_renewed_subscription(subscription) --- This is already handled by payment_service.fetch_and_sync_payment(payment_result['id'])
             
             # Update last_renewed timestamp to prevent duplicate renewals
             subscription.last_renewed = timezone.now()

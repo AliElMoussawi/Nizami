@@ -1,0 +1,12 @@
+// Payments component styles
+.table-section {
+  .table {
+    th {
+      @apply bg-gray-50 text-gray-700 font-medium text-sm;
+    }
+    
+    td {
+      @apply text-sm;
+    }
+  }
+}

@@ -169,7 +169,7 @@ class PaymentDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = MoyasarPayment
         fields = [
-            'id', 'status', 'amount', 'fee', 'currency', 
+            'id', 'internal_uuid', 'status', 'amount', 'fee', 'currency', 
             'refunded', 'refunded_at', 'captured', 'captured_at',
             'voided_at', 'description', 'amount_format', 'fee_format',
             'created_at', 'updated_at', 'metadata', 'source'
