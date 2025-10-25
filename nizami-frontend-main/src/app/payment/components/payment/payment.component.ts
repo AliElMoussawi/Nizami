@@ -75,6 +75,15 @@ export class PaymentComponent implements OnInit, OnDestroy {
   private initMoyasar() {
     if (!this.plan) return;
 
+    // Wait for user data to load if it's still loading
+    if (this.authService.isLoadingUser()) {
+      // Wait a bit and try again
+      setTimeout(() => {
+        this.initMoyasar();
+      }, 100);
+      return;
+    }
+
     const user = this.authService.user();
     const userId = user?.id;
 
@@ -82,6 +91,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
     if (!userId) {
       console.error('User ID is required for payment');
       this.error = 'User authentication required. Please log in again.';
+      // Redirect to login and let the user authenticate
       this.router.navigate(['/login']);
       return;
     }
