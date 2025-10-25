@@ -208,7 +208,7 @@
     </div>
     
     <div class="content">
-        <p>عزيزي/عزيزتي {{ user.first_name }} {{ user.last_name }}،</p>
+        <p>عزيزي/عزيزتي {{ user_first_name }} {{ user_last_name }}،</p>
         <p>أخبار رائعة! تم معالجة دفعتك بنجاح. شكراً لك على الشراء!</p>
         
         <div class="payment-details">
@@ -216,23 +216,23 @@
             <ul>
                 <li>
                     <span class="detail-label">المبلغ:</span>
-                    <span class="detail-value">${{ payment.amount }}</span>
+                    <span class="detail-value">${{ payment_amount }}</span>
                 </li>
                 <li>
                     <span class="detail-label">طريقة الدفع:</span>
-                    <span class="detail-value">{{ payment.payment_method }}</span>
+                    <span class="detail-value">{{ payment_method }}</span>
                 </li>
                 <li>
                     <span class="detail-label">رقم المعاملة:</span>
-                    <span class="detail-value">{{ payment.transaction_id }}</span>
+                    <span class="detail-value">{{ transaction_id }}</span>
                 </li>
                 <li>
                     <span class="detail-label">التاريخ:</span>
-                    <span class="detail-value">{{ payment.created_at|date:"d F Y" }}</span>
+                    <span class="detail-value">{{ payment_created_at|date:"d F Y" }}</span>
                 </li>
                 <li>
                     <span class="detail-label">الحالة:</span>
-                    <span class="detail-value">{{ payment.status|title }}</span>
+                    <span class="detail-value">{{ payment_status|title }}</span>
                 </li>
             </ul>
         </div>

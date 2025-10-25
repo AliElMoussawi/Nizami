@@ -185,7 +185,7 @@
     </div>
     
     <div class="content">
-        <p>عزيزي/عزيزتي {{ user.first_name }} {{ user.last_name }}،</p>
+        <p>عزيزي/عزيزتي {{ user_first_name }} {{ user_last_name }}،</p>
         <p>نأسف لرحيلك! تم إلغاء اشتراكك بنجاح.</p>
         
         <div class="cancellation-details">
@@ -193,21 +193,21 @@
             <ul>
                 <li>
                     <span class="detail-label">الخطة:</span>
-                    <span class="detail-value">{{ plan.name }}</span>
+                    <span class="detail-value">{{ plan_name }}</span>
                 </li>
                 <li>
                     <span class="detail-label">تاريخ الإلغاء:</span>
-                    <span class="detail-value">{{ subscription.deactivated_at|date:"d F Y" }}</span>
+                    <span class="detail-value">{{ subscription_deactivated_at|date:"d F Y" }}</span>
                 </li>
                 <li>
                     <span class="detail-label">الوصول متاح حتى:</span>
-                    <span class="detail-value">{{ subscription.expiry_date|date:"d F Y" }}</span>
+                    <span class="detail-value">{{ subscription_expiry_date|date:"d F Y" }}</span>
                 </li>
             </ul>
         </div>
 
         <div class="highlight-box">
-            <p>سيبقى حسابك نشطاً حتى {{ subscription.expiry_date|date:"d F Y" }}، لذا يمكنك الاستمرار في استخدام جميع الميزات المميزة حتى ذلك التاريخ.</p>
+            <p>سيبقى حسابك نشطاً حتى {{ subscription_expiry_date|date:"d F Y" }}، لذا يمكنك الاستمرار في استخدام جميع الميزات المميزة حتى ذلك التاريخ.</p>
         </div>
 
         <p>بعد هذا التاريخ، سيتم تخفيض حسابك إلى الخطة الأساسية مع ميزات محدودة.</p>

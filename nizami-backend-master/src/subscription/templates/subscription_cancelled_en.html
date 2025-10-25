@@ -184,7 +184,7 @@
     </div>
     
     <div class="content">
-        <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+        <p>Dear {{ user_first_name }} {{ user_last_name }},</p>
         <p>We're sorry to see you go! Your subscription has been successfully cancelled.</p>
         
         <div class="cancellation-details">
@@ -192,21 +192,21 @@
             <ul>
                 <li>
                     <span class="detail-label">Plan:</span>
-                    <span class="detail-value">{{ plan.name }}</span>
+                    <span class="detail-value">{{ plan_name }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Cancelled On:</span>
-                    <span class="detail-value">{{ subscription.deactivated_at|date:"F d, Y" }}</span>
+                    <span class="detail-value">{{ subscription_deactivated_at|date:"F d, Y" }}</span>
                 </li>
                 <li>
                     <span class="detail-label">Access Until:</span>
-                    <span class="detail-value">{{ subscription.expiry_date|date:"F d, Y" }}</span>
+                    <span class="detail-value">{{ subscription_expiry_date|date:"F d, Y" }}</span>
                 </li>
             </ul>
         </div>
 
         <div class="highlight-box">
-            <p>Your account will remain active until {{ subscription.expiry_date|date:"F d, Y" }}, so you can continue using all premium features until then.</p>
+            <p>Your account will remain active until {{ subscription_expiry_date|date:"F d, Y" }}, so you can continue using all premium features until then.</p>
         </div>
 
         <p>After this date, your account will be downgraded to the basic plan with limited features.</p>
