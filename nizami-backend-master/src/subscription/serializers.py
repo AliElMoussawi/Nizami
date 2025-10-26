@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from src.subscription.models import UserSubscription
 from src.plan.serializers import ListPlanSerializer
 from src.users.serializers import UserSerializer
+from src.subscription.enums import SubscriptionCreator
 
 User = get_user_model()
 
@@ -85,6 +86,7 @@ class CreateUserSubscriptionSerializer(serializers.ModelSerializer):
         # Replace user_email with user in the data
         validated_data['user'] = validated_data.pop('user_email')
         validated_data['is_active'] = True  # New subscriptions are active by default
+        validated_data['created_by'] = SubscriptionCreator.ADMIN
         return super().create(validated_data)
 
 
