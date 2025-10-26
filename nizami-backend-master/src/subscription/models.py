@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 
 from src.users.models import User
 from src.plan.models import Plan
+from src.subscription.enums import SubscriptionCreator
 from src.plan.enums import CreditType
 
 
@@ -19,6 +20,7 @@ class UserSubscription(models.Model):
     credit_amount = models.IntegerField(blank=True, null=True)
     credit_type = models.CharField(max_length=50, choices=CreditType.choices, default=CreditType.MESSAGES)
     is_unlimited = models.BooleanField(default=False)
+    created_by = models.CharField(max_length=50, blank=True, null=True, choices=SubscriptionCreator.choices)
     expiry_date = models.DateTimeField(null=False, blank=False)
     last_renewed = models.DateTimeField(null=True, blank=True)
     deactivated_at = models.DateTimeField(null=True, blank=True)
