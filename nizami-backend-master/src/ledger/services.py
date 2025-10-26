@@ -1,4 +1,4 @@
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
@@ -116,12 +116,13 @@ def renew_user_subscription():
         deactivated_at__isnull=True,
         expiry_date__lte=expiration_threshold,
         created_at__gte=one_month_ago,  # Only subscriptions created in last month
-        plan__tier__ne=Tier.BASIC,  # Exclude BASIC tier
         plan__is_active=True,  # Plan must be active
         plan__is_deleted=False,  # Plan must not be deleted
         user__is_active=True,  # User must be active
         user__payment_sources__is_active=True,  # User must have active payment sources
         user__payment_sources__is_default=True  # User must have default payment source
+    ).exclude(
+        plan__tier=Tier.BASIC  # Exclude BASIC tier
     ).select_related('user', 'plan').distinct('user')
     
     total_subscriptions = latest_subscriptions.count()
@@ -130,7 +131,9 @@ def renew_user_subscription():
         return {
             'renewed_count': 0,
             'failed_count': 0,
+            'skipped_count': 0,
             'total_processed': 0,
+            'total_found': 0,
             'message': 'No subscriptions found for renewal'
         }
     
