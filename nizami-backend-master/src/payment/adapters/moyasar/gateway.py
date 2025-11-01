@@ -12,6 +12,12 @@ class MoyasarGateway(APIGateway, PaymentGatewayInterface):
     def get_auth(self):
         return (settings.MOYASAR_SECRET_KEY, '')
 
+    def get_default_headers(self):
+        headers = super().get_default_headers()
+        # Explicitly set Content-Type for JSON requests to Moyasar API
+        headers['Content-Type'] = 'application/json'
+        return headers
+
     def fetch_payment(self, payment_intent_id):
         fetch_payment_id_path = f"payments/{payment_intent_id}"
         fetch_payment_url = self.build_url(uri=fetch_payment_id_path)

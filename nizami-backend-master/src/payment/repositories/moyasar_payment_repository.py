@@ -1,7 +1,6 @@
 import logging
 from typing import Optional, Dict, Any
 from django.db import transaction
-from django.core.exceptions import ValidationError
 from datetime import datetime
 from uuid import UUID
 
