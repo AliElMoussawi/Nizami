@@ -86,6 +86,8 @@ def admin_update(request: Request, uuid):
     }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAdminPermission])
 def user_raw_plan(request: Request):
     try:
         sub = request.user.subscriptions.filter(is_active=True).select_related('plan').get()

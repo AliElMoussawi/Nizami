@@ -24,14 +24,14 @@ services:
     container_name: web
     hostname: web
     init: true
-    command: [ "sh", "-c", "python manage.py init_vector_extension && python manage.py migrate && exec python manage.py runserver 0.0.0.0:8009" ]
+    command: [ "sh", "-c", "python manage.py init_vector_extension && python manage.py migrate && exec python manage.py runserver 0.0.0.0:8000" ]
     env_file:
       - .env
     volumes:
       - .:/app
       - ./packages:/app/packages
     ports:
-      - "8009:8009"
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy

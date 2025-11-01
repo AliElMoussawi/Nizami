@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from django.db import transaction
 import logging
 import uuid
+import json
 from src.subscription.services import upgrade_user_subscription_plan
 from src.plan.enums import CreditType, Tier
 from src.subscription.models import UserSubscription
@@ -13,6 +14,7 @@ from src.payment.models import UserPaymentSource
 from src.payment.services.moyasar_payment_service import get_moyasar_payment_service
 from src.payment.enums import Currency, PaymentSourceType
 from src.payment.enums import MoyasarPaymentStatus
+from src.common.generic_api_gateway import APIGatewayException
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -237,36 +239,62 @@ def _attempt_subscription_renewal(subscription: UserSubscription) -> bool:
         
         # Create payment
         payment_service = get_moyasar_payment_service()
-        payment_id = f"renewal-{str(uuid.uuid4())}"
+        payment_id = str(uuid.uuid4())
         
-        logger.info(f"Creating payment {payment_id} for user {subscription.user.id} (amount: {subscription.plan.price_cents} SAR)")
+        logger.info(f"Creating payment {payment_id} for user {subscription.user.id} (amount: {subscription.plan.price_cents} SAR) - renewal payment")
         
-        payment_result = payment_service.create_payment(
-            payment_source_type=PaymentSourceType.TOKEN,
-            given_id=payment_id,
-            amount=subscription.plan.price_cents,
-            currency=Currency.SAR.name,
-            description=f"Subscription renewal for {subscription.plan.name}",
-            callback_url=getattr(settings, 'FRONTEND_URL', 'https://app.nizami.ai/') + '/payment/callback',
-            token=payment_source.token,
-            user_email=subscription.user.email,
-            user_id=str(subscription.user.id),
-            plan_id=str(subscription.plan.uuid)
-        )
+        try:
+            payment_result = payment_service.create_payment(
+                payment_source_type=PaymentSourceType.TOKEN,
+                given_id=payment_id,
+                amount=subscription.plan.price_cents,
+                currency=Currency.SAR.name,
+                description=f"Subscription renewal for {subscription.plan.name}",
+                callback_url=getattr(settings, 'FRONTEND_URL', 'https://app.nizami.ai/') + '/payment/callback',
+                token=payment_source.token,
+                user_email=subscription.user.email,
+                user_id=str(subscription.user.id),
+                plan_id=str(subscription.plan.uuid)
+            )
+        except APIGatewayException as e:
+            # Check if the error is due to an invalid token
+            error_msg = e.msg.lower() if e.msg else ""
+            if "invalid" in error_msg and "token" in error_msg:
+                logger.warning(f"Invalid payment token detected for user {subscription.user.id}. Deactivating payment source.")
+                
+                # Parse error message to extract details
+                try:
+                    error_data = json.loads(e.msg) if isinstance(e.msg, str) else {}
+                    logger.warning(f"Payment gateway error: {error_data.get('message', e.msg)}")
+                except (json.JSONDecodeError, AttributeError):
+                    logger.warning(f"Payment gateway error: {e.msg}")
+                
+                # Deactivate the invalid payment source
+                payment_source.is_active = False
+                payment_source.save(update_fields=['is_active'])
+                
+                logger.error(
+                    f"Failed to renew subscription for user {subscription.user.id}: "
+                    f"Invalid payment token. Payment source deactivated. "
+                    f"User needs to add a new payment method."
+                )
+                return False
+            else:
+                # Re-raise if it's a different API error
+                raise
         
-        if not payment_result or not payment_result.get('id'):
+        if not payment_result or not payment_result.id:
             logger.error(f"Failed to create payment for user {subscription.user.id} - no payment ID returned")
             return False
         
-        logger.info(f"Payment created successfully for user {subscription.user.id}: {payment_result['id']}")
+        logger.info(f"Payment created successfully for user {subscription.user.id}: {payment_result.id}")
         
-        # Fetch and sync payment status
-        synced_payment = payment_service.fetch_and_sync_payment(payment_result['id'])
+        synced_payment = payment_service.fetch_and_sync_payment(str(payment_result.id))
         
         if synced_payment and synced_payment.status == MoyasarPaymentStatus.PAID:
-            logger.info(f"Payment successful for user {subscription.user.id}, creating new subscription")
-            subscription.last_renewed = timezone.now()
-            subscription.save(update_fields=['last_renewed'])
+            logger.info(f"Payment successful for user {subscription.user.id}, new subscription created")
+            
+            UserSubscription.objects.filter(uuid=subscription.uuid).update(last_renewed=timezone.now())
             
             logger.info(f"Successfully renewed subscription for user {subscription.user.id}")
             return True
