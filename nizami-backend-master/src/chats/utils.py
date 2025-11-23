@@ -38,6 +38,21 @@ def create_legal_advice_llm():
             #     'Connection': 'close',
             # },
         ),
+        reasoning_effort='low',
+    )
+
+def create_llm(model_name, **kwargs):
+    return ChatOpenAI(
+        openai_api_key=settings.OPENAI_API_KEY,
+        model_name=model_name,
+        request_timeout=30000,
+        http_client=httpx.Client(
+            timeout=httpx.Timeout(30000, connect=0000),
+            # headers={
+            #     'Connection': 'close',
+            # },
+        ),
+        **kwargs,
     )
 
 

@@ -34,7 +34,7 @@ def analyze_reference_document(reference_document_id):
         text_loader = TextLoader(reference_document.file.path)
         documents = text_loader.load()
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=120)
         all_splits = text_splitter.split_documents(documents)
 
         for split in all_splits:

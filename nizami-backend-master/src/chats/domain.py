@@ -1,13 +1,13 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 from pgvector.django import CosineDistance
 
-from src.chats.utils import create_legal_advice_llm
+from src.chats.utils import create_llm
 from src.reference_documents.models import ReferenceDocument
 from src.settings import embeddings
 
 
 def rephrase_user_input_using_history(message, old_messages):
-    llm = create_legal_advice_llm()
+    llm = create_llm('gpt-5-nano', reasoning_effort="low")
 
     message = message
     context = '\n'.join(filter(None, old_messages))
@@ -54,7 +54,7 @@ def translate_question(text, from_lang):
     }
 
     to_lang = translations[from_lang]
-    llm = create_legal_advice_llm()
+    llm = create_llm('gpt-5-nano', reasoning_effort="minimal")
     prompt = f"""
     You are a professional translator. Translate the following text provided by the user into {to_lang}, maintaining the original meaning, tone, and context. If the sentence contains idioms, cultural references, or technical terms, translate them appropriately for native speakers of the target language. Provide only the translation.
     
@@ -74,7 +74,6 @@ def find_ref_document_ids_by_description(text):
 
     files = (ReferenceDocument
              .objects
-             .filter(description__isnull=False)
              .order_by(CosineDistance('description_embedding', embedded_text))
              .values('id')[:10])
 

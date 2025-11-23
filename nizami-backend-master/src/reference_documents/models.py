@@ -5,12 +5,23 @@ from django.db import models
 from django.db.models import QuerySet
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from pgvector.django import VectorField
+from pgvector.django import HnswIndex, VectorField
 
 from src.users.models import User
 
 
 class ReferenceDocument(models.Model):
+    class Meta:
+        indexes = [
+            HnswIndex(
+                name='description_embedding_hnsw_idx',  # Custom name for your index
+                fields=['description_embedding'],
+                m=12,  # The number of connections per layer
+                ef_construction=120,  # The construction quality/speed trade-off
+                opclasses=['vector_cosine_ops'],  # Operator class for similarity search (e.g., cosine)
+            ),
+        ]
+
     STATUS_CHOICES = [
         ('new', 'New'),
         ('processing', 'Processing'),
@@ -29,7 +40,7 @@ class ReferenceDocument(models.Model):
     text = models.TextField(blank=True, null=True)
     language = models.CharField(max_length=255, null=True)
     description = models.TextField(blank=True, null=True)
-    description_embedding = VectorField(null=True)
+    description_embedding = VectorField(null=True, dimensions=1536)
 
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reference_documents', default=None, null=True)

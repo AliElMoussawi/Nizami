@@ -2,6 +2,13 @@ FROM python:3.9
 
 WORKDIR /app
 
+# Install system dependencies required for Aspose.Words (ICU libraries for .NET globalization)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libicu-dev \
+    icu-devtools && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy requirements first for better caching
 COPY requirements.txt /app/requirements.txt
 

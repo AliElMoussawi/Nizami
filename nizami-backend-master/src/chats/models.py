@@ -67,6 +67,31 @@ class MessageLog(models.Model):
         return ast.literal_eval(self.response)
 
 
+class MessageStepLog(models.Model):
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=True, verbose_name='ID')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    step_name = models.CharField(max_length=255, null=True)
+    message = models.ForeignKey(Message, related_name='messageStepLogs', on_delete=models.CASCADE, null=True)
+    input = models.TextField(null=True, blank=True)
+    output = models.TextField(null=True, blank=True)
+    time_sec = models.FloatField(null=True, blank=True)
+
+    def __str__(self):
+        t = round(self.time_sec, 3)
+        return f"{self.id} - {self.step_name} ({t}s)"
+
+    def output_json(self):
+        import ast
+
+        return ast.literal_eval(self.output)
+
+    def input_json(self):
+        import ast
+
+        return ast.literal_eval(self.output)
+
+
 @receiver(pre_save, sender=MessageFile)
 def modify_file_name(sender, instance, **kwargs):
     if instance.file and instance.file_name is None:

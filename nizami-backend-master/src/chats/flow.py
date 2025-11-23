@@ -1,7 +1,9 @@
 import json
 import re
+import time
 import uuid
 
+from django.db import connection
 from django.db.models import Q
 from langchain.retrievers import MultiQueryRetriever
 from langchain_core.documents import Document
@@ -14,8 +16,8 @@ from pydantic import BaseModel, Field
 from typing_extensions import TypedDict, Literal, Any
 
 from src.chats.domain import rephrase_user_input_using_history, find_ref_document_ids_by_description, translate_question
-from src.chats.models import Message, MessageLog
-from src.chats.utils import create_legal_advice_llm, detect_language
+from src.chats.models import Message, MessageLog, MessageStepLog
+from src.chats.utils import create_legal_advice_llm, detect_language, create_llm
 from src.prompts.enums import PromptType
 from src.prompts.utils import get_prompt_value_by_name
 from src.settings import vectorstore
@@ -47,7 +49,9 @@ class Route(BaseModel):
 
 
 def router(state: State):
-    llm = create_legal_advice_llm()
+    t1 = time.time()
+
+    llm = create_llm('gpt-5-nano', reasoning_effort="minimal")
 
     router_llm = llm.with_structured_output(Route)
 
@@ -62,6 +66,17 @@ def router(state: State):
         ),
     ])
 
+    t2 = time.time()
+    MessageStepLog.objects.create(
+        step_name='router',
+        message_id=state['message'].id,
+        time_sec=t2 - t1,
+        input=None,
+        output={
+            'decision': decision.step,
+        }
+    )
+
     return {
         'decision': decision.step,
     }
@@ -75,6 +90,8 @@ def has_answer(state: State):
 
 
 def first_or_create_message(state: State):
+    t1 = time.time()
+    
     user_message = Message.objects.filter(uuid=state['uuid']).first()
 
     if user_message is None:
@@ -87,6 +104,18 @@ def first_or_create_message(state: State):
             text=state['input'],
             uuid=state['uuid'],
         )
+        
+    t2 = time.time()
+    MessageStepLog.objects.create(
+        step_name='first_or_create_message',
+        message=user_message,
+        time_sec=t2 - t1,
+        input={
+            'uuid': state['uuid'],
+            'input': state['input'],
+        },
+        output=None
+    )
 
     return {
         'message': user_message,
@@ -94,10 +123,23 @@ def first_or_create_message(state: State):
 
 
 def retrieve_history(state: State):
+    t1 = time.time()
+    
     history = list(
         reversed(
             Message.objects.filter(Q(chat_id=state['chat_id']) & ~Q(id=state['message'].id)).order_by('-created_at')[
             :10]))
+    
+    t2 = time.time()
+    MessageStepLog.objects.create(
+        step_name='retrieve_history',
+        message_id=state['message'].id,
+        time_sec=t2 - t1,
+        input=None,
+        output={
+            'history_count': len(history),
+        }
+    )
 
     return {
         'history': history,
@@ -105,6 +147,8 @@ def retrieve_history(state: State):
 
 
 def rephrase_user_input(state: State):
+    t1 = time.time()
+
     user_message = state['message']
 
     query = state['message'].text
@@ -117,6 +161,18 @@ def rephrase_user_input(state: State):
             user_message.used_query = query
             user_message.save()
 
+    t2 = time.time()
+
+    MessageStepLog.objects.create(
+        step_name='rephrase_user_input',
+        message=user_message,
+        time_sec=t2 - t1,
+        input=None,
+        output={
+            'query': query,
+        }
+    )
+
     return {
         'query': query,
     }
@@ -125,7 +181,21 @@ def rephrase_user_input(state: State):
 def translate_user_input(state: State):
     user_message = state['message']
 
+    t1 = time.time()
+
     input_translation = translate_question(user_message.text, user_message.language)
+
+    t2 = time.time()
+
+    MessageStepLog.objects.create(
+        step_name='translate_user_input',
+        message=user_message,
+        time_sec=t2 - t1,
+        input=None,
+        output={
+            'input_translation': input_translation,
+        }
+    )
 
     return {
         'input_translation': input_translation,
@@ -133,6 +203,8 @@ def translate_user_input(state: State):
 
 
 def calculate_disclaimer(state: State):
+    t1 = time.time()
+
     response = state['response']
     answer = response['answer']
     used_languages = state['used_languages']
@@ -151,6 +223,21 @@ def calculate_disclaimer(state: State):
             context_multi_language or context_different_lang_from_question or answer_different_lang_from_question)
 
     show_translation_disclaimer = is_different_language and is_context_used and is_answer
+
+    t2 = time.time()
+    MessageStepLog.objects.create(
+        step_name='calculate_disclaimer',
+        message=user_message,
+        time_sec=t2 - t1,
+        input=None,
+        output={
+            'answer_language': answer_language,
+            'context_different_lang_from_question': context_different_lang_from_question,
+            'answer_different_lang_from_question': answer_different_lang_from_question,
+            'is_different_language': is_different_language,
+            'show_translation_disclaimer': show_translation_disclaimer,
+        }
+    )
 
     return {
         'answer_language': answer_language,
@@ -184,6 +271,8 @@ def store_system_message(state: State):
 
 
 def answer_legal_question(state: State):
+    t1 = time.time()
+    
     user_message = state['message']
     translation = state['input_translation']
     query = state['query']
@@ -194,8 +283,7 @@ def answer_legal_question(state: State):
     template = get_prompt_value_by_name(PromptType.LEGAL_ADVICE)
 
     search_kwargs = {
-        'k': 20,
-        'fetch_k': 50,
+        'k': 8,
         "filter": {
             "reference_document_id": {
                 "$in": ids,
@@ -207,7 +295,7 @@ def answer_legal_question(state: State):
         search_kwargs=search_kwargs,
     )
 
-    retriever = MultiQueryRetriever.from_llm(retriever, llm, include_original=False)
+    # retriever = MultiQueryRetriever.from_llm(retriever, llm, include_original=False)
 
     history_messages = [
         HumanMessage(content=msg.text) if msg.role == 'user' else AIMessage(content=msg.text)
@@ -227,6 +315,17 @@ def answer_legal_question(state: State):
 
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
+
+    with connection.cursor() as cursor:
+        try:
+            ef_search_value = 32
+            # Set the desired ef_search value
+            cursor.execute(f"SET LOCAL hnsw.ef_search = {ef_search_value};")
+            # NOTE: We don't execute the search here, we just set the parameter.
+            # The next query that uses the same connection will pick it up.
+
+        except Exception as e:
+            print(f"Error setting hnsw.ef_search: {e}")
 
     rag_chain = (
             RunnablePassthrough.assign(source_documents=RunnableLambda(
@@ -248,6 +347,22 @@ def answer_legal_question(state: State):
         message=user_message,
         response=response,
     )
+    
+    t2 = time.time()
+    MessageStepLog.objects.create(
+        step_name='answer_legal_question',
+        message=user_message,
+        time_sec=t2 - t1,
+        input={
+            'input': query,
+            'translated_input': translation,
+            'filters': search_kwargs,
+        },
+        output={
+            'rag_response': response,
+        }
+    )
+
 
     return {
         'rag_response': response,
@@ -255,6 +370,8 @@ def answer_legal_question(state: State):
 
 
 def extract_used_languages(state: State):
+    t1 = time.time()
+    
     response = state['rag_response']
     source_documents = response['source_documents']
 
@@ -263,12 +380,29 @@ def extract_used_languages(state: State):
         d: Document = source_document
         used_languages.add(d.metadata['language'])
 
+
+    t2 = time.time()
+    MessageStepLog.objects.create(
+        step_name='extract_used_languages',
+        message=state['message'],
+        time_sec=t2 - t1,
+        input={
+            'response': response,
+            'source_documents': source_documents,
+        },
+        output={
+            'used_languages': used_languages,
+        }
+    )
+
+
     return {
         'used_languages': used_languages,
     }
 
 
 def decode_response_json(state: State):
+    t1 = time.time()
     response = state['rag_response']['response'].content
 
     if response.startswith('```json') and response.endswith('```'):
@@ -279,6 +413,17 @@ def decode_response_json(state: State):
         response = {
             'answer': response,
         }
+    
+    t2 = time.time()
+    MessageStepLog.objects.create(
+        step_name='decode_response_json',
+        message=state['message'],
+        time_sec=t2 - t1,
+        input=None,
+        output={
+            'response': response,
+        }
+    )
 
     return {
         'response': response,
@@ -288,8 +433,10 @@ def decode_response_json(state: State):
 def translate_previous_message(state: State):
     """Translate previous message"""
     history = state['history']
+    
+    t1 = time.time()
 
-    llm = create_legal_advice_llm()
+    llm = create_llm('gpt-5-nano', reasoning_effort="low")
     to_langs = {
         'ar': 'English',
         'en': 'Arabic',
@@ -305,10 +452,25 @@ def translate_previous_message(state: State):
             previous_message.text
         ),
     ])
+
+    t2 = time.time()
+
+    MessageStepLog.objects.create(
+        step_name="translate_previous_message",
+        message=state['message'],
+        time_sec=t2 - t1,
+        input=None,
+        output={
+            'output': result.content,
+        }
+    )
+    
     return {"output": result.content}
 
 
 def store_translation_message(state: State):
+    t1 = time.time()
+
     answer = state['output']
     user_message = state['message']
     answer_language = detect_language(answer)
@@ -321,6 +483,17 @@ def store_translation_message(state: State):
         text=answer,
         role='ai',
         uuid=uuid.uuid4(),
+    )
+    
+    t2 = time.time()
+    MessageStepLog.objects.create(
+        step_name="store_translation_message",
+        message=user_message,
+        time_sec=t2 - t1,
+        input=None,
+        output={
+            'system_message_id': system_message.id,
+        }
     )
 
     return {
