@@ -81,11 +81,8 @@ INSTALLED_APPS = [
     'src.prompts',
     
     'src.plan',
-    # Payment apps
     'src.payment',
-    #Subscription app
     'src.subscription',
-    #Ledger app
     'src.ledger'
 ]
 
@@ -133,6 +130,9 @@ DATABASES = {
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
         'CONN_MAX_AGE': 600,
+        'OPTIONS': {
+            'options': '-c hnsw.ef_search=32',
+        }
     },
     'logs': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -246,7 +246,7 @@ Q_CLUSTER = {
 
 OPENAI_API_KEY = env('OPENAI_API_KEY')
 
-embeddings = OpenAIEmbeddings(model='text-embedding-3-large', openai_api_key=OPENAI_API_KEY)
+embeddings = OpenAIEmbeddings(model='text-embedding-3-large', dimensions=1536, openai_api_key=OPENAI_API_KEY)
 vectorstore = PGVector(
     collection_name="reference_document_parts",
     embeddings=embeddings,
@@ -259,7 +259,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://api.nizami.xob-webservices.com',
     'https://admin.nizami.xob-webservices.com',
     'https://nizami.xob-webservices.com',
-    'https://please-solved-leave-italiano.trycloudflare.com',
+
     'https://api.app.nizami.ai',
     'https://admin.app.nizami.ai',
     'https://app.nizami.ai',

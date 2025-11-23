@@ -1,17 +1,21 @@
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
-
+import aspose.words as aw
 from src import settings
+import os
+import time
+from functools import wraps
 
+_is_license_set = False  # Internal flag
 
 def get_db_url():
     db_config = settings.DATABASES['default']
-    user = db_config.get('USER', 'messaging')
-    password = db_config.get('PASSWORD', 'messaging')
+    user = db_config.get('USER', '')
+    password = db_config.get('PASSWORD', '')
     host = db_config.get('HOST', 'localhost')
-    port = db_config.get('PORT', '54325')
-    name = db_config.get('NAME', 'postgres')
+    port = db_config.get('PORT', '5432')
+    name = db_config['NAME']
 
     # Construct the database URL
     if user and password:
@@ -70,11 +74,17 @@ def send_welcome_mail(user):
 
 
 def load_aspose_license():
-    """
-    Stub function for Aspose license loading.
-    Aspose-words package is not available in this configuration.
-    """
-    pass
+    global _is_license_set
+    if _is_license_set:
+        return  # Prevent multiple loads
+
+    aw_license = aw.License()
+    try:
+        aw_license.set_license(os.path.abspath(settings.ASPOSE_LICENSE_PATH))
+        _is_license_set = True
+    except RuntimeError as err:
+        print("\nThere was an error setting the license:", err)
+
 
 
 def get_email_template(template_name, user_language='ar'):
@@ -212,3 +222,20 @@ def send_email(subject, html_message, from_email, to, message=None, fail_silentl
         fail_silently=fail_silently,
         html_message=html_message
     )
+    
+def timeit(func):
+    """Decorator to measure the execution time of a function."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        # Execute the original function
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+
+        total_time = end_time - start_time
+        print(f'Function {func.__name__!r} took {total_time:.4f} seconds to execute.')
+
+        return result
+
+    return wrapper
