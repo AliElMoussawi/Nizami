@@ -1,6 +1,6 @@
 from collections import Counter
 
-#import aspose.words as aw
+import aspose.words as aw
 
 
 class MostUsedFont:
@@ -24,13 +24,13 @@ class MostUsedFont:
 
         font_usage = []
 
-        # for paragraph in self.document.get_child_nodes(aw.NodeType.PARAGRAPH, True):
-        #     paragraph = paragraph.as_paragraph()
-        #     if paragraph.paragraph_format.style.name == style_name:
-        #         for run in paragraph.runs:
-        #             font = run.as_run().font
-        #             if font.name and font.size:
-        #                 font_usage.append((font.name, font.size))
+        for paragraph in self.document.get_child_nodes(aw.NodeType.PARAGRAPH, True):
+            paragraph = paragraph.as_paragraph()
+            if paragraph.paragraph_format.style.name == style_name:
+                for run in paragraph.runs:
+                    font = run.as_run().font
+                    if font.name and font.size:
+                        font_usage.append((font.name, font.size))
 
         if not font_usage:
             self._font_cache[style_name] = None

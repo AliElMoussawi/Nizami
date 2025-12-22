@@ -2,6 +2,8 @@ import json
 import re
 import time
 import uuid
+import logging
+
 
 from django.db import connection
 from django.db.models import Q
@@ -14,6 +16,7 @@ from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict, Literal, Any
+
 
 from src.chats.domain import rephrase_user_input_using_history, find_ref_document_ids_by_description, translate_question
 from src.chats.models import Message, MessageLog, MessageStepLog
@@ -272,16 +275,13 @@ def store_system_message(state: State):
 
 def answer_legal_question(state: State):
     t1 = time.time()
+    logger = logging.getLogger(__name__)
     
     user_message = state['message']
     translation = state['input_translation']
     query = state['query']
 
     ids = find_ref_document_ids_by_description(query)
-    
-    # Debug: Log document IDs found
-    import logging
-    logger = logging.getLogger(__name__)
     logger.info(f'[DEBUG] Found {len(ids)} document IDs: {ids}')
 
     llm = create_legal_advice_llm()
@@ -291,27 +291,24 @@ def answer_legal_question(state: State):
     # The issue: if we search globally and filter, we might not get chunks from target docs
     # Solution: Use SQL to do similarity search within the filtered chunk set
     class FilteredRetriever:
-        def __init__(self, document_ids, k=8):
+        def __init__(self, document_ids, k=8, logger=None):
             self.document_ids = set(document_ids) if document_ids else set()
             self.k = k
+            self.logger = logger or logging.getLogger(__name__)
             # Fallback: base retriever for when SQL approach doesn't work
-            self.base_retriever = vectorstore.as_retriever(search_kwargs={'k': max(k * 20, 100)})  # Get many more candidates
+            self.base_retriever = vectorstore.as_retriever(search_kwargs={'k': max(k * 20, 100)})
         
-        def invoke(self, query_text):
-            if not self.document_ids:
-                return []
-            
-            # Strategy 1: Try SQL-based similarity search within filtered chunks
-            # This ensures we search only within chunks from target documents
+        def _sql_based_search(self, query_text):
+            """
+            Strategy 1: SQL-based similarity search within filtered chunks.
+            This ensures we search only within chunks from target documents.
+            Returns list of Document objects or None if search fails.
+            """
             try:
-                # Get query embedding for the current query text
                 from src.settings import embeddings
                 query_emb = embeddings.embed_query(query_text)
                 
-                # Build SQL query to do similarity search within filtered chunks
                 with connection.cursor() as cursor:
-                    # Use cosine distance for similarity (<=> operator)
-                    # Format embedding as string for pgvector: '[1,2,3]'::vector
                     embedding_str = '[' + ','.join(str(x) for x in query_emb) + ']'
                     
                     cursor.execute("""
@@ -328,91 +325,73 @@ def answer_legal_question(state: State):
                     
                     rows = cursor.fetchall()
                     if rows:
-                        # Convert SQL results to Document objects
-                        from langchain_core.documents import Document
                         docs = []
                         for row in rows:
                             chunk_id, document, metadata, similarity = row
-                            # Parse metadata if it's a string
                             if isinstance(metadata, str):
-                                import json
                                 metadata = json.loads(metadata)
                             elif metadata is None:
                                 metadata = {}
                             
-                            # Add id to metadata for reference
                             metadata['id'] = str(chunk_id) if chunk_id else None
-                            
-                            doc = Document(
+                            docs.append(Document(
                                 page_content=document or '',
                                 metadata=metadata
-                            )
-                            docs.append(doc)
+                            ))
                         
-                        print(f'[DEBUG] SQL-based search found {len(docs)} chunks from target documents', flush=True)
-                        import logging
-                        logging.getLogger(__name__).info(f'[DEBUG] SQL-based search found {len(docs)} chunks from target documents')
+                        self.logger.info(f'SQL-based search found {len(docs)} chunks from target documents')
                         return docs
             except Exception as e:
-                print(f'[DEBUG] SQL-based search failed: {e}, falling back to filter approach', flush=True)
-                import logging
-                logging.getLogger(__name__).warning(f'[DEBUG] SQL-based search failed: {e}, falling back to filter approach')
-            
-            # Strategy 2: Fallback - search globally and filter (less reliable)
+                self.logger.warning(f'SQL-based search failed: {e}, falling back to filter approach')
+                return None
+        
+        def _fallback_search(self, query_text):
+            """
+            Strategy 2: Fallback - search globally and filter by document ID.
+            Less reliable but works when SQL-based search fails.
+            Returns list of Document objects.
+            """
+            self.logger.info('Using FALLBACK strategy: searching globally then filtering')
             all_docs = self.base_retriever.invoke(query_text)
-            
-            # Debug: Check what document IDs we're getting
-            found_doc_ids = set()
-            for doc in all_docs:
-                ref_id = doc.metadata.get('reference_document_id')
-                if ref_id is not None:
-                    try:
-                        ref_id_int = int(ref_id) if isinstance(ref_id, str) else ref_id
-                        found_doc_ids.add(ref_id_int)
-                    except (ValueError, TypeError):
-                        pass
-            
-            print(f'[DEBUG] Base search returned chunks from document IDs: {found_doc_ids}', flush=True)
-            print(f'[DEBUG] Looking for document IDs: {self.document_ids}', flush=True)
-            import logging
-            logging.getLogger(__name__).info(f'[DEBUG] Base search returned chunks from document IDs: {found_doc_ids}')
-            logging.getLogger(__name__).info(f'[DEBUG] Looking for document IDs: {self.document_ids}')
             
             # Filter by reference_document_id in metadata
             filtered_docs = []
             for doc in all_docs:
-                # Check if reference_document_id matches (handle both int and string)
                 ref_id = doc.metadata.get('reference_document_id')
                 if ref_id is not None:
-                    # Convert to int for comparison (metadata might be stored as string)
                     try:
                         ref_id_int = int(ref_id) if isinstance(ref_id, str) else ref_id
                         if ref_id_int in self.document_ids:
                             filtered_docs.append(doc)
+                            if len(filtered_docs) >= self.k:
+                                break
                     except (ValueError, TypeError):
                         pass
-                
-                # Stop when we have enough results
-                if len(filtered_docs) >= self.k:
-                    break
             
-            print(f'[DEBUG] After filtering, found {len(filtered_docs)} chunks', flush=True)
-            import logging
-            logging.getLogger(__name__).info(f'[DEBUG] After filtering, found {len(filtered_docs)} chunks')
+            if len(filtered_docs) == 0:
+                found_doc_ids = {int(doc.metadata.get('reference_document_id')) 
+                                for doc in all_docs 
+                                if doc.metadata.get('reference_document_id')}
+                self.logger.warning(f'Fallback: Base search returned chunks from {found_doc_ids}, but looking for {self.document_ids}')
+            else:
+                self.logger.info(f'Fallback strategy found {len(filtered_docs)} chunks')
             
             return filtered_docs[:self.k]
-    
-    # Debug: Log the query being used
-    import logging
-    logger = logging.getLogger(__name__)
-    print(f'[DEBUG] Query being used for retrieval: "{query[:200]}"', flush=True)
-    print(f'[DEBUG] Translation being used: "{translation[:200] if translation else "N/A"}"', flush=True)
-    logger.info(f'[DEBUG] Query: "{query[:200]}"')
-    logger.info(f'[DEBUG] Translation: "{translation[:200] if translation else "N/A"}"')
+        
+        def invoke(self, query_text):
+            if not self.document_ids:
+                return []
+            
+            # Try Strategy 1: SQL-based search
+            docs = self._sql_based_search(query_text)
+            if docs is not None:
+                return docs
+            
+            # Fallback to Strategy 2: Global search then filter
+            return self._fallback_search(query_text)
     
     # Use the custom filtered retriever
-    # Note: query_embedding will be computed per-query in invoke() method
-    retriever = FilteredRetriever(ids, k=8)
+    retriever = FilteredRetriever(ids, k=8, logger=logger)
     search_kwargs = {'k': 8, 'filter': {'reference_document_id': {'$in': ids}}}
 
     # retriever = MultiQueryRetriever.from_llm(retriever, llm, include_original=False)
@@ -434,64 +413,15 @@ def answer_legal_question(state: State):
     ])
 
     def format_docs(docs):
-        logger.info(f'[DEBUG] format_docs called with {len(docs)} documents')
         if len(docs) == 0:
             logger.warning('[DEBUG] No documents retrieved! Context will be empty.')
-        else:
-            logger.info(f'[DEBUG] First doc preview: {docs[0].page_content[:200] if docs[0].page_content else "EMPTY"}...')
         return "\n\n".join(doc.page_content for doc in docs)
 
     with connection.cursor() as cursor:
         try:
-            ef_search_value = 32
-            # Set the desired ef_search value
-            cursor.execute(f"SET LOCAL hnsw.ef_search = {ef_search_value};")
-            # NOTE: We don't execute the search here, we just set the parameter.
-            # The next query that uses the same connection will pick it up.
-
+            cursor.execute("SET LOCAL hnsw.ef_search = 32;")
         except Exception as e:
-            print(f"Error setting hnsw.ef_search: {e}")
-
-    # Debug: Check if chunks exist in database
-    
-    try:
-        # Check if chunks exist for these document IDs
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT COUNT(*) 
-                FROM langchain_pg_embedding 
-                WHERE (cmetadata->>'reference_document_id')::bigint = ANY(%s)
-            """, [ids])
-            chunk_count = cursor.fetchone()[0]
-            print(f'[DEBUG] Total chunks in DB for these {len(ids)} document IDs: {chunk_count}', flush=True)
-            logger.info(f'[DEBUG] Total chunks in DB for these {len(ids)} document IDs: {chunk_count}')
-            
-            # Check each document ID individually
-            for doc_id in ids[:3]:  # Check first 3
-                cursor.execute("""
-                    SELECT COUNT(*) 
-                    FROM langchain_pg_embedding 
-                    WHERE (cmetadata->>'reference_document_id')::bigint = %s
-                """, [doc_id])
-                count = cursor.fetchone()[0]
-                print(f'[DEBUG] Document ID {doc_id} has {count} chunks', flush=True)
-                logger.info(f'[DEBUG] Document ID {doc_id} has {count} chunks')
-    except Exception as e:
-        print(f'[DEBUG] Error checking chunks in DB: {e}', flush=True)
-        logger.error(f'[DEBUG] Error checking chunks in DB: {e}')
-    
-    # Test the retriever
-    try:
-        test_docs = retriever.invoke(query)
-        print(f'[DEBUG] Filtered retriever found {len(test_docs)} chunks for query: "{query[:100]}"', flush=True)
-        logger.info(f'[DEBUG] Filtered retriever found {len(test_docs)} chunks for query: "{query[:100]}"')
-        if len(test_docs) == 0:
-            print(f'[DEBUG] No chunks found! Document IDs: {ids}', flush=True)
-            logger.warning(f'[DEBUG] No chunks found! Document IDs: {ids}')
-            logger.warning(f'[DEBUG] This means context will be empty even though {len(ids)} document IDs were found')
-    except Exception as e:
-        print(f'[DEBUG] Error testing retriever: {e}', flush=True)
-        logger.error(f'[DEBUG] Error testing retriever: {e}')
+            logger.error(f"Error setting hnsw.ef_search: {e}")
     
     rag_chain = (
             RunnablePassthrough.assign(source_documents=RunnableLambda(
@@ -668,12 +598,7 @@ def store_translation_message(state: State):
 
 
 def legal_question_flow(state: State):
-    # Set query and input_translation directly from input (bypassing rephrase and translate)
-    # This allows testing without rephrase/translation steps
-    return {
-        'query': state['input'],  # Use input directly as query (no rephrasing)
-        'input_translation': state['input'],  # Use input directly as translation (no translation)
-    }
+    return state
 
 
 def return_first_child(state: State):
@@ -721,8 +646,7 @@ def build_graph():
         {
             "legal_question": 'legal_question_flow',
             "other": 'legal_question_flow',
-            "translation": 'legal_question_flow',  # Route translation to legal_question_flow (bypassing translation)
-            "translation": "translate_previous_message",  # Original translation flow (commented out)
+            "translation": "translate_previous_message",
         },
     )
 
@@ -732,9 +656,6 @@ def build_graph():
     graph_builder.add_edge('translate_user_input', 'answer_legal_question')
     graph_builder.add_edge('rephrase_user_input', 'answer_legal_question')
     
-    # Connect legal_question_flow directly to answer_legal_question (bypassing translate/rephrase)
-    graph_builder.add_edge('legal_question_flow', 'answer_legal_question')
-
     graph_builder.add_edge('answer_legal_question', 'extract_used_languages')
     graph_builder.add_edge('answer_legal_question', 'decode_response_json')
 

@@ -4,7 +4,7 @@ import uuid
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum
 
-#import aspose.words as aw
+import aspose.words as aw
 import math
 from django.core.files.base import ContentFile
 from django.db import models, transaction
@@ -73,7 +73,7 @@ class UpdateCurrentFile:
         for message_file in self.message_files:
             file: models.FileField = message_file.file
 
-            doc = 1#aw.Document(file.path) 
+            doc = aw.Document(file.path) 
 
             styles_json = extract_used_styles(doc)
             json_data = extract_doc_data(doc)
