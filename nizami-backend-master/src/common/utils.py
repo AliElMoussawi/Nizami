@@ -78,7 +78,7 @@ def load_aspose_license():
     if _is_license_set:
         return  # Prevent multiple loads
 
-    aw_license = aw.License() 
+    aw_license = aw.License()
     try:
         aw_license.set_license(os.path.abspath(settings.ASPOSE_LICENSE_PATH))
         _is_license_set = True

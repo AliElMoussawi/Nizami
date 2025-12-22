@@ -6,7 +6,6 @@ from src.reference_documents.models import ReferenceDocument
 from src.settings import embeddings
 
 
-
 def rephrase_user_input_using_history(message, old_messages):
     llm = create_llm('gpt-5-nano', reasoning_effort="low")
 

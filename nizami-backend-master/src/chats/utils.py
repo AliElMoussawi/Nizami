@@ -320,10 +320,10 @@ def append_modifications(builder, doc, records):
         builder.insert_html(record['new'])
 
 
-# def create_comment(text, doc, author, initial_author, date):
-#     cmt = aw.Comment(doc, author, initial_author, date)
-#     cmt.set_text(text)
-#     return cmt
+def create_comment(text, doc, author, initial_author, date):
+    cmt = aw.Comment(doc, author, initial_author, date)
+    cmt.set_text(text)
+    return cmt
 
 
 def get_run_index_at_char(run_positions, char_pos):
