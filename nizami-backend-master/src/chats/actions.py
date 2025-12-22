@@ -73,7 +73,7 @@ class UpdateCurrentFile:
         for message_file in self.message_files:
             file: models.FileField = message_file.file
 
-            doc = aw.Document(file.path) 
+            doc = aw.Document(file.path)
 
             styles_json = extract_used_styles(doc)
             json_data = extract_doc_data(doc)

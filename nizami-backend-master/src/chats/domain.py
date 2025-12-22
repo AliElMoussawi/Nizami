@@ -1,4 +1,3 @@
-import logging
 from langchain_core.messages import HumanMessage, SystemMessage
 from pgvector.django import CosineDistance
 
@@ -6,7 +5,6 @@ from src.chats.utils import create_llm
 from src.reference_documents.models import ReferenceDocument
 from src.settings import embeddings
 
-logger = logging.getLogger(__name__)
 
 
 def rephrase_user_input_using_history(message, old_messages):

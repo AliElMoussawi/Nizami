@@ -4,7 +4,7 @@ import aspose.words as aw
 
 
 class MostUsedFont:
-    def __init__(self, document):
+    def __init__(self, document: aw.Document):
         self.document = document
         self._font_cache = {}
 

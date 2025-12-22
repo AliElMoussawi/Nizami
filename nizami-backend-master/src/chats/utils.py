@@ -56,20 +56,20 @@ def create_llm(model_name, **kwargs):
     )
 
 
-# def create_translation_llm():
-#     return ChatOpenAI(
-#         openai_api_key=settings.OPENAI_API_KEY,
-#         model_name='gpt-4o-mini',
-#         temperature=0.1,
-#         top_p=0.3,
-#         request_timeout=30000,
-#         http_client=httpx.Client(
-#             timeout=httpx.Timeout(30000, connect=0000),
-#             # headers={
-#             #     'Connection': 'close',
-#             # },
-#         ),
-#     )
+def create_translation_llm():
+    return ChatOpenAI(
+        openai_api_key=settings.OPENAI_API_KEY,
+        model_name='gpt-4o-mini',
+        temperature=0.1,
+        top_p=0.3,
+        request_timeout=30000,
+        http_client=httpx.Client(
+            timeout=httpx.Timeout(30000, connect=0000),
+            # headers={
+            #     'Connection': 'close',
+            # },
+        ),
+    )
 
 def create_description_llm():
     return ChatOpenAI(
