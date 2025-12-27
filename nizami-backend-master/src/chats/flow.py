@@ -24,6 +24,7 @@ from src.chats.utils import create_legal_advice_llm, detect_language, create_llm
 from src.prompts.enums import PromptType
 from src.prompts.utils import get_prompt_value_by_name
 from src.settings import vectorstore
+from src.common.retrievers import FilteredRetriever
 
 
 class State(TypedDict):
@@ -282,115 +283,10 @@ def answer_legal_question(state: State):
     query = state['query']
 
     ids = find_ref_document_ids_by_description(query)
-    logger.info(f'[DEBUG] Found {len(ids)} document IDs: {ids}')
 
     llm = create_legal_advice_llm()
     template = get_prompt_value_by_name(PromptType.LEGAL_ADVICE)
 
-    # Create a custom retriever that properly filters by document IDs
-    # The issue: if we search globally and filter, we might not get chunks from target docs
-    # Solution: Use SQL to do similarity search within the filtered chunk set
-    class FilteredRetriever:
-        def __init__(self, document_ids, k=8, logger=None):
-            self.document_ids = set(document_ids) if document_ids else set()
-            self.k = k
-            self.logger = logger or logging.getLogger(__name__)
-            # Fallback: base retriever for when SQL approach doesn't work
-            self.base_retriever = vectorstore.as_retriever(search_kwargs={'k': max(k * 20, 100)})
-        
-        def _sql_based_search(self, query_text):
-            """
-            Strategy 1: SQL-based similarity search within filtered chunks.
-            This ensures we search only within chunks from target documents.
-            Returns list of Document objects or None if search fails.
-            """
-            try:
-                from src.settings import embeddings
-                query_emb = embeddings.embed_query(query_text)
-                
-                with connection.cursor() as cursor:
-                    embedding_str = '[' + ','.join(str(x) for x in query_emb) + ']'
-                    
-                    cursor.execute("""
-                        SELECT 
-                            id,
-                            document,
-                            cmetadata,
-                            1 - (embedding <=> %s::vector) as similarity
-                        FROM langchain_pg_embedding 
-                        WHERE (cmetadata->>'reference_document_id')::bigint = ANY(%s)
-                        ORDER BY embedding <=> %s::vector
-                        LIMIT %s
-                    """, [embedding_str, list(self.document_ids), embedding_str, self.k])
-                    
-                    rows = cursor.fetchall()
-                    if rows:
-                        docs = []
-                        for row in rows:
-                            chunk_id, document, metadata, similarity = row
-                            if isinstance(metadata, str):
-                                metadata = json.loads(metadata)
-                            elif metadata is None:
-                                metadata = {}
-                            
-                            metadata['id'] = str(chunk_id) if chunk_id else None
-                            docs.append(Document(
-                                page_content=document or '',
-                                metadata=metadata
-                            ))
-                        
-                        self.logger.info(f'SQL-based search found {len(docs)} chunks from target documents')
-                        return docs
-            except Exception as e:
-                self.logger.warning(f'SQL-based search failed: {e}, falling back to filter approach')
-                return None
-        
-        def _fallback_search(self, query_text):
-            """
-            Strategy 2: Fallback - search globally and filter by document ID.
-            Less reliable but works when SQL-based search fails.
-            Returns list of Document objects.
-            """
-            self.logger.info('Using FALLBACK strategy: searching globally then filtering')
-            all_docs = self.base_retriever.invoke(query_text)
-            
-            # Filter by reference_document_id in metadata
-            filtered_docs = []
-            for doc in all_docs:
-                ref_id = doc.metadata.get('reference_document_id')
-                if ref_id is not None:
-                    try:
-                        ref_id_int = int(ref_id) if isinstance(ref_id, str) else ref_id
-                        if ref_id_int in self.document_ids:
-                            filtered_docs.append(doc)
-                            if len(filtered_docs) >= self.k:
-                                break
-                    except (ValueError, TypeError):
-                        pass
-            
-            if len(filtered_docs) == 0:
-                found_doc_ids = {int(doc.metadata.get('reference_document_id')) 
-                                for doc in all_docs 
-                                if doc.metadata.get('reference_document_id')}
-                self.logger.warning(f'Fallback: Base search returned chunks from {found_doc_ids}, but looking for {self.document_ids}')
-            else:
-                self.logger.info(f'Fallback strategy found {len(filtered_docs)} chunks')
-            
-            return filtered_docs[:self.k]
-        
-        def invoke(self, query_text):
-            if not self.document_ids:
-                return []
-            
-            # Try Strategy 1: SQL-based search
-            docs = self._sql_based_search(query_text)
-            if docs is not None:
-                return docs
-            
-            # Fallback to Strategy 2: Global search then filter
-            return self._fallback_search(query_text)
-    
-    # Use the custom filtered retriever
     retriever = FilteredRetriever(ids, k=8, logger=logger)
     search_kwargs = {'k': 8, 'filter': {'reference_document_id': {'$in': ids}}}
 
@@ -414,7 +310,7 @@ def answer_legal_question(state: State):
 
     def format_docs(docs):
         if len(docs) == 0:
-            logger.warning('[DEBUG] No documents retrieved! Context will be empty.')
+            logger.warning('No documents retrieved! Context will be empty.')
         return "\n\n".join(doc.page_content for doc in docs)
 
     with connection.cursor() as cursor:

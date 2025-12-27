@@ -1,5 +1,6 @@
 import difflib
 import io
+import json
 import random
 import re
 import string
@@ -777,3 +778,5 @@ def detect_language(text):
         return "ar"
     else:
         return "ar"
+
+
