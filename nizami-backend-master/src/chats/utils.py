@@ -1,6 +1,5 @@
 import difflib
 import io
-import json
 import random
 import re
 import string

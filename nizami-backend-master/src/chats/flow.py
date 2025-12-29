@@ -23,7 +23,6 @@ from src.chats.models import Message, MessageLog, MessageStepLog
 from src.chats.utils import create_legal_advice_llm, detect_language, create_llm
 from src.prompts.enums import PromptType
 from src.prompts.utils import get_prompt_value_by_name
-from src.settings import vectorstore
 from src.common.retrievers import FilteredRetriever
 
 
