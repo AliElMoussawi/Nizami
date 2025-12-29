@@ -47,26 +47,51 @@ Context Instructions:
     return response.content
 
 
-def translate_question(text, from_lang):
+def translate_question(text: str, from_lang: str) -> str:
     translations = {
         'ar': 'English',
         'en': 'Arabic',
     }
 
-    to_lang = translations[from_lang]
+    to_lang = translations.get(from_lang)
+    if not to_lang:
+        raise ValueError(f"Unsupported source language: {from_lang}")
+
     llm = create_llm('gpt-5-nano', reasoning_effort="minimal")
-    prompt = f"""
-    You are a professional translator. Translate the following text provided by the user into {to_lang}, maintaining the original meaning, tone, and context. If the sentence contains idioms, cultural references, or technical terms, translate them appropriately for native speakers of the target language. Provide only the translation.
-    
-    {text}
-    """
+
+    system_prompt = f"""
+        You are a professional translator working for a legal-tech platform.
+
+        Your task:
+        - Translate all user text into {to_lang}.
+        - Always keep a **clear, precise, professional** tone.
+
+        Style rules:
+        - If the text is a legal question or contains legal content 
+        (e.g. contracts, clauses, terms & conditions, policies, laws, regulations, legal opinions, disclaimers):
+            - Use a **formal legal register** appropriate for {to_lang}.
+            - Preserve:
+            - Sentence structure and paragraphing
+            - Numbering, bullet points, headings
+            - Dates, amounts, article numbers, references to laws/codes/contracts
+            - Defined terms (e.g. "Client", "Party", "Service Provider") consistently
+        - If the text is not legal, translate it in a **neutral, professional** tone, not slangy or overly casual.
+
+        General rules:
+        - Do **not** summarize, simplify, or explain.
+        - Do **not** add comments, notes, or extra sentences.
+        - Do **not** change or omit information.
+        - Decide whether the text is legal or not based only on the user content and apply the right style.
+        - Return **only** the translated text, with no extra explanation.
+        """
 
     messages = [
-        SystemMessage(content=prompt),
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=text),
     ]
-    response = llm.invoke(messages)
 
-    return response.content
+    response = llm.invoke(messages)
+    return response.content.strip()
 
 
 def find_ref_document_ids_by_description(text):
