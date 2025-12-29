@@ -4,7 +4,7 @@ from django.db.models import Count, Q
 from django.shortcuts import render
 from django.urls import path
 
-from src.subscription.models import UserSubscription, UserSubscription
+from src.subscription.models import UserSubscription
 
 
 @admin.register(UserSubscription)

@@ -290,7 +290,7 @@ def answer_legal_question(state: State):
     retriever = FilteredRetriever(ids, k=8, logger=logger)
     search_kwargs = {'k': 8, 'filter': {'reference_document_id': {'$in': ids}}}
 
-    # retriever = MultiQueryRetriever.from_llm(retriever, llm, include_original=False)
+    retriever = MultiQueryRetriever.from_llm(retriever, llm, include_original=False)
 
     history_messages = [
         HumanMessage(content=msg.text) if msg.role == 'user' else AIMessage(content=msg.text)

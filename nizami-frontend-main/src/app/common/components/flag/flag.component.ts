@@ -11,5 +11,5 @@ export class FlagComponent {
 
   get url() {
     return `/assets/icons/flags/${this.code()?.toLowerCase()}.png`;
-  };
+  }
 }

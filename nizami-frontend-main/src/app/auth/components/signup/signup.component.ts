@@ -1,8 +1,7 @@
 import {Component} from '@angular/core';
 import {AuthTemplateComponent} from '../auth-template/auth-template.component';
 import {SignupFormComponent} from '../signup-form/signup-form.component';
-import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
-import {take} from 'rxjs';
+import {UntilDestroy} from '@ngneat/until-destroy';
 
 @UntilDestroy()
 @Component({

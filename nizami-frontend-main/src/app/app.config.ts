@@ -105,11 +105,11 @@ export const appConfig: ApplicationConfig = {
       locale: Arabic,
     }),
     provideAppInitializer(async () => {
-      let translationLoader = inject(TranslationLoaderService);
+      const translationLoader = inject(TranslationLoaderService);
       return await translationLoader.load();
     }),
     provideAppInitializer(async () => {
-        let authService = inject(AuthService);
+        const authService = inject(AuthService);
         authService.loadToken();
 
         if (authService.isAuthenticated()) {

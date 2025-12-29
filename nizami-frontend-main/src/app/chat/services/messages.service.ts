@@ -61,7 +61,7 @@ export class MessagesService {
   }
 
   loadMessages(chat_id: any, last_id: number | null = null, per_page = 50) {
-    let params: { [param: string]: string | number | boolean } = {
+    const params: { [param: string]: string | number | boolean } = {
       per_page,
     };
 
@@ -118,7 +118,7 @@ export class MessagesService {
     const formData = new FormData();
     formData.append('file', file);
 
-    let request = new HttpRequest(
+    const request = new HttpRequest(
       "POST",
       environment.apiUrl + '/v1/chats/messages/upload-file',
       formData,

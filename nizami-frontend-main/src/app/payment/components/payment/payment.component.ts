@@ -9,7 +9,7 @@ import { environment } from '../../../../environments/environment';
 import { SpinnerComponent } from '../../../common/components/spinner/spinner.component';
 import { ErrorComponent } from '../../../common/components/error/error.component';
 
-declare var Moyasar: any;
+declare let Moyasar: any;
 
 @Component({
   selector: 'app-payment',

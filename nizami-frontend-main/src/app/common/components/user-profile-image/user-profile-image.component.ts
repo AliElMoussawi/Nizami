@@ -56,7 +56,7 @@ export class UserProfileImageComponent {
         take(1),
         untilDestroyed(this)
       )
-      .subscribe((x) => {
+      .subscribe(() => {
       })
   }
 }

@@ -388,7 +388,7 @@ def apply_inline_tracked_changes(doc: aw.Document, old_para: aw.Paragraph, new_t
                     continue
 
                 text_start = run_start
-                text_end = run_end
+                # text_end = run_end
 
                 local_start = max(0, i1 - text_start)
                 run_text_length = len(run.text.split())

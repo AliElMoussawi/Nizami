@@ -65,7 +65,7 @@ export class LoginFormComponent {
           }
         ),
       )
-      .subscribe((x) => {
+      .subscribe((_x) => {
         this.router.navigate(['/users']);
       });
   }

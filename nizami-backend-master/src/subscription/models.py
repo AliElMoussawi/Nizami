@@ -2,7 +2,6 @@ from django.db import models
 
 import uuid
 
-from django.db import models
 from django.db.models import Q, UniqueConstraint
 from django.core.exceptions import ValidationError
 

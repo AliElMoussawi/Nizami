@@ -56,7 +56,7 @@ export class SubscriptionsComponent implements OnInit, AfterViewInit, OnDestroy 
         debounceTime(500),
         distinctUntilChanged(),
       )
-      .subscribe((x) => {
+      .subscribe((_x) => {
         this.onSearch()
       });
   }

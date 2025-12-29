@@ -2,7 +2,7 @@ import {Component, ContentChildren, forwardRef, input, QueryList} from '@angular
 import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {NgClass} from '@angular/common';
 import {ControlErrorsComponent} from '../errors/control-errors.component';
-import {FlatpickrDefaultsInterface, FlatpickrDirective} from 'angularx-flatpickr';
+import {FlatpickrDirective} from 'angularx-flatpickr';
 
 @Component({
   selector: 'app-date-picker',

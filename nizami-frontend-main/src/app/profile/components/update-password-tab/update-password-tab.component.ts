@@ -83,7 +83,7 @@ export class UpdatePasswordTabComponent {
           this.form.enable();
         }),
       )
-      .subscribe((x) => {
+      .subscribe(() => {
         this.toastr.success(this.translate.instant(marker('success.password_saved')));
 
         this.form.reset();

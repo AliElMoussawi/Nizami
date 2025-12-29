@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, input} from '@angular/core';
+import {Component, ElementRef, input} from '@angular/core';
 import {MessageModel} from '../../models/message.model';
 import {UserMessageComponent} from '../user-message/user-message.component';
 import {SystemMessageComponent} from '../system-message/system-message.component';

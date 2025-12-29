@@ -5,7 +5,6 @@ import {CountryListComponent, IConfig, ICountry} from 'ngx-countries-dropdown';
 import {NgClass} from '@angular/common';
 import {JurisdictionService} from '../../services/jurisdiction.service';
 import {AuthService} from '../../../auth/services/auth.service';
-import {JurisdictionModel} from '../../models/jurisdiction.model';
 
 @Component({
   selector: 'app-country-picker',

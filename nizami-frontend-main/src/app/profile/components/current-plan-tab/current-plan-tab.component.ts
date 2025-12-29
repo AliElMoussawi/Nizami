@@ -127,7 +127,7 @@ export class CurrentPlanTabComponent implements OnInit {
     this.error = null;
 
     this.subscriptionService.cancelSubscription().subscribe({
-      next: (response) => {
+      next: (_response) => {
         this.cancelling = false;
         this.showCancelConfirmation = false;
         // Reload subscription to get updated status

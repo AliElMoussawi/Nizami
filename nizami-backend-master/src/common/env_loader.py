@@ -9,5 +9,5 @@ import environ
 def load_env():
     base_dir = Path(__file__).resolve().parent.parent.parent  # Adjust as needed
     env_path = os.path.join(base_dir, '.env')
-    env = environ.Env()
+    _ = environ.Env()
     environ.Env.read_env(env_path)

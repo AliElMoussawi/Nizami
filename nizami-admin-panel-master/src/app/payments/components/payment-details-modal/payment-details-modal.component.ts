@@ -40,7 +40,7 @@ export class PaymentDetailsModalComponent implements OnInit {
     this.paymentsService.getPaymentDetails(this.paymentId)
       .pipe(
         untilDestroyed(this),
-        catchError((error) => {
+        catchError((_error) => {
           this.error.set('Failed to load payment details. Please try again.');
           this.loading.set(false);
           return EMPTY;

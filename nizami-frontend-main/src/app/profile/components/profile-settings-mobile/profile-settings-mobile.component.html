@@ -12,7 +12,7 @@
       <app-button-toggle-group class="self-stretch xl:self-center">
         @for (tab of tabs; track tab.id; let first = $first, last = $last) {
           <app-button-toggle
-            [selected]="tab.id == selectedTabId()"
+            [selected]="tab.id === selectedTabId()"
             (onClick)="selectTab(tab)"
             [tab]="tab"
             [isLast]="last"

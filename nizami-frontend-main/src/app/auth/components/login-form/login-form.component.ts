@@ -67,7 +67,7 @@ export class LoginFormComponent {
           }
         ),
       )
-      .subscribe((x) => {
+      .subscribe(() => {
         this.router.navigate(['/chat']);
       });
   }
