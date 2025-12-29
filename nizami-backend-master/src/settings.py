@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -19,6 +20,16 @@ from langchain_postgres import PGVector
 from langchain_postgres.vectorstores import DistanceStrategy
 
 from src.common.utils import get_db_url
+
+# Detect if we're running tests
+# Check if 'test' command is in sys.argv (for 'python manage.py test')
+# or if pytest is being used, or if DJANGO_TESTING env var is set
+TESTING = (
+    (len(sys.argv) > 1 and sys.argv[1] == 'test') or  # python manage.py test
+    'pytest' in sys.argv[0] or  # pytest runner
+    'test' in sys.argv or  # fallback: any 'test' in args
+    os.environ.get('DJANGO_TESTING') == '1'  # explicit env var
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -123,29 +134,42 @@ WSGI_APPLICATION = 'src.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_DATABASE'),
-        'USER': env('DB_USERNAME'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
-        'CONN_MAX_AGE': 600,
-        'OPTIONS': {
-            'options': '-c hnsw.ef_search=32',
+# Use SQLite for testing, PostgreSQL for production/development
+if TESTING:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        },
+        'logs': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
         }
-    },
-    'logs': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_DATABASE'),
-        'USER': env('DB_USERNAME'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
-        'CONN_MAX_AGE': 600,
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('DB_DATABASE'),
+            'USER': env('DB_USERNAME'),
+            'PASSWORD': env('DB_PASSWORD'),
+            'HOST': env('DB_HOST'),
+            'PORT': env('DB_PORT'),
+            'CONN_MAX_AGE': 600,
+            'OPTIONS': {
+                'options': '-c hnsw.ef_search=32',
+            }
+        },
+        'logs': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('DB_DATABASE'),
+            'USER': env('DB_USERNAME'),
+            'PASSWORD': env('DB_PASSWORD'),
+            'HOST': env('DB_HOST'),
+            'PORT': env('DB_PORT'),
+            'CONN_MAX_AGE': 600,
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -217,12 +241,22 @@ SIMPLE_JWT = {
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_PORT = env('EMAIL_PORT')
-EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-EMAIL_FROM_ADDRESS = env('EMAIL_FROM_ADDRESS')
+if TESTING:
+    # Use console backend for testing
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_HOST = 'localhost'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = False
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    EMAIL_FROM_ADDRESS = 'test@example.com'
+else:
+    EMAIL_HOST = env('EMAIL_HOST')
+    EMAIL_PORT = env('EMAIL_PORT')
+    EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
+    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+    EMAIL_FROM_ADDRESS = env('EMAIL_FROM_ADDRESS')
 # MAIL_MAILER=smtp
 
 
@@ -230,8 +264,8 @@ AUTH_USER_MODEL = 'users.User'
 
 APPEND_SLASH = True
 
-FRONTEND_DOMAIN = env('FRONTEND_DOMAIN')
-FRONTEND_RESET_PASSWORD_TEMPLATE = env('FRONTEND_RESET_PASSWORD_TEMPLATE')
+FRONTEND_DOMAIN = env('FRONTEND_DOMAIN', default='http://localhost:4201') if not TESTING else 'http://localhost:4201'
+FRONTEND_RESET_PASSWORD_TEMPLATE = env('FRONTEND_RESET_PASSWORD_TEMPLATE', default='/reset-password') if not TESTING else '/reset-password'
 
 Q_CLUSTER = {
     'name': 'DjangoQ',
@@ -246,16 +280,21 @@ Q_CLUSTER = {
     'orm': 'default',  # Use the default database as the broker
 }
 
-OPENAI_API_KEY = env('OPENAI_API_KEY')
+OPENAI_API_KEY = env('OPENAI_API_KEY', default='') if not TESTING else ''
 
-embeddings = OpenAIEmbeddings(model='text-embedding-3-large', dimensions=1536, openai_api_key=OPENAI_API_KEY)
-vectorstore = PGVector(
-    collection_name="reference_document_parts",
-    embeddings=embeddings,
-    connection=get_db_url(),
-    distance_strategy=DistanceStrategy.COSINE,
-)
-
+# Initialize embeddings and vectorstore only if not testing and OPENAI_API_KEY is set
+try:
+    embeddings = OpenAIEmbeddings(model='text-embedding-3-large', dimensions=1536, openai_api_key=OPENAI_API_KEY)
+    vectorstore = PGVector(
+        collection_name="reference_document_parts",
+        embeddings=embeddings,
+        connection=get_db_url(),
+        distance_strategy=DistanceStrategy.COSINE,
+    )
+except Exception:
+    # If initialization fails, set to None
+    embeddings = None
+    vectorstore = None
 
 CSRF_TRUSTED_ORIGINS = [
     'https://api.nizami.xob-webservices.com',
@@ -269,7 +308,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.app.nizami.ai',
 ]
 
-MOYASAR_URL = env('MOYASAR_URL')
-MOYASAR_SECRET_KEY = env('MOYASAR_SECRET_KEY')
-MOYASAR_WEBHOOK_SECRET_KEY = env('MOYASAR_WEBHOOK_SECRET_KEY')
+MOYASAR_URL = env('MOYASAR_URL', default='') if not TESTING else ''
+MOYASAR_SECRET_KEY = env('MOYASAR_SECRET_KEY', default='') if not TESTING else ''
+MOYASAR_WEBHOOK_SECRET_KEY = env('MOYASAR_WEBHOOK_SECRET_KEY', default='') if not TESTING else ''
 
