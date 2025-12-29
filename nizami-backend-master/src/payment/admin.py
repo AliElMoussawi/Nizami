@@ -4,7 +4,8 @@ from .models import (
     MoyasarPaymentSource,
     MoyasarPayment,
     MoyasarWebhookEvent,
-    UserPaymentSource
+    UserPaymentSource,
+    PaymentUserSubscription
 )
 
 
@@ -70,3 +71,48 @@ class UserPaymentSourceAdmin(admin.ModelAdmin):
         """
         qs = super().get_queryset(request)
         return qs.select_related('user', 'payment_source')
+
+
+@admin.register(PaymentUserSubscription)
+class PaymentUserSubscriptionAdmin(admin.ModelAdmin):
+    """
+    Admin interface for PaymentUserSubscription model with full CRUD support.
+    """
+    list_display = ['uuid', 'user_subscription', 'payment', 'created_at', 'updated_at']
+    list_filter = ['created_at', 'updated_at']
+    search_fields = [
+        'uuid',
+        'user_subscription__uuid',
+        'user_subscription__user__email',
+        'user_subscription__user__username',
+        'payment__id',
+    ]
+    readonly_fields = ['uuid', 'created_at', 'updated_at']
+    raw_id_fields = ['user_subscription', 'payment']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('uuid',)
+        }),
+        ('Relations', {
+            'fields': ('user_subscription', 'payment'),
+            'description': 'Links a payment to a user subscription.'
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        """
+        Optimize queryset with select_related for better performance.
+        """
+        qs = super().get_queryset(request)
+        return qs.select_related(
+            'user_subscription',
+            'user_subscription__user',
+            'user_subscription__plan',
+            'payment',
+            'payment__source'
+        )

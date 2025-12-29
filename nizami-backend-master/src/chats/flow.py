@@ -2,6 +2,8 @@ import json
 import re
 import time
 import uuid
+import logging
+
 
 from django.db import connection
 from django.db.models import Q
@@ -15,12 +17,13 @@ from langgraph.graph import StateGraph
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict, Literal, Any
 
+
 from src.chats.domain import rephrase_user_input_using_history, find_ref_document_ids_by_description, translate_question
 from src.chats.models import Message, MessageLog, MessageStepLog
 from src.chats.utils import create_legal_advice_llm, detect_language, create_llm
 from src.prompts.enums import PromptType
 from src.prompts.utils import get_prompt_value_by_name
-from src.settings import vectorstore
+from src.common.retrievers import FilteredRetriever
 
 
 class State(TypedDict):
@@ -272,6 +275,7 @@ def store_system_message(state: State):
 
 def answer_legal_question(state: State):
     t1 = time.time()
+    logger = logging.getLogger(__name__)
     
     user_message = state['message']
     translation = state['input_translation']
@@ -282,18 +286,8 @@ def answer_legal_question(state: State):
     llm = create_legal_advice_llm()
     template = get_prompt_value_by_name(PromptType.LEGAL_ADVICE)
 
-    search_kwargs = {
-        'k': 8,
-        "filter": {
-            "reference_document_id": {
-                "$in": ids,
-            },
-        },
-    }
-
-    retriever = vectorstore.as_retriever(
-        search_kwargs=search_kwargs,
-    )
+    retriever = FilteredRetriever(ids, k=8, logger=logger)
+    search_kwargs = {'k': 8, 'filter': {'reference_document_id': {'$in': ids}}}
 
     retriever = MultiQueryRetriever.from_llm(retriever, llm, include_original=False)
 
@@ -314,19 +308,16 @@ def answer_legal_question(state: State):
     ])
 
     def format_docs(docs):
+        if len(docs) == 0:
+            logger.warning('No documents retrieved! Context will be empty.')
         return "\n\n".join(doc.page_content for doc in docs)
 
     with connection.cursor() as cursor:
         try:
-            ef_search_value = 32
-            # Set the desired ef_search value
-            cursor.execute(f"SET LOCAL hnsw.ef_search = {ef_search_value};")
-            # NOTE: We don't execute the search here, we just set the parameter.
-            # The next query that uses the same connection will pick it up.
-
+            cursor.execute("SET LOCAL hnsw.ef_search = 32;")
         except Exception as e:
-            print(f"Error setting hnsw.ef_search: {e}")
-
+            logger.error(f"Error setting hnsw.ef_search: {e}")
+    
     rag_chain = (
             RunnablePassthrough.assign(source_documents=RunnableLambda(
                 lambda x: retriever.invoke(x['input']) + retriever.invoke(x['translated_input'])))
@@ -559,7 +550,7 @@ def build_graph():
 
     graph_builder.add_edge('translate_user_input', 'answer_legal_question')
     graph_builder.add_edge('rephrase_user_input', 'answer_legal_question')
-
+    
     graph_builder.add_edge('answer_legal_question', 'extract_used_languages')
     graph_builder.add_edge('answer_legal_question', 'decode_response_json')
 

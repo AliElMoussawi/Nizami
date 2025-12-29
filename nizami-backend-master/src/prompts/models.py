@@ -9,3 +9,6 @@ class Prompt(models.Model):
     value = models.TextField(null=False, blank=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.name})"
