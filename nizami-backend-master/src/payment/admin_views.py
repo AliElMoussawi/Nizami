@@ -1,4 +1,4 @@
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils import timezone
 from datetime import datetime, timedelta
 from rest_framework import status
