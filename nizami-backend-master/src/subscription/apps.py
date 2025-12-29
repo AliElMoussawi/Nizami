@@ -6,4 +6,4 @@ class SubscriptionConfig(AppConfig):
     name = 'src.subscription'
 
     def ready(self):
-        from . import signals  
+        from . import signals # noqa: F401

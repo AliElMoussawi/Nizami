@@ -7,4 +7,4 @@ class LedgerConfig(AppConfig):
     
     def ready(self):
         # Import tasks to register scheduled tasks
-        import src.ledger.tasks
+        import src.ledger.tasks # noqa: F401
