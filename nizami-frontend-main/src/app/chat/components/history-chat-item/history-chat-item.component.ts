@@ -52,8 +52,6 @@ export class HistoryChatItemComponent implements OnInit {
   }
 
 
-  ngOnInit(): void {
-  }
 
   viewChat() {
     this.onClick.emit(this.chat());

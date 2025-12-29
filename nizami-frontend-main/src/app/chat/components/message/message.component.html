@@ -1,4 +1,4 @@
-@if (message().role == 'user') {
+@if (message().role === 'user') {
   <app-user-message
     [message]="message()"
   ></app-user-message>

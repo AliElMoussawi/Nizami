@@ -10,7 +10,7 @@
   leading-1.5 px-4 text-grey12
   bg-white rounded-xl rounded-tl-none w-fit
 "
-        [dir]="message().language == 'en' ? 'ltr' : 'rtl'"
+        [dir]="message().language === 'en' ? 'ltr' : 'rtl'"
   >
     {{ message().text }}
   </span>

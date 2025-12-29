@@ -1,7 +1,7 @@
 <div
   class="border-2 border-grey3 rounded-2xl p-3 flex flex-row gap-2"
   [ngClass]="{
-  'bg-red1 border-red2 text-red3 font-bold': error() != null,
+  'bg-red1 border-red2 text-red3 font-bold': error() !== null,
   }"
 >
   <div>
@@ -14,7 +14,7 @@
         {{ file().file_name ?? file().file?.name }}
       </p>
 
-      @if (progress() == 100 && !showDeleteButton()) {
+      @if (progress() === 100 && !showDeleteButton()) {
         <div
           class="text-green-500 shrink-0"
           (mouseover)="showDeleteButton.set(true)" (mouseleave)="showDeleteButton.set(false)">

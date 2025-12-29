@@ -34,6 +34,4 @@ export class AccountDetailsTabComponent implements OnInit {
     return this.auth.user;
   }
 
-  ngOnInit() {
-  }
 }

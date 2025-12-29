@@ -45,7 +45,7 @@ export function convertToFormData(data: any): FormData {
   const formData = new FormData();
 
   for (const key in data) {
-    if (data.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
       if (data[key] instanceof File) {
         formData.append(key, data[key]);
       } else if (typeof data[key] === 'object' && data[key] !== null) {
@@ -76,7 +76,7 @@ export function extractErrorFromResponse(error: any) {
       return error.error?.error;
     }
 
-    if (error.status == 400) {
+    if (error.status === 400) {
       return Object.values(error.error)[0] as string;
     }
   }

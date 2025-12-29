@@ -92,13 +92,11 @@ export class ChatMessagesComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-  }
 
   scrollToLastMessage(): void {
-    let messageComponents = this.messageComponents();
+    const messageComponents = this.messageComponents();
     if (messageComponents.length - 2 > 0) {
-      let component = messageComponents[messageComponents.length - 2];
+      const component = messageComponents[messageComponents.length - 2];
 
       component.elementRef.nativeElement.scrollIntoView({behavior: 'smooth'});
     }

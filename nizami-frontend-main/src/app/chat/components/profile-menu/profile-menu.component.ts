@@ -47,7 +47,7 @@ export class ProfileMenuComponent {
         take(1),
         untilDestroyed(this)
       )
-      .subscribe((x) => {
+      .subscribe(() => {
       })
   }
 

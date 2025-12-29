@@ -5,7 +5,7 @@
   }"
 >
   @for (chat of historyChats.chats(); track chat.id; let i = $index) {
-    @if (i == 0 || (i > 0 && historyChats.chats()[i - 1].relative_date != chat.relative_date)) {
+    @if (i === 0 || (i > 0 && historyChats.chats()[i - 1].relative_date !== chat.relative_date)) {
       <span class="sticky top-0 text-sm font-semibold bg-white z-20 mt-4 text-grey6">
           {{ chat.relative_date }}
       </span>
@@ -16,7 +16,7 @@
       [highlightedText]="historyChats.searchValue()"
       (onClick)="viewChat(chat)"
       (onDelete)="deleteChat(chat)"
-      [selected]="chat.id == selected_id"
+      [selected]="chat.id === selected_id"
       [alwaysShowActions]="alwaysShowActions()"
     ></app-history-chat-item>
   }

@@ -1,6 +1,5 @@
 import {Component, input} from '@angular/core';
 import {FileModel} from '../../models/message.model';
-import {NgIcon} from '@ng-icons/core';
 import {FileSizePipe} from '../../../common/pipes/file-size.pipe';
 import {NgClass} from '@angular/common';
 

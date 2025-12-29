@@ -35,7 +35,7 @@ export class StepperComponent implements AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.stepTemplates.forEach((template, index) => {
+    this.stepTemplates.forEach((template) => {
       const appStep = template.appStep();
 
       if (appStep) {

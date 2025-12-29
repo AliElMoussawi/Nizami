@@ -54,7 +54,7 @@ export class ChatSideBarComponent {
     });
   }
 
-  onAnimationDone($event: any) {
+  onAnimationDone(_$event: any) {
     // this.sidebar.showCollapsedContent.set(!this.sidebar.isOpen());
   }
 

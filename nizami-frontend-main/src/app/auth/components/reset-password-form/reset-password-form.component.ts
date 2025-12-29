@@ -55,8 +55,6 @@ export class ResetPasswordFormComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
-  }
 
   submit() {
     if (this.form.invalid) {

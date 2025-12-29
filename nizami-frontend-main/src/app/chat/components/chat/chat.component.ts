@@ -371,7 +371,7 @@ export class ChatComponent {
       .pipe(
         untilDestroyed(this),
         takeUntil(this.stop$),
-        catchError((e) => {
+        catchError((_e) => {
           this.loadingError.set(this.translate.instant(marker('errors.failed_loading_chat')));
 
           return EMPTY;

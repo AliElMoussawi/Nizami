@@ -38,7 +38,7 @@ export class MobileChatSideBarComponent {
   ) {
   }
 
-  onAnimationDone($event: any) {
+  onAnimationDone(_$event: any) {
     // this.sidebar.showCollapsedContent.set(!this.sidebar.isOpen());
   }
 

@@ -1,7 +1,7 @@
-import {Component, output, signal} from '@angular/core';
+import {Component, output} from '@angular/core';
 import {InputComponent} from '../../../common/components/input/input.component';
 import {FormsModule} from '@angular/forms';
-import {debounceTime, distinct, distinctUntilChanged, Subject} from 'rxjs';
+import {debounceTime, distinctUntilChanged, Subject} from 'rxjs';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {TranslatePipe} from '@ngx-translate/core';
 

@@ -55,7 +55,7 @@ export class ChatInputComponent implements OnInit {
     this.chatInputService.textareaControl = this.form.controls.text;
 
     effect(() => {
-      let isDisabled = this.disabled();
+      const isDisabled = this.disabled();
 
       if (isDisabled) {
         this.form.disable();
@@ -80,7 +80,7 @@ export class ChatInputComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    let text = this.form.controls.text.value;
+    const text = this.form.controls.text.value;
     if (text == null || text.trim().length < 1) {
       return;
     }
@@ -105,15 +105,15 @@ export class ChatInputComponent implements OnInit {
   }
 
   editingText() {
-    let textarea = this.textarea()!.nativeElement;
+    const textarea = this.textarea()!.nativeElement;
 
-    let rowHeight = parseInt(window.getComputedStyle(textarea).lineHeight, 10);
+    const rowHeight = parseInt(window.getComputedStyle(textarea).lineHeight, 10);
     if (!textarea.value) {
       textarea.style.height = `${rowHeight}px`;
       return;
     }
 
-    let scrollHeight = textarea.scrollHeight;
+    const scrollHeight = textarea.scrollHeight;
 
     const maxRows = 5;
     const maxHeight = rowHeight * maxRows;
@@ -140,7 +140,7 @@ export class ChatInputComponent implements OnInit {
     const input = $event.target as HTMLInputElement;
     if (input.files) {
       Array.from(input.files).forEach((rawFile) => {
-        let file: FileModel = {
+        const file: FileModel = {
           file: rawFile,
         };
 
@@ -164,7 +164,7 @@ export class ChatInputComponent implements OnInit {
   }
 
   tryAgain(i: number, file: FileModel) {
-    let file$ = this.files[i];
+    const file$ = this.files[i];
 
     file$.update((f) => {
       return {
@@ -178,7 +178,7 @@ export class ChatInputComponent implements OnInit {
   }
 
   private uploadFile(file: FileModel) {
-    let file$ = signal({
+    const file$ = signal({
       file: file,
       progress: 0,
       error: null,

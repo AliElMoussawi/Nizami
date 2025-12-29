@@ -33,8 +33,6 @@ export class InitialMessagesComponent implements OnInit {
   ) {
   }
 
-  ngOnInit() {
-  }
 
   user() {
     return this.authService.user();

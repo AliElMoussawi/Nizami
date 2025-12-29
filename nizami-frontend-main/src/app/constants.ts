@@ -1,1 +1,1 @@
-export const specialCharPattern = /^(?=.*[!@#$%^&*(),.?":{}|<>~`_+\-=\\\/]).*$/;
+export const specialCharPattern = /^(?=.*[!@#$%^&*(),.?":{}|<>~`_+\-=\/]).*$/;

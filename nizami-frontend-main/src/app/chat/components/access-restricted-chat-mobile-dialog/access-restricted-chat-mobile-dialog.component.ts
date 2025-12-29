@@ -1,4 +1,4 @@
-import {Component, Inject, signal} from '@angular/core';
+import {Component, Inject} from '@angular/core';
 import {DIALOG_DATA, DialogRef} from '@angular/cdk/dialog';
 import {CountryNamePipe} from '../../../common/pipes/country-name.pipe';
 import {TranslatePipe} from '@ngx-translate/core';

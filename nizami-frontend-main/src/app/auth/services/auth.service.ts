@@ -36,7 +36,7 @@ export class AuthService {
       environment.apiUrl + '/v1/auth/login', data
     ).pipe(
       map((response) => {
-        let remember_me = data.remember_me ?? false;
+        const remember_me = data.remember_me ?? false;
 
         const token = response.access_token;
         if (token) {
