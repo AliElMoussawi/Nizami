@@ -11,7 +11,7 @@ import {DatePipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {ReferenceDocumentsService} from '../../services/reference-documents.service';
-import {ReferenceDocumentModel} from '../../models/reference-document.model';
+import type {ReferenceDocumentModel} from '../../models/reference-document.model';
 import {FileSizePipe} from '../../../common/pipes/file-size.pipe';
 import {
   DeleteConfirmationDialogComponent
@@ -66,7 +66,7 @@ export class ReferenceDocumentsComponent implements OnInit, AfterViewInit, OnDes
         debounceTime(500),
         distinctUntilChanged(),
       )
-      .subscribe((x) => {
+      .subscribe((_x) => {
         this.onSearch();
       });
   }

@@ -67,7 +67,7 @@ export class ChatInputComponent implements OnInit {
 
   get isTyping() {
     return this.isTypingService.value;
-  };
+  }
 
   ngOnInit() {
     this.chatInputService.textarea = this.textarea;

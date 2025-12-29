@@ -88,7 +88,7 @@ export class ChatComponent {
 
   get isNewChat() {
     return ((!this.messages() || this.messages().length == 0) && !this.isLoadingMessages() && !this.error() && !this.loadingError() && !this.isGeneratingResponse());
-  };
+  }
 
   get chat() {
     return this.historyChats.selectedChat;
