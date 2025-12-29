@@ -1,4 +1,4 @@
-import {Component, effect, ElementRef, input, OnInit, output, signal, viewChild, viewChildren} from '@angular/core';
+import {Component, effect, ElementRef, input, output, signal, viewChild, viewChildren} from '@angular/core';
 import {MessageComponent} from '../message/message.component';
 import {MessageModel} from '../../models/message.model';
 import {GeneratingResponseMessageComponent} from '../generating-response-message/generating-response-message.component';
@@ -56,7 +56,7 @@ import {marker} from '@colsen1991/ngx-translate-extract-marker';
     ])
   ],
 })
-export class ChatMessagesComponent implements OnInit {
+export class ChatMessagesComponent {
   messages = input.required<MessageModel[]>();
   chat = input.required<ChatModel>();
   disabled = input(false);

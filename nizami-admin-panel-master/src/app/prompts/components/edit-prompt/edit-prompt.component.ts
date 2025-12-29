@@ -57,7 +57,7 @@ export class EditPromptComponent implements OnInit {
           this.isUpdating.set(false);
         })
       )
-      .subscribe((_x) => {
+      .subscribe((x) => {
         this.toastr.success('Prompt successfully updated');
         this.onUpdated.emit(x);
       });

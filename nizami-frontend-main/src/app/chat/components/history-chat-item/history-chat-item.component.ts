@@ -1,4 +1,4 @@
-import {Component, input, OnInit, output, signal} from '@angular/core';
+import {Component, input, output, signal} from '@angular/core';
 import {ChatModel} from '../../models/chat.model';
 import {ReactiveFormsModule} from '@angular/forms';
 import {NgClass} from '@angular/common';
@@ -31,7 +31,7 @@ import {
   templateUrl: './history-chat-item.component.html',
   styleUrl: './history-chat-item.component.scss'
 })
-export class HistoryChatItemComponent implements OnInit {
+export class HistoryChatItemComponent {
   chat = input.required<ChatModel>();
   selected = input<boolean>(false);
   alwaysShowActions = input(false);

@@ -1,4 +1,4 @@
-import {Component, output} from '@angular/core';
+import {Component, output, signal} from '@angular/core';
 import {InputComponent} from '../../../common/components/input/input.component';
 import {FormsModule} from '@angular/forms';
 import {debounceTime, distinctUntilChanged, Subject} from 'rxjs';
