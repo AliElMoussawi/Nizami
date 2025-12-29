@@ -295,7 +295,7 @@ def answer_legal_question(state: State):
         search_kwargs=search_kwargs,
     )
 
-    # retriever = MultiQueryRetriever.from_llm(retriever, llm, include_original=False)
+    retriever = MultiQueryRetriever.from_llm(retriever, llm, include_original=False)
 
     history_messages = [
         HumanMessage(content=msg.text) if msg.role == 'user' else AIMessage(content=msg.text)

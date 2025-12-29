@@ -8,7 +8,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             with connection.cursor() as cursor:
-                cursor.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+                cursor.execute("ALTER EXTENSION vector UPDATE;")
                 self.stdout.write(
                     self.style.SUCCESS('Successfully created vector extension')
                 )

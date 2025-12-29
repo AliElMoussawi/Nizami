@@ -150,6 +150,6 @@ def payment_details(request: Request, payment_id):
         )
     except Exception as e:
         return Response(
-            {"error": "Internal server error"},
+            {"error": "Internal server error", "details": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

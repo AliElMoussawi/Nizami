@@ -272,7 +272,7 @@ class PaymentService:
                     "event_id": event_data["id"]
                 }
             
-            webhook_event = self.repository.create_webhook_event(event_data=event_data)
+            _ = self.repository.create_webhook_event(event_data=event_data)
 
             payment_data = event_data['data']
             
