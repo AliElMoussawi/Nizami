@@ -1,7 +1,7 @@
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
-# import aspose.words as aw
+import aspose.words as aw
 from src import settings
 import os
 import time
@@ -78,12 +78,12 @@ def load_aspose_license():
     if _is_license_set:
         return  # Prevent multiple loads
 
-    aw_license = None # aw.License()
-    # try:
-    #     aw_license.set_license(os.path.abspath(settings.ASPOSE_LICENSE_PATH))
-    #     _is_license_set = True
-    # except RuntimeError as err:
-    #     print("\nThere was an error setting the license:", err)
+    aw_license = aw.License()
+    try:
+        aw_license.set_license(os.path.abspath(settings.ASPOSE_LICENSE_PATH))
+        _is_license_set = True
+    except RuntimeError as err:
+        print("\nThere was an error setting the license:", err)
 
 
 
