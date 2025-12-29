@@ -31,15 +31,14 @@ def create_document_review_llm():
 def create_legal_advice_llm():
     return ChatOpenAI(
         openai_api_key=settings.OPENAI_API_KEY,
-        model_name='gpt-5-mini',
+        model_name='gpt-4o',
         request_timeout=30000,
         http_client=httpx.Client(
             timeout=httpx.Timeout(30000, connect=0000),
             # headers={
             #     'Connection': 'close',
             # },
-        ),
-        reasoning_effort='low',
+        )
     )
 
 def create_llm(model_name, **kwargs):
