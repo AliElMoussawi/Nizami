@@ -26,7 +26,7 @@ export class CopyButtonComponent {
         setTimeout(() => {
           this.isCopied.set(false);
         }, 2000);
-      }).catch(err => {
+      }).catch(_err => {
         this.isCopied.set(false);
       });
     } else {

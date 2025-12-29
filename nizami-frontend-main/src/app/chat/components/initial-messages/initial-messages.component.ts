@@ -1,4 +1,4 @@
-import {Component, computed, input, OnInit, output} from '@angular/core';
+import {Component, computed, input, output} from '@angular/core';
 import {SuggestionBoxComponent} from '../suggestion-box/suggestion-box.component';
 import {AuthService} from '../../../auth/services/auth.service';
 import {NgIf, TitleCasePipe} from '@angular/common';
@@ -19,7 +19,7 @@ import {ScreenObserverService} from '../../../common/services/screen-observer.se
   templateUrl: './initial-messages.component.html',
   styleUrl: './initial-messages.component.scss'
 })
-export class InitialMessagesComponent implements OnInit {
+export class InitialMessagesComponent {
   onUploadForReview = output();
   onGetLegalAdvice = output();
   onAdjustDocument = output();
@@ -33,8 +33,6 @@ export class InitialMessagesComponent implements OnInit {
   ) {
   }
 
-  ngOnInit() {
-  }
 
   user() {
     return this.authService.user();

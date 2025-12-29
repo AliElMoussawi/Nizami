@@ -8,7 +8,7 @@
     <app-chat-system-profile></app-chat-system-profile>
 
     <p class="w-full text-sm font-normal flex items-start pt-2.5 xl:ml-32"
-       [dir]="message().language == 'en' ? 'ltr' : 'rtl'"
+       [dir]="message().language === 'en' ? 'ltr' : 'rtl'"
     >
       @if (isLast() && isTyping()) {
         <ngx-typed-writer

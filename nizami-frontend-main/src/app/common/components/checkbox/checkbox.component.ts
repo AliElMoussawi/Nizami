@@ -44,7 +44,7 @@ export class CheckboxComponent implements ControlValueAccessor {
 // Triggered when the value changes
   onInputChange($event: any): void {
     if (!this.isDisabled) {
-      let value = $event;
+      const value = $event;
       this.value = value;
       this.onChange(value);
     }

@@ -45,7 +45,7 @@ export class SignupFormComponent {
   createAccount() {
     this.isCreating.set(true);
 
-    let value = {
+    const value = {
       ...this.data,
     };
 
@@ -67,7 +67,7 @@ export class SignupFormComponent {
           }
         ),
       )
-      .subscribe((x) => {
+      .subscribe(() => {
         this.router.navigate(['/chat/']);
       });
   }

@@ -1,4 +1,4 @@
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils import timezone
 from datetime import datetime, timedelta
 from rest_framework import status
@@ -150,6 +150,6 @@ def payment_details(request: Request, payment_id):
         )
     except Exception as e:
         return Response(
-            {"error": "Internal server error"},
+            {"error": "Internal server error", "details": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

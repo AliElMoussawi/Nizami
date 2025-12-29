@@ -5,12 +5,10 @@ import {ControlErrorsComponent} from '../../../common/components/errors/control-
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {InputComponent} from '../../../common/components/input/input.component';
 import {DatePickerComponent} from '../../../common/components/date-picker/date-picker.component';
-import {CountryPickerComponent} from '../../../common/components/country-picker/country-picker.component';
 import {UntilDestroy, untilDestroyed} from '@ngneat/until-destroy';
 import {catchError, EMPTY, finalize} from 'rxjs';
 import {ToastrService} from 'ngx-toastr';
 import {convertToFormData, extractErrorFromResponse} from '../../../common/utils';
-import {HttpErrorResponse} from '@angular/common/http';
 import {environment} from '../../../../environments/environment';
 import {ButtonComponent} from '../../../common/components/button/button.component';
 import {OutlineButtonComponent} from '../../../common/components/outline-button/outline-button.component';
@@ -87,7 +85,7 @@ export class PersonalDetailsTabComponent implements OnInit {
     this.form.disable();
     this.isSaving.set(true);
 
-    let value = this.form.value;
+    const value = this.form.value;
 
     if (typeof value.profile_image == 'string' || !value.profile_image) {
       delete value['profile_image'];

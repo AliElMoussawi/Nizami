@@ -93,7 +93,7 @@ class APIGateway(object):
            resp = request_session.delete(url, data=json_data, timeout=10, **requests_kwargs)
         try:
             assert resp.ok
-        except:
+        except Exception:
             exception_dict = dict(url=url, method=method, data=self.recursive_obfuscate(json.loads(json_data)), status_code=resp.status_code, resp_text=resp.text)
             logger.exception(exception_dict)
             raise APIGatewayException(resp.status_code, resp.text, self.SOURCE)

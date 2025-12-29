@@ -12,7 +12,6 @@ from src.subscription.models import UserSubscription
 from src.subscription.serializers import UserSubscriptionSerializer, CreateUserSubscriptionSerializer, UpdateUserSubscriptionSerializer
 from src.common.mixins import ForceDatatablesFormatMixin
 from src.common.permissions import IsAdminPermission
-from src.common.pagination import PerPagePagination
 
 
 class ListUserSubscriptionViewSet(ForceDatatablesFormatMixin, ReadOnlyModelViewSet):

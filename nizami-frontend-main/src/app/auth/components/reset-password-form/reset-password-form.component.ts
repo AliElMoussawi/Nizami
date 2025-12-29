@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {InputComponent} from '../../../common/components/input/input.component';
 import {ButtonComponent} from '../../../common/components/button/button.component';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -30,7 +30,7 @@ import {marker} from '@colsen1991/ngx-translate-extract-marker';
   templateUrl: './reset-password-form.component.html',
   styleUrl: './reset-password-form.component.scss'
 })
-export class ResetPasswordFormComponent implements OnInit {
+export class ResetPasswordFormComponent {
   isSubmitted = signal(false);
   isPasswordVisible = signal(false);
   token = null;
@@ -55,8 +55,6 @@ export class ResetPasswordFormComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
-  }
 
   submit() {
     if (this.form.invalid) {

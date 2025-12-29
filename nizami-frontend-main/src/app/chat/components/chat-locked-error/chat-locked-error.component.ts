@@ -1,4 +1,4 @@
-import {Component, ElementRef, input, output} from '@angular/core';
+import {Component} from '@angular/core';
 import {NgIcon} from '@ng-icons/core';
 import {OutlineButtonComponent} from '../../../common/components/outline-button/outline-button.component';
 import {Router} from '@angular/router';

@@ -17,6 +17,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - nizami-network
 
   web:
     build: .
@@ -35,6 +37,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - nizami-network
 
   admin-panel:
     build:
@@ -48,6 +52,8 @@ services:
       - "4200:80"
     depends_on:
       - web
+    networks:
+      - nizami-network
 
   frontend:
     build:
@@ -63,7 +69,12 @@ services:
       - "4201:80"
     depends_on:
       - web
+    networks:
+      - nizami-network
 
+networks:
+  nizami-network:
+    driver: bridge
 
 volumes:
   postgres_data:

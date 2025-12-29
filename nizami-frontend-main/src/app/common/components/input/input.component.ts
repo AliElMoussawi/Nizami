@@ -1,4 +1,4 @@
-import {Component, ContentChildren, forwardRef, input, output, QueryList} from '@angular/core';
+import {Component, ContentChildren, forwardRef, input, QueryList} from '@angular/core';
 import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {NgClass} from '@angular/common';
 import {ControlErrorsComponent} from '../errors/control-errors.component';
@@ -34,7 +34,7 @@ export class InputComponent implements ControlValueAccessor {
   // Triggered when the value changes
   onInputChange($event: any): void {
     if (!this.isDisabled) {
-      let value = $event;
+      const value = $event;
       this.value = value;
       this.onChange(value);
     }

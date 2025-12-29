@@ -3,11 +3,8 @@ from datetime import timedelta
 
 from django.db import transaction
 from django.db.models import Q
-from django.db.models.expressions import RawSQL
-from django.db.models.functions import Lower
 from django.http import FileResponse, Http404
 from django.utils.timezone import now
-from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
@@ -22,7 +19,6 @@ from .. import settings
 from ..common.mixins import ForceDatatablesFormatMixin
 from ..common.permissions import IsAdminPermission
 from ..settings import vectorstore
-from ..users.models import User
 
 
 class ListReferenceDocumentViewSet(ForceDatatablesFormatMixin, ReadOnlyModelViewSet):
