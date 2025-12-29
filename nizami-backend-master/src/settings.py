@@ -37,7 +37,8 @@ SECRET_KEY = env("SECRET_KEY", default="django-insecure-test-key-change-in-produ
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
-ASPOSE_LICENSE_PATH = env('ASPOSE_LICENSE_PATH')
+# Default value is only for testing - production must set ASPOSE_LICENSE_PATH environment variable
+ASPOSE_LICENSE_PATH = env('ASPOSE_LICENSE_PATH', default='')
 
 ALLOWED_HOSTS = [
     '*'

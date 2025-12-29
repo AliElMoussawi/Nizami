@@ -77,6 +77,10 @@ def load_aspose_license():
     global _is_license_set
     if _is_license_set:
         return  # Prevent multiple loads
+    
+    # Skip license loading if ASPOSE_LICENSE_PATH is not set (e.g., in test environments)
+    if not settings.ASPOSE_LICENSE_PATH:
+        return
 
     aw_license = aw.License()
     try:
