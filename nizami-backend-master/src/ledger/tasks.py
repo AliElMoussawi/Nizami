@@ -1,4 +1,3 @@
-from django_q.tasks import schedule
 from django_q.models import Schedule
 from django.core.management import call_command
 from django.db import transaction
