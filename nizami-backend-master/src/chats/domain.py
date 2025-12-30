@@ -57,7 +57,7 @@ def translate_question(text: str, from_lang: str) -> str:
     if not to_lang:
         raise ValueError(f"Unsupported source language: {from_lang}")
 
-    llm = create_llm('gpt-5-nano', reasoning_effort="minimal")
+    llm = create_llm('gpt-4o')
 
     system_prompt = f"""
         You are a professional translator working for a legal-tech platform.
