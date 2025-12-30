@@ -5,7 +5,6 @@ namespace: nizami-stage
 
 resources:
   - ../base
-  - namespace.yaml
 
 patches:
   - patch: |-
