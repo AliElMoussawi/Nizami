@@ -7,7 +7,6 @@ import logging
 
 from django.db import connection
 from django.db.models import Q
-from langchain.retrievers import MultiQueryRetriever
 from langchain_core.documents import Document
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate
