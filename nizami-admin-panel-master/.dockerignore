@@ -1,10 +1,23 @@
+# Dependencies
 node_modules
 npm-debug.log
+yarn-error.log
+
+# Build outputs
 dist
-.angular
+tmp
+out-tsc
+bazel-out
+# Testing
+coverage
+.nyc_output
+
+# Misc
 .git
 .gitignore
 README.md
-.editorconfig
-.vscode
-*.md
+.env
+.env.local
+.env.*.local
+
+.angular
