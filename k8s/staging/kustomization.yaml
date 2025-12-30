@@ -1,10 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: default
+namespace: nizami-stage
 
 resources:
   - ../base
+  - namespace.yaml
 
 patches:
   - patch: |-
@@ -14,4 +15,3 @@ patches:
     target:
       kind: Deployment
       name: backend
-
