@@ -142,5 +142,15 @@ export class PaymentComponent implements OnInit, OnDestroy {
     
     return translation;
   }
+
+  /**
+   * Get translated credit type (always plural)
+   */
+  getCreditTypeText(creditType: string | null): string {
+    if (!creditType) return '';
+    // Always use plural form
+    const key = `credit_type.messages`;
+    return this.translate.instant(key);
+  }
 }
 

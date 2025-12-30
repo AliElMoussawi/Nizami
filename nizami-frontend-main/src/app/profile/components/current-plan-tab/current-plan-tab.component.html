@@ -68,7 +68,7 @@
                 @if (!subscription.plan.is_unlimited && subscription.plan.credit_amount) {
                   <div class="flex flex-row gap-2 items-center">
                     <span class="text-blue1 font-semibold">✓</span>
-                    <span>{{ subscription.plan.credit_amount }} {{ subscription.plan.credit_type | lowercase }}</span>
+                    <span>{{ subscription.plan.credit_amount }} {{ getCreditTypeText(subscription.plan.credit_type) }}</span>
                   </div>
                 }
                 @if (subscription.plan.rollover_allowed) {
