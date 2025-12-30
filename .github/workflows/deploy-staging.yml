@@ -1,0 +1,158 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
+    inputs:
+      image_sha:
+        description: "Git SHA to deploy"
+        required: false
+        default: ""
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPO: ${{ vars.ECR_BACKEND_REPO }}
+  EKS_CLUSTER: ${{ vars.EKS_CLUSTER_STAGING }}
+  K8S_NAMESPACE: ${{ vars.K8S_NAMESPACE || 'default' }}
+  BACKEND_DEPLOYMENT: ${{ vars.BACKEND_DEPLOYMENT || 'backend' }}
+  BACKEND_CONTAINER: ${{ vars.BACKEND_CONTAINER || 'backend' }}
+  USER_WEB_BUCKET: ${{ vars.USER_WEB_BUCKET_STAGING }}
+  ADMIN_WEB_BUCKET: ${{ vars.ADMIN_WEB_BUCKET_STAGING }}
+  USER_CF_DIST_ID: ${{ vars.USER_CF_DIST_ID_STAGING }}
+  ADMIN_CF_DIST_ID: ${{ vars.ADMIN_CF_DIST_ID_STAGING }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: stage
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image tag
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.image_sha }}" ]; then
+            echo "IMAGE_TAG=${{ github.event.inputs.image_sha }}" >> "$GITHUB_ENV"
+          else
+            echo "IMAGE_TAG=${GITHUB_SHA}" >> "$GITHUB_ENV"
+          fi
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_STAGING }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        run: |
+          set -euo pipefail
+          REGISTRY="$(echo "$ECR_REPO" | cut -d/ -f1)"
+          aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$REGISTRY"
+
+      - name: Build backend image
+        run: |
+          set -euo pipefail
+          docker build -t "$ECR_REPO:$IMAGE_TAG" -f nizami-backend-master/Dockerfile nizami-backend-master
+
+      - name: Push backend image
+        run: |
+          set -euo pipefail
+          docker push "$ECR_REPO:$IMAGE_TAG"
+
+      - name: Update kubeconfig
+        run: |
+          set -euo pipefail
+          aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$AWS_REGION"
+
+      - name: Apply Kubernetes manifests
+        run: |
+          set -euo pipefail
+          kubectl apply -k k8s/staging
+
+      - name: Update backend image
+        run: |
+          set -euo pipefail
+          kubectl set image deployment/"$BACKEND_DEPLOYMENT" "$BACKEND_CONTAINER"="$ECR_REPO:$IMAGE_TAG" -n "$K8S_NAMESPACE"
+
+      - name: Run database migrations
+        run: |
+          set -euo pipefail
+          MIGRATION_JOB="django-migrate-${IMAGE_TAG:0:12}"
+          kubectl delete job "$MIGRATION_JOB" -n "$K8S_NAMESPACE" --ignore-not-found
+          cat <<EOF | kubectl apply -n "$K8S_NAMESPACE" -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: ${MIGRATION_JOB}
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: migrate
+                    image: ${ECR_REPO}:${IMAGE_TAG}
+                    imagePullPolicy: IfNotPresent
+                    envFrom:
+                      - secretRef:
+                          name: backend-secrets
+                    command: ["bash", "-c", "python manage.py migrate --noinput"]
+          EOF
+          kubectl wait --for=condition=complete job/"$MIGRATION_JOB" -n "$K8S_NAMESPACE" --timeout=300s
+
+      - name: Check backend rollout
+        run: |
+          set -euo pipefail
+          kubectl rollout status deployment/"$BACKEND_DEPLOYMENT" -n "$K8S_NAMESPACE" --timeout=300s
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            nizami-frontend-main/package-lock.json
+            nizami-admin-panel-master/package-lock.json
+
+      - name: Build user app
+        run: |
+          set -euo pipefail
+          cd nizami-frontend-main
+          npm ci
+          npm run build -- --configuration=production
+
+      - name: Deploy user app
+        run: |
+          set -euo pipefail
+          aws s3 sync nizami-frontend-main/dist/nizami-frontend/ s3://"$USER_WEB_BUCKET"/releases/"$IMAGE_TAG"/ --delete
+          aws s3 sync s3://"$USER_WEB_BUCKET"/releases/"$IMAGE_TAG"/ s3://"$USER_WEB_BUCKET"/current/ --delete
+          aws cloudfront create-invalidation --distribution-id "$USER_CF_DIST_ID" --paths "/*"
+
+      - name: Build admin app
+        run: |
+          set -euo pipefail
+          cd nizami-admin-panel-master
+          npm ci
+          npm run build -- --configuration=production
+
+      - name: Deploy admin app
+        run: |
+          set -euo pipefail
+          aws s3 sync nizami-admin-panel-master/dist/nizami_admin_panel/ s3://"$ADMIN_WEB_BUCKET"/releases/"$IMAGE_TAG"/ --delete
+          aws s3 sync s3://"$ADMIN_WEB_BUCKET"/releases/"$IMAGE_TAG"/ s3://"$ADMIN_WEB_BUCKET"/current/ --delete
+          aws cloudfront create-invalidation --distribution-id "$ADMIN_CF_DIST_ID" --paths "/*"
+
+      - name: Rollback backend on failure
+        if: failure()
+        run: |
+          set -euo pipefail
+          kubectl rollout undo deployment/"$BACKEND_DEPLOYMENT" -n "$K8S_NAMESPACE"
+
