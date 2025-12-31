@@ -8,9 +8,20 @@ resources:
 
 patches:
   - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nizami-stage
+      spec:
+        replicas: 1
     target:
       kind: Deployment
+      name: backend
+  - patch: |-
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: nizami-stage
+    target:
+      kind: Service
       name: backend

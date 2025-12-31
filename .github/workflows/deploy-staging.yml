@@ -76,6 +76,8 @@ jobs:
       - name: Apply Kubernetes manifests
         run: |
           set -euo pipefail
+          # Clean up old deployment if it exists with different name
+          kubectl delete deployment backend -n "$K8S_NAMESPACE" --ignore-not-found
           kubectl apply -k k8s/staging
 
       - name: Update backend image
