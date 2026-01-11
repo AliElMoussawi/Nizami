@@ -125,11 +125,15 @@ jobs:
             echo "✓ ExternalSecret CRD found"
           else
             echo "ERROR: ExternalSecret CRD not found"
-            echo "The External Secrets Operator deployment exists, but CRDs are not installed."
-            echo "Ask a cluster admin to install CRDs using:"
-            echo "  kubectl apply -f https://raw.githubusercontent.com/external-secrets/external-secrets/main/deploy/charts/external-secrets/crds/bundle.yaml"
-            echo "Or reinstall ESO with CRDs:"
-            echo "  helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets-system --create-namespace"
+            echo "The External Secrets Operator deployment exists in namespace '$OPERATOR_NS', but CRDs are not installed."
+            echo ""
+            echo "Ask a cluster admin to install CRDs using Helm (recommended):"
+            echo "  helm repo add external-secrets https://charts.external-secrets.io"
+            echo "  helm repo update"
+            echo "  helm upgrade --install external-secrets external-secrets/external-secrets -n $OPERATOR_NS --set installCRDs=true"
+            echo ""
+            echo "Or install CRDs manually:"
+            echo "  kubectl apply -f https://github.com/external-secrets/external-secrets/releases/latest/download/external-secrets-crds.yaml"
             exit 1
           fi
   
@@ -137,9 +141,15 @@ jobs:
             echo "✓ SecretStore CRD found"
           else
             echo "ERROR: SecretStore CRD not found"
-            echo "The External Secrets Operator deployment exists, but CRDs are not installed."
-            echo "Ask a cluster admin to install CRDs using:"
-            echo "  kubectl apply -f https://raw.githubusercontent.com/external-secrets/external-secrets/main/deploy/charts/external-secrets/crds/bundle.yaml"
+            echo "The External Secrets Operator deployment exists in namespace '$OPERATOR_NS', but CRDs are not installed."
+            echo ""
+            echo "Ask a cluster admin to install CRDs using Helm (recommended):"
+            echo "  helm repo add external-secrets https://charts.external-secrets.io"
+            echo "  helm repo update"
+            echo "  helm upgrade --install external-secrets external-secrets/external-secrets -n $OPERATOR_NS --set installCRDs=true"
+            echo ""
+            echo "Or install CRDs manually:"
+            echo "  kubectl apply -f https://github.com/external-secrets/external-secrets/releases/latest/download/external-secrets-crds.yaml"
             exit 1
           fi
   
