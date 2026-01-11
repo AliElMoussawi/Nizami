@@ -73,11 +73,6 @@ jobs:
           set -euo pipefail
           aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$AWS_REGION"
 
-      - name: Install Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: 'latest'
-
       - name: Verify External Secrets Operator
         run: |
           set -euo pipefail
