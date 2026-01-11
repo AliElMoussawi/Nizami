@@ -82,33 +82,66 @@ jobs:
         run: |
           set -euo pipefail
           echo "Verifying External Secrets Operator is installed..."
-    
+     
+          OPERATOR_FOUND=false
+          OPERATOR_NS=""
+          
           # check common namespaces
           for ns in external-secrets external-secrets-system kube-system; do
             if kubectl get deploy -n "$ns" external-secrets >/dev/null 2>&1; then
               echo "External Secrets Operator deployment found in namespace: $ns"
               kubectl -n "$ns" wait --for=condition=available deploy/external-secrets --timeout=60s || true
-              echo "ESO_NAMESPACE=$ns" >> "$GITHUB_ENV"
-              exit 0
+              OPERATOR_FOUND=true
+              OPERATOR_NS="$ns"
+              break
             fi
           done
-    
+     
           # If deployment name differs, search by label as fallback
-          for ns in external-secrets external-secrets-system kube-system; do
-            if kubectl get deploy -n "$ns" -l app.kubernetes.io/name=external-secrets >/dev/null 2>&1; then
-              echo "External Secrets Operator found by label in namespace: $ns"
-              kubectl -n "$ns" get deploy -l app.kubernetes.io/name=external-secrets
-              exit 0
-            fi
-          done
-    
-          echo "ERROR: External Secrets Operator not found (checked namespaces: external-secrets, external-secrets-system, kube-system)"
-          echo "Ask a cluster admin to install ESO (one-time):"
-          echo "  helm repo add external-secrets https://charts.external-secrets.io"
-          echo "  helm repo update"
-          echo "  kubectl create namespace external-secrets --dry-run=client -o yaml | kubectl apply -f -"
-          echo "  helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets --set installCRDs=false"
-          exit 1
+          if [ "$OPERATOR_FOUND" = "false" ]; then
+            for ns in external-secrets external-secrets-system kube-system; do
+              if kubectl get deploy -n "$ns" -l app.kubernetes.io/name=external-secrets >/dev/null 2>&1; then
+                echo "External Secrets Operator found by label in namespace: $ns"
+                OPERATOR_FOUND=true
+                OPERATOR_NS="$ns"
+                break
+              fi
+            done
+          fi
+     
+          if [ "$OPERATOR_FOUND" = "false" ]; then
+            echo "ERROR: External Secrets Operator deployment not found (checked namespaces: external-secrets, external-secrets-system, kube-system)"
+            echo "Ask a cluster admin to install ESO (one-time):"
+            echo "  helm repo add external-secrets https://charts.external-secrets.io"
+            echo "  helm repo update"
+            echo "  kubectl create namespace external-secrets-system --dry-run=client -o yaml | kubectl apply -f -"
+            echo "  helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets-system --create-namespace"
+            exit 1
+          fi
+     
+          # Verify CRDs are installed (required for ExternalSecret and SecretStore resources)
+          echo "Verifying External Secrets Operator CRDs are installed..."
+          if kubectl api-resources | grep -q "externalsecrets.external-secrets.io"; then
+            echo "✓ ExternalSecret CRD found"
+          else
+            echo "ERROR: ExternalSecret CRD not found"
+            echo "The External Secrets Operator deployment exists, but CRDs are not installed."
+            echo "Ask a cluster admin to install CRDs using:"
+            echo "  kubectl apply -f https://raw.githubusercontent.com/external-secrets/external-secrets/main/deploy/charts/external-secrets/crds/bundle.yaml"
+            echo "Or reinstall ESO with CRDs:"
+            echo "  helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets-system --create-namespace"
+            exit 1
+          fi
+     
+          if kubectl api-resources | grep -q "secretstores.external-secrets.io"; then
+            echo "✓ SecretStore CRD found"
+          else
+            echo "ERROR: SecretStore CRD not found"
+            echo "The External Secrets Operator deployment exists, but CRDs are not installed."
+            echo "Ask a cluster admin to install CRDs using:"
+            echo "  kubectl apply -f https://raw.githubusercontent.com/external-secrets/external-secrets/main/deploy/charts/external-secrets/crds/bundle.yaml"
+            exit 1
+          fi
 
       - name: Apply Kubernetes manifests
         run: |
