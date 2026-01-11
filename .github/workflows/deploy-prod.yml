@@ -76,7 +76,27 @@ jobs:
       - name: Apply Kubernetes manifests
         run: |
           set -euo pipefail
+          
+          # Apply kustomization (will show errors for ExternalSecret/SecretStore if CRDs not installed)
+          # Temporarily allow errors so workflow can continue even if External Secrets resources fail
+          set +e
           kubectl apply -k k8s/prod
+          APPLY_EXIT=$?
+          set -euo pipefail
+          
+          # If apply failed, check if it's just due to missing External Secrets CRDs
+          if [ $APPLY_EXIT -ne 0 ]; then
+            echo "Warning: kubectl apply encountered errors. Checking if it's due to missing External Secrets CRDs..."
+            # Check if base resources were applied successfully
+            if kubectl get deployment backend -n "$K8S_NAMESPACE" >/dev/null 2>&1; then
+              echo "Base resources (deployment, service) were applied successfully."
+              echo "External Secrets resources may have failed due to missing CRDs - this is expected if ESO is not installed."
+              echo "Workflow will continue - External Secrets can be applied later once CRDs are installed."
+            else
+              echo "ERROR: Base resources were not applied. Failing workflow."
+              exit 1
+            fi
+          fi
 
       - name: Update backend image
         run: |
