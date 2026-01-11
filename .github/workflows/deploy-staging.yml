@@ -82,34 +82,26 @@ jobs:
         run: |
           set -euo pipefail
           # Add Helm repository
-          helm repo add external-secrets https://charts.external-secrets.io
+          helm repo add external-secrets https://charts.external-secrets.io || true
           helm repo update
           
-          # Check if External Secrets Operator is already installed
-          if helm list -n external-secrets-system | grep -q external-secrets; then
-            echo "External Secrets Operator already installed, upgrading..."
-            helm upgrade external-secrets \
-              external-secrets/external-secrets \
-              -n external-secrets-system \
-              --create-namespace \
-              --wait
-          else
-            echo "Installing External Secrets Operator..."
-            helm install external-secrets \
-              external-secrets/external-secrets \
-              -n external-secrets-system \
-              --create-namespace \
-              --wait
-          fi
+          # Install/upgrade External Secrets Operator
+          # Using --skip-crds since CRDs are cluster-scoped and likely already installed by cluster admin
+          # This avoids RBAC permission issues with CRD management
+          echo "Installing/Upgrading External Secrets Operator (skipping CRD installation)..."
+          helm upgrade --install external-secrets \
+            external-secrets/external-secrets \
+            -n external-secrets-system \
+            --create-namespace \
+            --skip-crds \
+            --wait
           
-          # Wait for CRDs to be available (they should be created by helm install/upgrade)
-          echo "Verifying External Secrets Operator CRDs are available..."
-          sleep 5  # Give CRDs a moment to register
-          kubectl get crd externalsecrets.external-secrets.io >/dev/null 2>&1 || {
-            echo "Error: External Secrets CRD not found. Retrying..."
-            sleep 10
-            kubectl get crd externalsecrets.external-secrets.io
-          }
+          # Verify operator is running
+          echo "Verifying External Secrets Operator is running..."
+          kubectl wait --for=condition=available \
+            --timeout=120s \
+            deployment/external-secrets \
+            -n external-secrets-system
 
       - name: Apply Kubernetes manifests
         run: |
