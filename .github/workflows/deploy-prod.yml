@@ -81,23 +81,34 @@ jobs:
       - name: Verify External Secrets Operator
         run: |
           set -euo pipefail
-          # External Secrets Operator must be pre-installed by cluster admin
-          # (CRDs require cluster-admin permissions that GitHub Actions role doesn't have)
           echo "Verifying External Secrets Operator is installed..."
-          if kubectl get deployment external-secrets -n external-secrets-system >/dev/null 2>&1; then
-            echo "External Secrets Operator deployment found."
-            # Verify it's running (if we have permissions)
-            kubectl wait --for=condition=available \
-              --timeout=30s \
-              deployment/external-secrets \
-              -n external-secrets-system 2>/dev/null || echo "Warning: Could not verify operator readiness, but deployment exists."
-          else
-            echo "ERROR: External Secrets Operator not found in namespace external-secrets-system"
-            echo "Please install External Secrets Operator using:"
-            echo "  helm repo add external-secrets https://charts.external-secrets.io"
-            echo "  helm install external-secrets external-secrets/external-secrets -n external-secrets-system --create-namespace"
-            exit 1
-          fi
+    
+          # check common namespaces
+          for ns in external-secrets external-secrets-system kube-system; do
+            if kubectl get deploy -n "$ns" external-secrets >/dev/null 2>&1; then
+              echo "External Secrets Operator deployment found in namespace: $ns"
+              kubectl -n "$ns" wait --for=condition=available deploy/external-secrets --timeout=60s || true
+              echo "ESO_NAMESPACE=$ns" >> "$GITHUB_ENV"
+              exit 0
+            fi
+          done
+    
+          # If deployment name differs, search by label as fallback
+          for ns in external-secrets external-secrets-system kube-system; do
+            if kubectl get deploy -n "$ns" -l app.kubernetes.io/name=external-secrets >/dev/null 2>&1; then
+              echo "External Secrets Operator found by label in namespace: $ns"
+              kubectl -n "$ns" get deploy -l app.kubernetes.io/name=external-secrets
+              exit 0
+            fi
+          done
+    
+          echo "ERROR: External Secrets Operator not found (checked namespaces: external-secrets, external-secrets-system, kube-system)"
+          echo "Ask a cluster admin to install ESO (one-time):"
+          echo "  helm repo add external-secrets https://charts.external-secrets.io"
+          echo "  helm repo update"
+          echo "  kubectl create namespace external-secrets --dry-run=client -o yaml | kubectl apply -f -"
+          echo "  helm upgrade --install external-secrets external-secrets/external-secrets -n external-secrets --set installCRDs=false"
+          exit 1
 
       - name: Apply Kubernetes manifests
         run: |
