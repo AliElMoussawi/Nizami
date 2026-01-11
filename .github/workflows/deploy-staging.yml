@@ -106,7 +106,9 @@ jobs:
                     imagePullPolicy: IfNotPresent
                     envFrom:
                       - secretRef:
-                          name: backend-secrets
+                          name: backend-secrets-db
+                      - secretRef:
+                          name: backend-secrets-functional
                     command: ["bash", "-c", "python manage.py migrate --noinput"]
           EOF
           kubectl wait --for=condition=complete job/"$MIGRATION_JOB" -n "$K8S_NAMESPACE" --timeout=300s

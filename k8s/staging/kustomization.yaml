@@ -5,6 +5,8 @@ namespace: nizami-stage
 
 resources:
   - ../base
+  - externalsecret-db.yaml
+  - externalsecret-functional.yaml
 
 patches:
   - patch: |-

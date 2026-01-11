@@ -23,7 +23,9 @@ spec:
           name: http
         envFrom:
         - secretRef:
-            name: backend-secrets
+            name: backend-secrets-db
+        - secretRef:
+            name: backend-secrets-functional
         resources:
           requests:
             memory: "512Mi"
