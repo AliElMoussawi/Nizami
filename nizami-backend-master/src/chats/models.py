@@ -15,6 +15,8 @@ class Chat(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    summary = models.TextField(null=True, blank=True, help_text="Conversation summary maintained throughout the chat")
+    summary_last_message_id = models.BigIntegerField(null=True, blank=True, help_text="ID of the last message included in the summary")
 
 
 class Message(models.Model):

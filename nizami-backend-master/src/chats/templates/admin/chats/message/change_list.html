@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools %}
+  {{ block.super }}
+  <ul class="object-tools">
+    <li>
+      <a href="{% url 'admin:chats_chat_chatlog' %}" class="addlink" style="background-color: #417690;">
+        📋 View All Chat Messages (Chat Log)
+      </a>
+    </li>
+  </ul>
+{% endblock %}
+

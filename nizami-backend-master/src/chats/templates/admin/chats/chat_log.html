@@ -1,0 +1,256 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Chat Log - All Messages{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .chat-log-container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .filters {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .filters form {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+    .filters .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .filters label {
+        font-weight: bold;
+        font-size: 12px;
+        color: #666;
+    }
+    .filters input, .filters select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+    }
+    .filters button {
+        padding: 8px 20px;
+        background: #417690;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .filters button:hover {
+        background: #205067;
+    }
+    .message-item {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+    .message-user {
+        background-color: #e3f2fd;
+        border-color: #2196f3;
+    }
+    .message-ai {
+        background-color: #f1f8e9;
+        border-color: #4caf50;
+    }
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .message-role {
+        font-weight: bold;
+        font-size: 14px;
+    }
+    .message-time {
+        color: #666;
+        font-size: 12px;
+    }
+    .message-chat-info {
+        color: #666;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+    .message-text {
+        margin: 10px 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .message-meta {
+        font-size: 11px;
+        color: #999;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    .pagination {
+        margin-top: 30px;
+        text-align: center;
+    }
+    .pagination a, .pagination span {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #ddd;
+        text-decoration: none;
+        color: #417690;
+    }
+    .pagination .current {
+        background: #417690;
+        color: white;
+        border-color: #417690;
+    }
+    .stats {
+        background: #fff;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    .stat-item {
+        text-align: center;
+    }
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #417690;
+    }
+    .stat-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-log-container">
+    <h1>Chat Log - All Messages</h1>
+    <p>View all user and AI messages across all chats</p>
+    
+    <div class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">{{ page_obj.paginator.count }}</div>
+                <div class="stat-label">Total Messages</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ page_obj.paginator.count|default:0 }}</div>
+                <div class="stat-label">Showing</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="filters">
+        <form method="get" action="{% url 'admin:chats_chat_chatlog' %}">
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select name="role" id="role">
+                    <option value="">All Roles</option>
+                    <option value="user" {% if role_filter == 'user' %}selected{% endif %}>User</option>
+                    <option value="ai" {% if role_filter == 'ai' %}selected{% endif %}>AI</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="chat">Chat ID</label>
+                <input type="number" name="chat" id="chat" value="{{ chat_filter }}" placeholder="Chat ID">
+            </div>
+            <div class="form-group">
+                <label for="search">Search Text</label>
+                <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="Search in messages">
+            </div>
+            <div class="form-group">
+                <button type="submit">Filter</button>
+            </div>
+            {% if role_filter or chat_filter or search_query %}
+            <div class="form-group">
+                <a href="{% url 'admin:chats_chat_chatlog' %}" style="padding: 8px 20px; background: #ba2121; color: white; text-decoration: none; border-radius: 3px; display: inline-block;">Clear Filters</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+    
+    <div class="messages-list">
+        {% for message in messages %}
+        <div class="message-item message-{{ message.role }}">
+            <div class="message-header">
+                <div>
+                    <span class="message-role">
+                        {% if message.role == 'user' %}
+                            👤 User
+                        {% elif message.role == 'ai' %}
+                            🤖 AI
+                        {% else %}
+                            💬 {{ message.role|title }}
+                        {% endif %}
+                    </span>
+                    <div class="message-chat-info">
+                        Chat: <a href="{% url 'admin:chats_chat_change' message.chat.id %}">{{ message.chat.title|default:message.chat.id }}</a> 
+                        | User: {{ message.chat.user.email|default:message.chat.user.username }}
+                    </div>
+                </div>
+                <div class="message-time">{{ message.created_at|date:"Y-m-d H:i:s" }}</div>
+            </div>
+            <div class="message-text">
+                {{ message.text|default:"<em>No text</em>"|safe }}
+            </div>
+            <div class="message-meta">
+                {% if message.language %}
+                    <strong>Language:</strong> {{ message.language }} | 
+                {% endif %}
+                {% if message.used_query %}
+                    <strong>Used Query:</strong> {{ message.used_query|truncatewords:20 }} | 
+                {% endif %}
+                {% if message.messageFiles.exists %}
+                    <strong>Files:</strong> 
+                    {% for file in message.messageFiles.all %}
+                        {{ file.file_name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    | 
+                {% endif %}
+                <strong>ID:</strong> <a href="{% url 'admin:chats_message_change' message.id %}">{{ message.id }}</a> | 
+                <strong>UUID:</strong> {{ message.uuid }}
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <p>No messages found.</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% if role_filter %}&role={{ role_filter }}{% endif %}{% if chat_filter %}&chat={{ chat_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">« First</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if chat_filter %}&chat={{ chat_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">‹ Previous</a>
+        {% endif %}
+        
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if chat_filter %}&chat={{ chat_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Next ›</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if chat_filter %}&chat={{ chat_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Last »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
