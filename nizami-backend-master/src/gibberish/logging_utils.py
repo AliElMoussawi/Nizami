@@ -3,7 +3,6 @@
 import logging
 from typing import Any, Dict
 
-from src.gibberish.enums import InputVerdict
 from src.gibberish.models import GibberishResult
 from src.gibberish.text_stats import TextStats
 

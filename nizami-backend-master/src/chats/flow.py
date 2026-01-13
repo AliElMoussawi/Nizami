@@ -26,7 +26,7 @@ from src.chats.domain import (
     create_initial_summary,
     update_conversation_summary,
 )
-from src.chats.models import Chat, Message, MessageLog, MessageStepLog
+from src.chats.models import Message, MessageLog, MessageStepLog
 from src.chats.utils import create_legal_advice_llm, detect_language, create_llm
 from src.prompts.enums import PromptType
 from src.prompts.utils import get_prompt_value_by_name
@@ -309,7 +309,6 @@ def calculate_disclaimer(state: State):
     t1 = time.time()
 
     response = state['response']
-    answer = response['answer']
     used_languages = state['used_languages']
     user_message = state['message']
     question_language = user_message.language

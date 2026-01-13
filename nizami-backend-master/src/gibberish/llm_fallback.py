@@ -1,6 +1,5 @@
 """Optional LLM fallback for borderline gibberish cases."""
 
-import json
 import logging
 from typing import Any, Dict, Optional
 

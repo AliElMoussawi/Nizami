@@ -1,7 +1,5 @@
 """Comprehensive tests for gibberish classifier."""
 
-import pytest
-
 from src.gibberish.classifier import classify_input
 from src.gibberish.enums import InputVerdict
 from src.gibberish.models import GibberishConfig
@@ -276,14 +274,14 @@ class TestConfigOptions:
             real_threshold=0.70,
             suspicious_threshold=0.40,
         )
-        result = classify_input("Article 74")
+        result = classify_input("Article 74", config=config)
         # Should still be REAL due to legal keyword override
         assert result.status == InputVerdict.REAL
     
     def test_llm_disabled(self):
         """Test with LLM disabled."""
         config = GibberishConfig(llm_enabled=False)
-        result = classify_input("some borderline text")
+        result = classify_input("some borderline text", config=config)
         # Should not use LLM
         assert 'llm_override' not in result.meta or result.meta.get('llm_override') is False
 

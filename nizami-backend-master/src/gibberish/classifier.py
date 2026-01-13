@@ -1,7 +1,5 @@
 """Main classifier for gibberish detection."""
 
-from typing import Dict, Any
-
 from src.gibberish.enums import InputVerdict
 from src.gibberish.llm_fallback import apply_llm_override, classify_with_llm
 from src.gibberish.logging_utils import log_classification_result
