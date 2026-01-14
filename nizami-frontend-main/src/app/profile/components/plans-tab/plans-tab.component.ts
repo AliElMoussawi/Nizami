@@ -1,7 +1,7 @@
 import { Component, OnInit, Optional, output } from '@angular/core';
 import { CommonModule, LowerCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DialogRef } from '@angular/cdk/dialog';
 import { PaymentService } from '../../../payment/services/payment.service';
 import { Plan } from '../../../payment/models/plan.model';
@@ -34,6 +34,7 @@ export class PlansTabComponent implements OnInit {
   constructor(
     private paymentService: PaymentService,
     private router: Router,
+    private translateService: TranslateService,
     @Optional() private dialogRef: DialogRef<any>
   ) {}
 
@@ -74,7 +75,23 @@ export class PlansTabComponent implements OnInit {
 
   getIntervalText(intervalUnit: string | null, intervalCount: number | null): string {
     if (!intervalUnit || !intervalCount) return '';
-    const plural = intervalCount > 1 ? `${intervalUnit.toLowerCase()}s` : intervalUnit.toLowerCase();
-    return `/ ${intervalCount > 1 ? intervalCount + ' ' : ''}${plural}`;
+    
+    const unitKey = intervalCount > 1 
+      ? `billing_interval.${intervalUnit.toLowerCase()}s`
+      : `billing_interval.${intervalUnit.toLowerCase()}`;
+    
+    const translatedUnit = this.translateService.instant(unitKey);
+    const prefix = this.translateService.instant('interval_prefix') || '/';
+    
+    return intervalCount > 1 
+      ? `${prefix} ${intervalCount} ${translatedUnit}`
+      : `${prefix} ${translatedUnit}`;
+  }
+
+  getCreditTypeText(creditType: string | null): string {
+    if (!creditType) return '';
+    // Always use plural form for credit type
+    const key = `credit_type.messages`;
+    return this.translateService.instant(key);
   }
 }
