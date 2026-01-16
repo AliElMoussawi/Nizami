@@ -228,5 +228,8 @@
 	"billing_interval.daily": "يومي",
 	"interval_prefix": "/",
 	"credit_type.message": "رسائل",
-	"credit_type.messages": "رسائل"
+	"credit_type.messages": "رسائل",
+	"request_legal_assistance": "طلب مساعدة قانونية",
+	"success.legal_assistance_requested": "تم إرسال طلب المساعدة القانونية بنجاح",
+	"errors.validation_error": "خطأ في التحقق من البيانات"
 }

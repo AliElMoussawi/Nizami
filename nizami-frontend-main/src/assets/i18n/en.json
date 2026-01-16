@@ -228,5 +228,8 @@
   "billing_interval.daily": "daily",
   "interval_prefix": "/",
   "credit_type.message": "messages",
-  "credit_type.messages": "messages"
+  "credit_type.messages": "messages",
+  "request_legal_assistance": "Request Legal Assistance",
+  "success.legal_assistance_requested": "Legal assistance request submitted successfully",
+  "errors.validation_error": "Validation error"
 }

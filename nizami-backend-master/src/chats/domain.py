@@ -33,15 +33,15 @@ Your task is to analyze the full transcript of a conversation between a User and
 
 Carefully extract and organize the following elements:
 
-🧑‍⚖️ Main Legal Topics & Subtopics
+Main Legal Topics & Subtopics
 
 Identify the primary legal domains (e.g., contracts, family law, IP) and any sub-issues raised.
 
-📌 Key Facts & Context
+ Key Facts & Context
 
 Extract all relevant user-provided facts: names, dates, jurisdictions, legal terms, case types, timelines, or other case details.
 
-💬 Conversation Flow
+ Conversation Flow
 
 Outline the progression of the conversation in a clear step-by-step format:
 
@@ -51,11 +51,11 @@ Assistant responses or clarifications
 
 Any follow-up interactions or new concerns
 
-📚 Legal Advice or Clarifications Given
+ Legal Advice or Clarifications Given
 
 Summarize the most important legal explanations, definitions, or guidance provided by the assistant.
 
-❓ Unresolved Questions or Next Steps
+ Unresolved Questions or Next Steps
 
 Note anything the assistant could not answer, or any recommendations for follow-up, further action, or legal consultation.
 
@@ -63,7 +63,7 @@ Note anything the assistant could not answer, or any recommendations for follow-
 
 Summarize the user's underlying goal (e.g., "understand custody rights") and how the assistant directed or reframed the issue.
 
-✴️ Exclude small talk, confirmations, or repetition. Only summarize content that has legal or contextual significance.
+ Exclude small talk, confirmations, or repetition. Only summarize content that has legal or contextual significance.
 
 Transcript to summarize:
 {conversation_text}

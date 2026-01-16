@@ -101,6 +101,7 @@ INSTALLED_APPS = [
     'src.subscription',
     'src.ledger',
     'src.gibberish',
+    'src.user_requests',
 ]
 
 MIDDLEWARE = [

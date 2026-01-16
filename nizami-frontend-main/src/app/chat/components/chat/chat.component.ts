@@ -19,6 +19,8 @@ import {marker} from '@colsen1991/ngx-translate-extract-marker';
 import {TranslateService} from '@ngx-translate/core';
 import {detectLanguage, extractErrorFromResponse} from '../../../common/utils';
 import {CreditErrorPopupComponent} from '../../../common/components/credit-error-popup/credit-error-popup.component';
+import {ToastrService} from 'ngx-toastr';
+import {HttpErrorResponse} from '@angular/common/http';
 
 
 @UntilDestroy()
@@ -74,6 +76,7 @@ export class ChatComponent {
     public sidebarService: ChatSideBarService,
     public historyChats: HistoryChatsService,
     private translate: TranslateService,
+    private toastr: ToastrService,
   ) {
     const id = this.route.snapshot.params['id'] ?? null;
     if (id) {
@@ -203,6 +206,76 @@ export class ChatComponent {
     this.error.set(null);
 
     this.refreshStop();
+  }
+
+  requestLegalAssistance() {
+    const currentChat = this.chat();
+    if (!currentChat || !currentChat.id) {
+      return;
+    }
+
+    this.messagesService
+      .createLegalAssistanceRequest(currentChat.id)
+      .pipe(
+        untilDestroyed(this),
+        catchError((err: HttpErrorResponse) => {
+          // Check if it's a validation error (400 status)
+          if (err.status === 400) {
+            // Extract validation error message
+            let errorMessage = '';
+            
+            if (err.error && typeof err.error === 'object') {
+              // Handle DRF validation errors - could be field-specific or general
+              const errorObj = err.error;
+              
+              // Check for field-specific errors (e.g., { chat_id: ['error message'] })
+              const fieldErrors = Object.values(errorObj).flat();
+              if (fieldErrors.length > 0 && typeof fieldErrors[0] === 'string') {
+                errorMessage = fieldErrors[0] as string;
+              } else if (errorObj.detail) {
+                errorMessage = errorObj.detail;
+              } else if (errorObj.error) {
+                errorMessage = errorObj.error;
+              } else {
+                // Fallback to first value if it's a string
+                const firstValue = Object.values(errorObj)[0];
+                if (typeof firstValue === 'string') {
+                  errorMessage = firstValue;
+                } else if (Array.isArray(firstValue) && firstValue.length > 0) {
+                  errorMessage = firstValue[0];
+                }
+              }
+            } else if (typeof err.error === 'string') {
+              errorMessage = err.error;
+            }
+            
+            // Show yellow/warning toast for validation errors
+            this.toastr.warning(
+              errorMessage || this.translate.instant(marker('errors.validation_error')),
+              '',
+              { timeOut: 5000 }
+            );
+          } else {
+            // Show red/error toast for other errors
+            const extracted = extractErrorFromResponse(err);
+            const errorMsg = typeof extracted === 'string' && extracted.startsWith('errors.')
+              ? this.translate.instant(marker(extracted))
+              : (extracted || this.translate.instant(marker('errors.something_went_wrong')));
+            
+            this.toastr.error(errorMsg, '', { timeOut: 5000 });
+          }
+          
+          return EMPTY;
+        }),
+      )
+      .subscribe((response) => {
+        // Show green/success toast
+        this.toastr.success(
+          this.translate.instant(marker('success.legal_assistance_requested')),
+          '',
+          { timeOut: 5000 }
+        );
+      });
   }
 
   loadMessages(scrollToBottom = true) {

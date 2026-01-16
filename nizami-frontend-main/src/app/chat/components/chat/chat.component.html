@@ -26,6 +26,9 @@
     <div class="flex flex-col flex-1">
       <app-chat-header
         (onNewChatClicked)="newChatClicked()"
+        (onLegalAssistanceClicked)="requestLegalAssistance()"
+        [messagesCount]="messages().length"
+        [showLegalAssistanceButton]="messages().length >= 3 && chat() !== null"
       ></app-chat-header>
 
       <app-chat-messages

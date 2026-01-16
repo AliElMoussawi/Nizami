@@ -37,7 +37,9 @@ urlpatterns = [
     path('api/v1/admin/payments/', include('src.payment.admin_urls')),
     #Subscription
     path('api/v1/subscriptions/', include('src.subscription.urls')),
-    path('api/v1/admin/subscriptions/', include('src.subscription.admin_urls'))
+    path('api/v1/admin/subscriptions/', include('src.subscription.admin_urls')),
+    #User Requests
+    path('api/v1/user-requests/', include('src.user_requests.urls')),
     
 ]
 

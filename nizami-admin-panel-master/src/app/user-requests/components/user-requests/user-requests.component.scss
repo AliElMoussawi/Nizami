@@ -1,0 +1,66 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  &.status-new {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  &.status-in_progress {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  &.status-closed {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+}
+
+.chat-summary-cell {
+  max-width: 300px;
+  cursor: pointer;
+  word-wrap: break-word;
+  
+  &:hover {
+    text-decoration: underline;
+    color: #3b82f6;
+  }
+}
+
+// Improve table styling
+::ng-deep {
+  .table {
+    thead {
+      background-color: #f9fafb;
+      
+      th {
+        font-weight: 600;
+        color: #374151;
+        padding: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+      }
+    }
+    
+    tbody {
+      tr {
+        transition: background-color 0.2s;
+        
+        &:hover {
+          background-color: #f9fafb;
+        }
+        
+        td {
+          padding: 1rem;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+}
