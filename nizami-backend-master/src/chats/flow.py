@@ -359,34 +359,47 @@ def _update_chat_summary_sync(chat_id: int, message_ids: list):
         message_ids: List of message IDs to add to summary
     """
     from src.chats.models import Chat
+    from django.db import transaction
+    
+    logger = logging.getLogger(__name__)
     
     try:
         if not message_ids:
+            logger.warning(f"Empty message_ids list for chat {chat_id}")
             return
         
         # Get messages
         new_messages = list(Message.objects.filter(id__in=message_ids).order_by('created_at'))
         if not new_messages:
+            logger.warning(f"No messages found for IDs {message_ids} in chat {chat_id}")
             return
         
-        chat = Chat.objects.get(id=chat_id)
-        existing_summary = chat.summary or ""
-        
-        # Update summary with new messages
-        updated_summary = update_conversation_summary(existing_summary, new_messages)
-        chat.summary = updated_summary
-        # Track the last message ID included in summary (the most recent one)
-        chat.summary_last_message_id = max(message_ids)
-        chat.save(update_fields=['summary', 'summary_last_message_id'])
-        
-        logger = logging.getLogger(__name__)
-        logger.info(f"Summary updated for chat {chat_id} with {len(new_messages)} messages (last message ID: {chat.summary_last_message_id})")
+        # Use atomic transaction to ensure the save is committed
+        with transaction.atomic():
+            chat = Chat.objects.get(id=chat_id)
+            existing_summary = chat.summary or ""
+            
+            # Update summary with new messages
+            updated_summary = update_conversation_summary(existing_summary, new_messages)
+            
+            if not updated_summary or not updated_summary.strip():
+                logger.warning(f"Empty summary generated for chat {chat_id}, keeping existing summary")
+                return
+            
+            chat.summary = updated_summary
+            # Track the last message ID included in summary (the most recent one)
+            chat.summary_last_message_id = max(message_ids)
+            
+            # Save with explicit commit
+            chat.save(update_fields=['summary', 'summary_last_message_id'])
+            
+            logger.info(f"Summary updated for chat {chat_id} with {len(new_messages)} messages (last message ID: {chat.summary_last_message_id}, summary length: {len(chat.summary)})")
     except Exception as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Error updating summary for chat {chat_id}: {str(e)}", exc_info=True)
+        raise  # Re-raise to allow retry mechanisms to work
 
 
-def update_chat_summary(chat_id: int, new_messages: list):
+def update_chat_summary(chat_id: int, new_messages: list, sync_fallback: bool = False):
     """
     Update the chat summary with new messages asynchronously in the background.
     This function returns immediately without blocking the response.
@@ -394,6 +407,7 @@ def update_chat_summary(chat_id: int, new_messages: list):
     Args:
         chat_id: The chat ID
         new_messages: List of new Message objects to add to summary
+        sync_fallback: If True, execute synchronously as fallback (for testing/debugging)
     """
     if not new_messages:
         return
@@ -401,12 +415,34 @@ def update_chat_summary(chat_id: int, new_messages: list):
     # Extract message IDs for async processing
     message_ids = [msg.id for msg in new_messages]
     
+    logger = logging.getLogger(__name__)
+    
+    # If sync_fallback is True, execute synchronously (useful for testing or if async fails)
+    if sync_fallback:
+        logger.info(f"Executing summary update synchronously for chat {chat_id}")
+        try:
+            _update_chat_summary_sync(chat_id, message_ids)
+        except Exception as e:
+            logger.error(f"Synchronous summary update failed for chat {chat_id}: {str(e)}", exc_info=True)
+        return
+    
     # Try to use django_q if available, otherwise use threading
     try:
         from django_q.tasks import async_task
         async_task(_update_chat_summary_sync, chat_id, message_ids)
+        logger.debug(f"Summary update task queued for chat {chat_id} with message IDs {message_ids}")
     except ImportError:
         # Fallback to threading if django_q is not available
+        logger.info(f"django_q not available, using threading fallback for chat {chat_id}")
+        thread = threading.Thread(
+            target=_update_chat_summary_sync,
+            args=(chat_id, message_ids),
+            daemon=True
+        )
+        thread.start()
+    except Exception as e:
+        # If async_task fails for any reason, fall back to threading
+        logger.warning(f"django_q async_task failed for chat {chat_id}: {str(e)}, using threading fallback")
         thread = threading.Thread(
             target=_update_chat_summary_sync,
             args=(chat_id, message_ids),
