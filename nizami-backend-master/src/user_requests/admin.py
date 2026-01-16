@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.urls import reverse
 
 from src.user_requests.models import LegalAssistanceRequest
 
@@ -18,13 +19,15 @@ class LegalAssistanceRequestAdmin(admin.ModelAdmin):
     ]
     list_filter = ['status', 'created_at_ts']
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'chat__title']
-    readonly_fields = ['created_at_ts', 'in_progress_ts', 'closed_at_ts', 'chat_summary_display']
+    readonly_fields = ['created_at_ts', 'in_progress_ts', 'closed_at_ts', 'chat_summary_display', 'user_link', 'chat_link']
+    raw_id_fields = ['user', 'chat']
     ordering = ['-created_at_ts']
     date_hierarchy = 'created_at_ts'
     
     fieldsets = (
         ('Request Information', {
-            'fields': ('user', 'chat', 'status')
+            'fields': ('user_link', 'user', 'chat_link', 'chat', 'status'),
+            'description': 'Click on the links above to view the user or chat details. Use the fields below to edit if needed.'
         }),
         ('Timestamps', {
             'fields': ('created_at_ts', 'in_progress_ts', 'closed_at_ts')
@@ -55,18 +58,25 @@ class LegalAssistanceRequestAdmin(admin.ModelAdmin):
         return format_html('<div style="max-width: 600px; white-space: pre-wrap;">{}</div>', summary)
     chat_summary_display.short_description = 'Chat Summary'
     
+    def user_link(self, obj):
+        """Display user as a link to the user admin page"""
+        if obj.user:
+            url = reverse('admin:users_user_change', args=[obj.user.pk])
+            return format_html('<a href="{}">{}</a>', url, obj.user.email)
+        return '-'
+    user_link.short_description = 'User'
+    
+    def chat_link(self, obj):
+        """Display chat as a link to the chat admin page"""
+        if obj.chat:
+            url = reverse('admin:chats_chat_change', args=[obj.chat.pk])
+            return format_html('<a href="{}">{}</a>', url, f"Chat {obj.chat.id} - {obj.chat.title}")
+        return '-'
+    chat_link.short_description = 'Chat'
+    
     def status_badge(self, obj):
-        colors = {
-            'new': '#3b82f6',  # blue
-            'in_progress': '#f59e0b',  # yellow
-            'closed': '#10b981',  # green
-        }
-        color = colors.get(obj.status, '#6b7280')
-        return format_html(
-            '<span style="background-color: {}; color: white; padding: 4px 12px; border-radius: 12px; font-weight: 600; text-transform: capitalize;">{}</span>',
-            color,
-            obj.status.replace('_', ' ')
-        )
+        """Display status without colors"""
+        return obj.status.replace('_', ' ').title()
     status_badge.short_description = 'Status'
     status_badge.admin_order_field = 'status'
     
