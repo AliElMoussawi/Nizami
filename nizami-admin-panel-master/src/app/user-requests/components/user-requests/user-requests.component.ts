@@ -38,6 +38,8 @@ export class UserRequestsComponent implements OnInit, AfterViewInit, OnDestroy {
   
   userRequests = signal<UserRequest[]>([]);
   isLoading = signal<boolean>(false);
+  showSummaryModal = signal<boolean>(false);
+  selectedSummary = signal<string>('');
 
   constructor(
     private userRequestsService: UserRequestsService,
@@ -56,6 +58,15 @@ export class UserRequestsComponent implements OnInit, AfterViewInit, OnDestroy {
       const request = this.userRequests().find(r => r.id === id);
       if (request) {
         this.updateStatus(request, status);
+      }
+    };
+    
+    // Make showSummary available globally for DataTables
+    (window as any).showSummary = (id: number) => {
+      const request = this.userRequests().find(r => r.id === id);
+      if (request) {
+        this.showSummaryModal.set(true);
+        this.selectedSummary.set(request.chat_summary || 'No summary available');
       }
     };
     
@@ -95,10 +106,9 @@ export class UserRequestsComponent implements OnInit, AfterViewInit, OnDestroy {
         {
           title: 'Chat Summary',
           data: 'chat_summary',
-          render: (data: any, type: any, row: any) => {
-            const summary = data || 'No summary available';
-            const truncated = summary.length > 100 ? summary.substring(0, 100) + '...' : summary;
-            return `<div class="chat-summary-cell" data-full-summary="${summary.replace(/"/g, '&quot;')}">${truncated}</div>`;
+          orderable: false,
+          render: (data: any, type: any, row: UserRequest) => {
+            return `<button class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200" onclick="window.showSummary(${row.id})">Show</button>`;
           },
         },
         {
@@ -106,6 +116,14 @@ export class UserRequestsComponent implements OnInit, AfterViewInit, OnDestroy {
           data: 'status',
           render: (data: any) => {
             return `<span class="status-badge status-${data}">${this.formatStatus(data)}</span>`;
+          },
+        },
+        {
+          title: 'In Charge',
+          data: 'in_charge',
+          defaultContent: '-',
+          render: (data: any) => {
+            return data || '-';
           },
         },
         {
@@ -122,7 +140,8 @@ export class UserRequestsComponent implements OnInit, AfterViewInit, OnDestroy {
           defaultContent: '',
           render: (data: any, type: any, row: UserRequest) => {
             let buttons = '';
-            if (row.status !== 'in_progress') {
+            // Hide "Mark In Progress" if status is closed
+            if (row.status !== 'in_progress' && row.status !== 'closed') {
               buttons += `<button class="px-3 py-1 text-sm bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 mr-2" onclick="window.updateStatus(${row.id}, 'in_progress')">Mark In Progress</button>`;
             }
             if (row.status !== 'closed') {
@@ -260,11 +279,29 @@ export class UserRequestsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateStatus(request: UserRequest, newStatus: 'new' | 'in_progress' | 'closed') {
-    this.userRequestsService.updateUserRequestStatus(request.id, newStatus)
+    // Check if in_charge is required
+    const requiresInCharge = 
+      (request.status === 'new' && newStatus === 'in_progress') ||
+      (request.status === 'in_progress' && newStatus === 'closed') ||
+      (request.status === 'new' && newStatus === 'closed');
+    
+    let inCharge = request.in_charge;
+    
+    if (requiresInCharge && !inCharge) {
+      // Prompt for in_charge
+      inCharge = prompt('Please enter the name of the person in charge (required):');
+      if (!inCharge || !inCharge.trim()) {
+        this.toastr.error('In Charge field is required for this status change');
+        return;
+      }
+    }
+    
+    this.userRequestsService.updateUserRequestStatus(request.id, newStatus, inCharge || undefined)
       .pipe(
         untilDestroyed(this),
         catchError((error) => {
-          this.toastr.error('Failed to update request status');
+          const errorMessage = error?.error?.in_charge?.[0] || error?.error?.detail || 'Failed to update request status';
+          this.toastr.error(errorMessage);
           return EMPTY;
         }),
       )
@@ -272,6 +309,11 @@ export class UserRequestsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.toastr.success('Request status updated');
         this.loadUserRequests();
       });
+  }
+  
+  closeSummaryModal() {
+    this.showSummaryModal.set(false);
+    this.selectedSummary.set('');
   }
 
   getChatSummary(request: UserRequest): string {

@@ -86,6 +86,7 @@ class LegalAssistanceRequestSerializer(serializers.ModelSerializer):
             'chat_title',
             'chat_summary',
             'status',
+            'in_charge',
             'created_at_ts',
             'in_progress_ts',
             'closed_at_ts',
@@ -102,7 +103,7 @@ class LegalAssistanceRequestSerializer(serializers.ModelSerializer):
 class UpdateLegalAssistanceRequestStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = LegalAssistanceRequest
-        fields = ['status']
+        fields = ['status', 'in_charge']
     
     def validate_status(self, value):
         """Validate status transitions"""
@@ -111,3 +112,38 @@ class UpdateLegalAssistanceRequestStatusSerializer(serializers.ModelSerializer):
         if value not in valid_statuses:
             raise serializers.ValidationError(f"Status must be one of: {', '.join(valid_statuses)}")
         return value
+    
+    def validate(self, attrs):
+        """Validate that in_charge is provided when transitioning status"""
+        instance = self.instance
+        new_status = attrs.get('status')
+        in_charge = attrs.get('in_charge')
+        
+        if instance and new_status:
+            from src.user_requests.enums import LegalAssistanceRequestStatus
+            original_status = instance.status
+            
+            # Check if status is changing
+            if original_status != new_status:
+                # Transitioning from NEW to IN_PROGRESS
+                if original_status == LegalAssistanceRequestStatus.NEW.value and new_status == LegalAssistanceRequestStatus.IN_PROGRESS.value:
+                    if not in_charge or not in_charge.strip():
+                        raise serializers.ValidationError({
+                            'in_charge': ['In Charge field is required when moving from New to In Progress status.']
+                        })
+                
+                # Transitioning from IN_PROGRESS to CLOSED
+                elif original_status == LegalAssistanceRequestStatus.IN_PROGRESS.value and new_status == LegalAssistanceRequestStatus.CLOSED.value:
+                    if not in_charge or not in_charge.strip():
+                        raise serializers.ValidationError({
+                            'in_charge': ['In Charge field is required when moving from In Progress to Closed status.']
+                        })
+                
+                # Transitioning directly from NEW to CLOSED
+                elif original_status == LegalAssistanceRequestStatus.NEW.value and new_status == LegalAssistanceRequestStatus.CLOSED.value:
+                    if not in_charge or not in_charge.strip():
+                        raise serializers.ValidationError({
+                            'in_charge': ['In Charge field is required when moving to Closed status.']
+                        })
+        
+        return attrs

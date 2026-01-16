@@ -64,5 +64,48 @@
       </div>
     </div>
   </div>
+
+  <!-- Summary Modal -->
+  @if (showSummaryModal()) {
+    <div 
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      (click)="closeSummaryModal()"
+    >
+      <div 
+        class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Chat Summary</h3>
+          <button 
+            (click)="closeSummaryModal()"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="p-6">
+          <div class="whitespace-pre-wrap text-gray-700 leading-relaxed">
+            {{ selectedSummary() }}
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex justify-end p-6 border-t border-gray-200">
+          <button
+            (click)="closeSummaryModal()"
+            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </app-template>
 

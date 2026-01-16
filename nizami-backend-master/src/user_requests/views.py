@@ -71,13 +71,16 @@ class UpdateLegalAssistanceRequestStatusViewSet(ModelViewSet):
         """Update status and timestamps accordingly"""
         instance = serializer.instance
         new_status = serializer.validated_data['status']
+        in_charge = serializer.validated_data.get('in_charge')
         
         from src.user_requests.enums import LegalAssistanceRequestStatus
         
         if new_status == LegalAssistanceRequestStatus.IN_PROGRESS.value:
-            instance.mark_in_progress()
+            instance.mark_in_progress(in_charge)
         elif new_status == LegalAssistanceRequestStatus.CLOSED.value:
-            instance.mark_closed()
+            instance.mark_closed(in_charge)
         else:
             instance.status = new_status
-            instance.save(update_fields=['status'])
+            if in_charge:
+                instance.in_charge = in_charge
+            instance.save(update_fields=['status'] + (['in_charge'] if in_charge else []))
