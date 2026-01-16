@@ -22,7 +22,6 @@ class LegalAssistanceRequest(models.Model):
         max_length=255,
         blank=True,
         null=True,
-        help_text="Name of the admin/person in charge of this request. Required when moving to in_progress or closed."
     )
     
     created_at_ts = models.DateTimeField(auto_now_add=True)
@@ -38,7 +37,6 @@ class LegalAssistanceRequest(models.Model):
         return f"LegalAssistanceRequest {self.id} - {self.user.email} - {self.status}"
 
     def mark_in_progress(self, in_charge=None):
-        """Mark the request as in progress"""
         if self.status == LegalAssistanceRequestStatus.NEW.value:
             if in_charge:
                 self.in_charge = in_charge
@@ -50,7 +48,6 @@ class LegalAssistanceRequest(models.Model):
             self.save(update_fields=update_fields)
 
     def mark_closed(self, in_charge=None):
-        """Mark the request as closed"""
         if self.status != LegalAssistanceRequestStatus.CLOSED.value:
             if in_charge:
                 self.in_charge = in_charge

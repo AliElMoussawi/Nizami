@@ -217,7 +217,6 @@ export class ChatComponent {
       return;
     }
 
-    // Show consent dialog first
     this.showLegalAssistanceConsent.set(true);
   }
 
@@ -241,16 +240,11 @@ export class ChatComponent {
       .pipe(
         untilDestroyed(this),
         catchError((err: HttpErrorResponse) => {
-          // Check if it's a validation error (400 status)
           if (err.status === 400) {
-            // Extract validation error message
             let errorMessage = '';
             
             if (err.error && typeof err.error === 'object') {
-              // Handle DRF validation errors - could be field-specific or general
               const errorObj = err.error;
-              
-              // Check for field-specific errors (e.g., { chat_id: ['error message'] })
               const fieldErrors = Object.values(errorObj).flat();
               if (fieldErrors.length > 0 && typeof fieldErrors[0] === 'string') {
                 errorMessage = fieldErrors[0] as string;
@@ -259,7 +253,6 @@ export class ChatComponent {
               } else if (errorObj.error) {
                 errorMessage = errorObj.error;
               } else {
-                // Fallback to first value if it's a string
                 const firstValue = Object.values(errorObj)[0];
                 if (typeof firstValue === 'string') {
                   errorMessage = firstValue;
@@ -271,32 +264,24 @@ export class ChatComponent {
               errorMessage = err.error;
             }
             
-            // Show yellow/warning toast for validation errors
-            // Handle both Arabic and English messages
             let finalMessage = '';
             
             if (errorMessage.trim().length > 0) {
-              // Check if message is in Arabic
               const isArabic = /[\u0600-\u06FF]/.test(errorMessage);
               
               if (isArabic) {
-                // Message is already in Arabic, show as-is
                 finalMessage = errorMessage;
               } else {
-                // Message is in English, try to translate common validation messages
-                // Check for request limit exceeded message (may have dynamic number)
                 let translationKey = null;
                 if (errorMessage.includes('maximum limit') && errorMessage.includes('legal assistance requests')) {
                   translationKey = 'errors.request_limit_exceeded';
                 } else {
-                  // Common backend validation messages that need translation
                   const commonMessages: { [key: string]: string } = {
                     'Chat must have at least 3 messages': 'errors.chat_min_messages',
                     'Chat not found or does not belong to user': 'errors.chat_not_found',
                     'A legal assistance request already exists for this chat.': 'errors.request_already_exists'
                   };
                   
-                  // Check if we have a translation key for this message
                   for (const [englishMsg, key] of Object.entries(commonMessages)) {
                     if (errorMessage.includes(englishMsg) || errorMessage === englishMsg) {
                       translationKey = key;
@@ -308,12 +293,10 @@ export class ChatComponent {
                 if (translationKey) {
                   finalMessage = this.translate.instant(marker(translationKey));
                 } else {
-                  // Show English message as-is if no translation found
                   finalMessage = errorMessage;
                 }
               }
             } else {
-              // Empty message, use default translation
               finalMessage = this.translate.instant(marker('errors.validation_error'));
             }
             
@@ -323,7 +306,6 @@ export class ChatComponent {
               { timeOut: 5000 }
             );
           } else {
-            // Show red/error toast for other errors
             const extracted = extractErrorFromResponse(err);
             const errorMsg = typeof extracted === 'string' && extracted.startsWith('errors.')
               ? this.translate.instant(marker(extracted))
@@ -335,8 +317,7 @@ export class ChatComponent {
           return EMPTY;
         }),
       )
-      .subscribe((response) => {
-        // Show green/success toast
+      .subscribe(() => {
         this.toastr.success(
           this.translate.instant(marker('success.legal_assistance_requested')),
           '',
@@ -439,7 +420,6 @@ export class ChatComponent {
         catchError((err) => {
           const extracted = extractErrorFromResponse(err);
           
-          // Define all ledger enum error types that should show popup
           const popupErrorTypes = [
             'errors.user_inactive',
             'errors.subscription_not_found',
@@ -449,7 +429,6 @@ export class ChatComponent {
             'errors.no_message_credits'
           ];
           
-          // Check if it's a ledger error and show popup instead of inline error
           if (typeof extracted === 'string' && popupErrorTypes.includes(extracted)) {
             this.creditErrorMessage.set(this.translate.instant(marker(extracted)));
             this.showCreditErrorPopup.set(true);
@@ -458,7 +437,6 @@ export class ChatComponent {
             return EMPTY;
           }
           
-          // Handle other errors normally
           if (typeof extracted === 'string' && extracted.startsWith('errors.')) {
             this.error.set(this.translate.instant(marker(extracted)));
           } else if (typeof extracted === 'string' && extracted.trim().length > 0) {
@@ -530,13 +508,11 @@ export class ChatComponent {
     this.messages.set([]);
   }
 
-  // Credit error popup handlers
   closeCreditErrorPopup() {
     this.showCreditErrorPopup.set(false);
   }
 
   goToPlansFromPopup() {
     this.showCreditErrorPopup.set(false);
-    // Navigation is handled in the popup component
   }
 }
