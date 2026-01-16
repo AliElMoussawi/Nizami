@@ -231,5 +231,13 @@
 	"credit_type.messages": "رسائل",
 	"request_legal_assistance": "طلب مساعدة قانونية",
 	"success.legal_assistance_requested": "تم إرسال طلب المساعدة القانونية بنجاح",
-	"errors.validation_error": "خطأ في التحقق من البيانات"
+	"errors.validation_error": "خطأ في التحقق من البيانات",
+	"errors.chat_min_messages": "يجب أن تحتوي الدردشة على 3 رسائل على الأقل",
+	"errors.chat_not_found": "لم يتم العثور على الدردشة أو أنها لا تنتمي للمستخدم",
+	"errors.request_already_exists": "يوجد بالفعل طلب مساعدة قانونية لهذه الدردشة",
+	"errors.request_limit_exceeded": "لقد وصلت إلى الحد الأقصى من طلبات المساعدة القانونية (5 طلبات) في آخر 30 يومًا. يرجى ترقية اشتراكك للمتابعة.",
+	"legal_assistance_consent_title": "طلب مساعدة من فريق قانوني",
+	"legal_assistance_consent_message": "أنت تطلب المساعدة من فريق قانوني. سيتم إرسال ملخص الدردشة \"{{title}}\" كسياق للفريق. سيتواصل الفريق القانوني معك عبر البريد الإلكتروني أو الهاتف لبدء الإجراءات ومعرفة كيفية البدء بالخطوات التالية.",
+	"yes": "نعم",
+	"no": "لا"
 }

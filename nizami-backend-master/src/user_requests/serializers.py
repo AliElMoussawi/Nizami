@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.utils import timezone
+from datetime import timedelta
 
 from src.chats.serializers import ListChatsSerializer
 from src.user_requests.models import LegalAssistanceRequest
@@ -24,6 +26,47 @@ class CreateLegalAssistanceRequestSerializer(serializers.Serializer):
             return value
         except Chat.DoesNotExist:
             raise serializers.ValidationError("Chat not found or does not belong to user")
+    
+    def validate(self, attrs):
+        """Validate user subscription and request limit"""
+        user = self.context['request'].user
+        from src.user_requests.constants import MAX_REQUESTS_FOR_FREE_EXPIRED_USERS
+        from src.subscription.models import UserSubscription
+        from src.plan.enums import Tier
+        
+        # Check if user has free subscription (BASIC tier) or expired subscription
+        is_free_or_expired = False
+        
+        try:
+            # Get the latest subscription (even if expired)
+            subscription = UserSubscription.objects.filter(
+                user=user
+            ).latest('created_at')
+            
+            # Check if it's BASIC tier (free)
+            if subscription.plan.tier == Tier.BASIC:
+                is_free_or_expired = True
+            # Check if subscription is expired
+            elif subscription.expiry_date < timezone.now():
+                is_free_or_expired = True
+        except UserSubscription.DoesNotExist:
+            # No subscription found, treat as free/expired
+            is_free_or_expired = True
+        
+        # If user is on free or expired subscription, check request limit
+        if is_free_or_expired:
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            recent_requests_count = LegalAssistanceRequest.objects.filter(
+                user=user,
+                created_at_ts__gte=thirty_days_ago
+            ).count()
+            
+            if recent_requests_count >= MAX_REQUESTS_FOR_FREE_EXPIRED_USERS:
+                raise serializers.ValidationError(
+                    f"You have reached the maximum limit of {MAX_REQUESTS_FOR_FREE_EXPIRED_USERS} legal assistance requests in the last 30 days. Please upgrade your subscription to continue."
+                )
+        
+        return attrs
 
 
 class LegalAssistanceRequestSerializer(serializers.ModelSerializer):

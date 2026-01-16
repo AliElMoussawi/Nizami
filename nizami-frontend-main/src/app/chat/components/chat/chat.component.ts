@@ -21,6 +21,7 @@ import {detectLanguage, extractErrorFromResponse} from '../../../common/utils';
 import {CreditErrorPopupComponent} from '../../../common/components/credit-error-popup/credit-error-popup.component';
 import {ToastrService} from 'ngx-toastr';
 import {HttpErrorResponse} from '@angular/common/http';
+import {LegalAssistanceConsentDialogComponent} from '../legal-assistance-consent-dialog/legal-assistance-consent-dialog.component';
 
 
 @UntilDestroy()
@@ -35,6 +36,7 @@ import {HttpErrorResponse} from '@angular/common/http';
     NgClass,
     NgStyle,
     CreditErrorPopupComponent,
+    LegalAssistanceConsentDialogComponent,
   ],
   providers: [
     MessagesService,
@@ -65,6 +67,7 @@ export class ChatComponent {
   submittingMessage = signal<MessageModel | null>(null);
   showCreditErrorPopup = signal<boolean>(false);
   creditErrorMessage = signal<string>('');
+  showLegalAssistanceConsent = signal<boolean>(false);
 
   stop$ = new Subject<void>();
 
@@ -214,6 +217,25 @@ export class ChatComponent {
       return;
     }
 
+    // Show consent dialog first
+    this.showLegalAssistanceConsent.set(true);
+  }
+
+  onLegalAssistanceConsentConfirmed() {
+    this.showLegalAssistanceConsent.set(false);
+    this.sendLegalAssistanceRequest();
+  }
+
+  onLegalAssistanceConsentClosed() {
+    this.showLegalAssistanceConsent.set(false);
+  }
+
+  private sendLegalAssistanceRequest() {
+    const currentChat = this.chat();
+    if (!currentChat || !currentChat.id) {
+      return;
+    }
+
     this.messagesService
       .createLegalAssistanceRequest(currentChat.id)
       .pipe(
@@ -250,8 +272,53 @@ export class ChatComponent {
             }
             
             // Show yellow/warning toast for validation errors
+            // Handle both Arabic and English messages
+            let finalMessage = '';
+            
+            if (errorMessage.trim().length > 0) {
+              // Check if message is in Arabic
+              const isArabic = /[\u0600-\u06FF]/.test(errorMessage);
+              
+              if (isArabic) {
+                // Message is already in Arabic, show as-is
+                finalMessage = errorMessage;
+              } else {
+                // Message is in English, try to translate common validation messages
+                // Check for request limit exceeded message (may have dynamic number)
+                let translationKey = null;
+                if (errorMessage.includes('maximum limit') && errorMessage.includes('legal assistance requests')) {
+                  translationKey = 'errors.request_limit_exceeded';
+                } else {
+                  // Common backend validation messages that need translation
+                  const commonMessages: { [key: string]: string } = {
+                    'Chat must have at least 3 messages': 'errors.chat_min_messages',
+                    'Chat not found or does not belong to user': 'errors.chat_not_found',
+                    'A legal assistance request already exists for this chat.': 'errors.request_already_exists'
+                  };
+                  
+                  // Check if we have a translation key for this message
+                  for (const [englishMsg, key] of Object.entries(commonMessages)) {
+                    if (errorMessage.includes(englishMsg) || errorMessage === englishMsg) {
+                      translationKey = key;
+                      break;
+                    }
+                  }
+                }
+                
+                if (translationKey) {
+                  finalMessage = this.translate.instant(marker(translationKey));
+                } else {
+                  // Show English message as-is if no translation found
+                  finalMessage = errorMessage;
+                }
+              }
+            } else {
+              // Empty message, use default translation
+              finalMessage = this.translate.instant(marker('errors.validation_error'));
+            }
+            
             this.toastr.warning(
-              errorMessage || this.translate.instant(marker('errors.validation_error')),
+              finalMessage,
               '',
               { timeOut: 5000 }
             );
