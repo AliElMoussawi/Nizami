@@ -3,10 +3,9 @@ import re
 import time
 import uuid
 import logging
-import threading
 
 
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Q
 from langchain_core.documents import Document
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
@@ -26,7 +25,7 @@ from src.chats.domain import (
     create_initial_summary,
     update_conversation_summary,
 )
-from src.chats.models import Message, MessageLog, MessageStepLog
+from src.chats.models import Message, MessageLog, MessageStepLog, Chat
 from src.chats.utils import create_legal_advice_llm, detect_language, create_llm
 from src.prompts.enums import PromptType
 from src.prompts.utils import get_prompt_value_by_name
@@ -101,43 +100,101 @@ class InputRelevance(BaseModel):
 
 def router(state: State):
     t1 = time.time()
+    logger = logging.getLogger(__name__)
+    
+    try:
+        message = state.get('message')
+        input_text = state.get('input')
+        
+        if message is None:
+            logger.error("router: message is None in state")
+            raise ValueError("Message is None in state")
+        
+        if input_text is None:
+            logger.error("router: input is None in state")
+            raise ValueError("Input is None in state")
+        
+        llm = create_llm('gpt-5-nano', reasoning_effort="minimal")
+        router_llm = llm.with_structured_output(Route)
+        template = get_prompt_value_by_name(PromptType.ROUTER)
 
-    llm = create_llm('gpt-5-nano', reasoning_effort="minimal")
+        decision = router_llm.invoke([
+            SystemMessage(content=template),
+            HumanMessage(content=input_text),
+        ])
 
-    router_llm = llm.with_structured_output(Route)
+        t2 = time.time()
+        MessageStepLog.objects.create(
+            step_name='router',
+            message_id=message.id,
+            time_sec=t2 - t1,
+            input=None,
+            output={
+                'decision': decision.step,
+            }
+        )
 
-    template = get_prompt_value_by_name(PromptType.ROUTER)
-
-    decision = router_llm.invoke([
-        SystemMessage(
-            content=template,
-        ),
-        HumanMessage(
-            content=state['input'],
-        ),
-    ])
-
-    t2 = time.time()
-    MessageStepLog.objects.create(
-        step_name='router',
-        message_id=state['message'].id,
-        time_sec=t2 - t1,
-        input=None,
-        output={
+        return {
             'decision': decision.step,
         }
-    )
-
-    return {
-        'decision': decision.step,
-    }
+    except Exception as e:
+        logger.error(f"Error in router: {str(e)}", exc_info=True)
+        t2 = time.time()
+        message = state.get('message')
+        if message:
+            try:
+                MessageStepLog.objects.create(
+                    step_name='router',
+                    message_id=message.id,
+                    time_sec=t2 - t1,
+                    input={'error': str(e)},
+                    output={
+                        'decision': 'legal_question',
+                        'error': True,
+                    }
+                )
+            except:
+                pass
+        # Default to legal_question to continue processing
+        return {
+            'decision': 'legal_question',
+        }
 
 
 def has_answer(state: State):
-    child = state['message'].children.first()
-    return {
-        'decision': 'yes' if child is not None else 'no',
-    }
+    t1 = time.time()
+    logger = logging.getLogger(__name__)
+    
+    try:
+        message = state.get('message')
+        if message is None:
+            logger.error("has_answer: message is None in state")
+            raise ValueError("Message is None in state")
+        
+        child = message.children.first()
+        decision = 'yes' if child is not None else 'no'
+        
+        t2 = time.time()
+        MessageStepLog.objects.create(
+            step_name='has_answer',
+            message_id=message.id,
+            time_sec=t2 - t1,
+            input=None,
+            output={
+                'decision': decision,
+                'has_child': child is not None,
+            }
+        )
+        
+        return {
+            'decision': decision,
+        }
+    except Exception as e:
+        logger.error(f"Error in has_answer: {str(e)}", exc_info=True)
+        # Default to 'no' to continue processing
+        return {
+            'decision': 'no',
+        }
 
 
 def first_or_create_message(state: State):
@@ -175,134 +232,237 @@ def first_or_create_message(state: State):
 
 def retrieve_history(state: State):
     t1 = time.time()
+    logger = logging.getLogger(__name__)
     
-    # Get the chat object to access summary
-    from src.chats.models import Chat
-    chat = Chat.objects.get(id=state['chat_id'])
-    
-    # Get recent messages (last 5 for immediate context, summary handles the rest)
-    recent_messages = list(
-        reversed(
-            Message.objects.filter(Q(chat_id=state['chat_id']) & ~Q(id=state['message'].id)).order_by('-created_at')[
-            :5]))
-    
-    # Get or create summary
-    summary = chat.summary
-    summary_last_message_id = chat.summary_last_message_id
-    
-    # Get messages that might not be in summary yet (created after last summarized message)
-    unsummarized_messages = []
-    if summary_last_message_id:
-        # Get messages created after the last summarized message
-        unsummarized_messages = list(
-            Message.objects.filter(
-                Q(chat_id=state['chat_id']) & 
-                Q(id__gt=summary_last_message_id) & 
-                ~Q(id=state['message'].id)
-            ).order_by('created_at')
+    try:
+        # Get the chat object to access summary
+        chat_id = state.get('chat_id')
+        message = state.get('message')
+        
+        if chat_id is None:
+            logger.error("retrieve_history: chat_id is None in state")
+            raise ValueError("chat_id is None in state")
+        
+        if message is None:
+            logger.error("retrieve_history: message is None in state")
+            raise ValueError("message is None in state")
+        
+        try:
+            chat = Chat.objects.get(id=chat_id)
+        except Chat.DoesNotExist:
+            logger.error(f"retrieve_history: Chat with id {chat_id} does not exist")
+            raise
+        
+        # Get recent messages (last 5 for immediate context, summary handles the rest)
+        recent_messages = list(
+            reversed(
+                Message.objects.filter(Q(chat_id=chat_id) & ~Q(id=message.id)).order_by('-created_at')[
+                :5]))
+        
+        # Get or create summary
+        summary = chat.summary
+        summary_last_message_id = chat.summary_last_message_id
+        
+        # Get messages that might not be in summary yet (created after last summarized message)
+        unsummarized_messages = []
+        if summary_last_message_id:
+            # Get messages created after the last summarized message
+            unsummarized_messages = list(
+                Message.objects.filter(
+                    Q(chat_id=chat_id) & 
+                    Q(id__gt=summary_last_message_id) & 
+                    ~Q(id=message.id)
+                ).order_by('created_at')
+            )
+        
+        if not summary and recent_messages:
+            # Create initial summary if it doesn't exist
+            all_messages = list(
+                Message.objects.filter(
+                    Q(chat_id=chat_id) & 
+                    ~Q(id=message.id) &
+                    ~Q(text__isnull=True) &
+                    ~Q(text='')
+                ).order_by('created_at')
+            )
+            if all_messages:
+                summary = create_initial_summary(all_messages)
+                chat.summary = summary
+                # Track the last message ID included in summary
+                chat.summary_last_message_id = all_messages[-1].id
+                chat.save(update_fields=['summary', 'summary_last_message_id'])
+        
+        t2 = time.time()
+        MessageStepLog.objects.create(
+            step_name='retrieve_history',
+            message_id=message.id,
+            time_sec=t2 - t1,
+            input=None,
+            output={
+                'history_count': len(recent_messages),
+                'has_summary': bool(summary),
+                'summary_length': len(summary) if summary else 0,
+                'unsummarized_count': len(unsummarized_messages),
+            }
         )
-    
-    if not summary and recent_messages:
-        # Create initial summary if it doesn't exist
-        all_messages = list(
-            Message.objects.filter(
-                Q(chat_id=state['chat_id']) & 
-                ~Q(id=state['message'].id) &
-                ~Q(text__isnull=True) &
-                ~Q(text='')
-            ).order_by('created_at')
-        )
-        if all_messages:
-            summary = create_initial_summary(all_messages)
-            chat.summary = summary
-            # Track the last message ID included in summary
-            chat.summary_last_message_id = all_messages[-1].id
-            chat.save(update_fields=['summary', 'summary_last_message_id'])
-    
-    t2 = time.time()
-    MessageStepLog.objects.create(
-        step_name='retrieve_history',
-        message_id=state['message'].id,
-        time_sec=t2 - t1,
-        input=None,
-        output={
-            'history_count': len(recent_messages),
-            'has_summary': bool(summary),
-            'summary_length': len(summary) if summary else 0,
-            'unsummarized_count': len(unsummarized_messages),
-        }
-    )
 
-    return {
-        'history': recent_messages,
-        'summary': summary or '',
-        'unsummarized_messages': unsummarized_messages,  # Messages not yet in summary
-    }
+        return {
+            'history': recent_messages,
+            'summary': summary or '',
+            'unsummarized_messages': unsummarized_messages,  # Messages not yet in summary
+        }
+    except Exception as e:
+        logger.error(f"Error in retrieve_history: {str(e)}", exc_info=True)
+        # Return empty history to allow processing to continue
+        return {
+            'history': [],
+            'summary': '',
+            'unsummarized_messages': [],
+        }
 
 
 def rephrase_user_input(state: State):
     t1 = time.time()
+    logger = logging.getLogger(__name__)
+    
+    try:
+        user_message = state.get('message')
+        if user_message is None:
+            logger.error("rephrase_user_input: message is None in state")
+            raise ValueError("Message is None in state")
+        
+        query = user_message.text or state.get('input', '')
+        if not query:
+            logger.warning("rephrase_user_input: query is empty, using input")
+            query = state.get('input', '')
+        
+        summary = state.get('summary', '')
 
-    user_message = state['message']
+        # Use summary for rephrasing if available, otherwise fall back to history
+        if summary:
+            query = rephrase_user_input_using_summary(query, summary)
+            user_message.used_query = query
+            user_message.save()
+        else:
+            # Fallback to old method if no summary exists
+            history = state.get('history', [])
+            if len(history) > 0:
+                used_queries = list(filter(None, [msg.used_query if msg.role != 'ai' else None for msg in history]))
+                if len(used_queries) > 0:
+                    query = rephrase_user_input_using_history(query, used_queries)
+                    user_message.used_query = query
+                    user_message.save()
 
-    query = state['message'].text
-    summary = state.get('summary', '')
+        t2 = time.time()
+        MessageStepLog.objects.create(
+            step_name='rephrase_user_input',
+            message=user_message,
+            time_sec=t2 - t1,
+            input=None,
+            output={
+                'query': query,
+                'used_summary': bool(summary),
+            }
+        )
 
-    # Use summary for rephrasing if available, otherwise fall back to history
-    if summary:
-        query = rephrase_user_input_using_summary(query, summary)
-        user_message.used_query = query
-        user_message.save()
-    else:
-        # Fallback to old method if no summary exists
-        history = state.get('history', [])
-        if len(history) > 0:
-            used_queries = list(filter(None, [msg.used_query if msg.role != 'ai' else None for msg in history]))
-            if len(used_queries) > 0:
-                query = rephrase_user_input_using_history(query, used_queries)
-                user_message.used_query = query
-                user_message.save()
-
-    t2 = time.time()
-
-    MessageStepLog.objects.create(
-        step_name='rephrase_user_input',
-        message=user_message,
-        time_sec=t2 - t1,
-        input=None,
-        output={
+        return {
             'query': query,
-            'used_summary': bool(summary),
         }
-    )
-
-    return {
-        'query': query,
-    }
+    except Exception as e:
+        logger.error(f"Error in rephrase_user_input: {str(e)}", exc_info=True)
+        t2 = time.time()
+        user_message = state.get('message')
+        # Use original input as fallback
+        fallback_query = state.get('input', state.get('query', ''))
+        
+        if user_message:
+            try:
+                MessageStepLog.objects.create(
+                    step_name='rephrase_user_input',
+                    message=user_message,
+                    time_sec=t2 - t1,
+                    input={'error': str(e)},
+                    output={
+                        'query': fallback_query,
+                        'used_summary': False,
+                        'error': True,
+                    }
+                )
+            except:
+                pass
+        
+        return {
+            'query': fallback_query,
+        }
 
 
 def translate_user_input(state: State):
-    user_message = state['message']
-
     t1 = time.time()
+    logger = logging.getLogger(__name__)
+    
+    try:
+        user_message = state.get('message')
+        if user_message is None:
+            logger.error("translate_user_input: message is None in state")
+            raise ValueError("Message is None in state")
+        
+        if not user_message.text:
+            logger.warning("translate_user_input: message text is empty")
+            # Return empty translation if no text
+            t2 = time.time()
+            MessageStepLog.objects.create(
+                step_name='translate_user_input',
+                message=user_message,
+                time_sec=t2 - t1,
+                input=None,
+                output={
+                    'input_translation': '',
+                }
+            )
+            return {
+                'input_translation': '',
+            }
+        
+        input_translation = translate_question(user_message.text, user_message.language)
 
-    input_translation = translate_question(user_message.text, user_message.language)
+        t2 = time.time()
+        MessageStepLog.objects.create(
+            step_name='translate_user_input',
+            message=user_message,
+            time_sec=t2 - t1,
+            input=None,
+            output={
+                'input_translation': input_translation,
+            }
+        )
 
-    t2 = time.time()
-
-    MessageStepLog.objects.create(
-        step_name='translate_user_input',
-        message=user_message,
-        time_sec=t2 - t1,
-        input=None,
-        output={
+        return {
             'input_translation': input_translation,
         }
-    )
-
-    return {
-        'input_translation': input_translation,
-    }
+    except Exception as e:
+        logger.error(f"Error in translate_user_input: {str(e)}", exc_info=True)
+        t2 = time.time()
+        user_message = state.get('message')
+        
+        if user_message:
+            try:
+                MessageStepLog.objects.create(
+                    step_name='translate_user_input',
+                    message=user_message,
+                    time_sec=t2 - t1,
+                    input={'error': str(e)},
+                    output={
+                        'input_translation': '',
+                        'error': True,
+                    }
+                )
+            except:
+                pass
+        
+        # Return empty translation as fallback
+        return {
+            'input_translation': '',
+        }
 
 
 def calculate_disclaimer(state: State):
@@ -349,28 +509,39 @@ def calculate_disclaimer(state: State):
     }
 
 
+@transaction.atomic
 def _update_chat_summary_sync(chat_id: int, message_ids: list):
     """
     Synchronous function to update chat summary (called in background).
     Updates summary and tracks the last message ID included.
+    Uses database locking to prevent race conditions.
     
     Args:
         chat_id: The chat ID
         message_ids: List of message IDs to add to summary
     """
-    from src.chats.models import Chat
+    logger = logging.getLogger(__name__)
     
     try:
         if not message_ids:
+            return
+        
+        # Use select_for_update to lock the row and prevent concurrent updates
+        chat = Chat.objects.select_for_update().get(id=chat_id)
+        existing_summary = chat.summary or ""
+        
+        # Ensure we're not processing messages already in summary
+        if chat.summary_last_message_id:
+            message_ids = [mid for mid in message_ids if mid > chat.summary_last_message_id]
+        
+        if not message_ids:
+            logger.debug(f"No new messages to add to summary for chat {chat_id}")
             return
         
         # Get messages
         new_messages = list(Message.objects.filter(id__in=message_ids).order_by('created_at'))
         if not new_messages:
             return
-        
-        chat = Chat.objects.get(id=chat_id)
-        existing_summary = chat.summary or ""
         
         # Update summary with new messages
         updated_summary = update_conversation_summary(existing_summary, new_messages)
@@ -379,17 +550,14 @@ def _update_chat_summary_sync(chat_id: int, message_ids: list):
         chat.summary_last_message_id = max(message_ids)
         chat.save(update_fields=['summary', 'summary_last_message_id'])
         
-        logger = logging.getLogger(__name__)
         logger.info(f"Summary updated for chat {chat_id} with {len(new_messages)} messages (last message ID: {chat.summary_last_message_id})")
     except Exception as e:
-        logger = logging.getLogger(__name__)
         logger.error(f"Error updating summary for chat {chat_id}: {str(e)}", exc_info=True)
 
 
 def update_chat_summary(chat_id: int, new_messages: list):
     """
-    Update the chat summary with new messages asynchronously in the background.
-    This function returns immediately without blocking the response.
+    Update the chat summary with new messages synchronously.
     
     Args:
         chat_id: The chat ID
@@ -398,21 +566,11 @@ def update_chat_summary(chat_id: int, new_messages: list):
     if not new_messages:
         return
     
-    # Extract message IDs for async processing
+    # Extract message IDs for processing
     message_ids = [msg.id for msg in new_messages]
     
-    # Try to use django_q if available, otherwise use threading
-    try:
-        from django_q.tasks import async_task
-        async_task(_update_chat_summary_sync, chat_id, message_ids)
-    except ImportError:
-        # Fallback to threading if django_q is not available
-        thread = threading.Thread(
-            target=_update_chat_summary_sync,
-            args=(chat_id, message_ids),
-            daemon=True
-        )
-        thread.start()
+    # Update summary synchronously
+    _update_chat_summary_sync(chat_id, message_ids)
 
 
 def store_system_message(state: State):
@@ -437,7 +595,6 @@ def store_system_message(state: State):
         uuid=uuid.uuid4(),
     )
     
-    # Update chat summary asynchronously in the background (non-blocking)
     update_chat_summary(chat_id, [user_message, system_message])
     
     t2 = time.time()
@@ -689,7 +846,6 @@ def store_translation_message(state: State):
         uuid=uuid.uuid4(),
     )
     
-    # Update chat summary asynchronously in the background (non-blocking)
     update_chat_summary(chat_id, [user_message, system_message])
     
     t2 = time.time()
@@ -722,33 +878,53 @@ def return_first_child(state: State):
 def validate_input_quality(state: State):
     """Check if the user input is random characters or gibberish using deterministic detection"""
     t1 = time.time()
-    gibberishConfig = GibberishConfig()
-    GibberishConfig.llm_enabled = True
-    # Use our deterministic gibberish detection system
-    result = classify_input(state['input'],config=gibberishConfig)
+    logger = logging.getLogger(__name__)
     
-    # Classify as gibberish if status is GIBBERISH
-    is_gibberish = (result.status == InputVerdict.GIBBERISH)
-    
-    t2 = time.time()
-    MessageStepLog.objects.create(
-        step_name='validate_input_quality',
-        message_id=state['message'].id,
-        time_sec=t2 - t1,
-        input={
-            'input': state['input'],
-        },
-        output={
+    try:
+        message = state.get('message')
+        input_text = state.get('input')
+        
+        if message is None:
+            logger.error("validate_input_quality: message is None in state")
+            raise ValueError("Message is None in state")
+        
+        if input_text is None:
+            logger.error("validate_input_quality: input is None in state")
+            raise ValueError("Input is None in state")
+        
+        gibberishConfig = GibberishConfig()
+        gibberishConfig.llm_enabled = True
+        # Use our deterministic gibberish detection system
+        result = classify_input(input_text, config=gibberishConfig)
+        
+        # Classify as gibberish if status is GIBBERISH
+        is_gibberish = (result.status == InputVerdict.GIBBERISH)
+        
+        t2 = time.time()
+        MessageStepLog.objects.create(
+            step_name='validate_input_quality',
+            message_id=message.id,
+            time_sec=t2 - t1,
+            input={
+                'input': input_text,
+            },
+            output={
+                'is_gibberish': is_gibberish,
+                'classification_status': result.status.value,
+                'score': result.score,
+                'reasons': result.reasons[:3] if result.reasons else [],  # Store first 3 reasons
+            }
+        )
+        
+        return {
             'is_gibberish': is_gibberish,
-            'classification_status': result.status.value,
-            'score': result.score,
-            'reasons': result.reasons[:3],  # Store first 3 reasons
         }
-    )
-    
-    return {
-        'is_gibberish': is_gibberish,
-    }
+    except Exception as e:
+        logger.error(f"Error in validate_input_quality: {str(e)}", exc_info=True)
+        # Default to not gibberish to allow processing to continue
+        return {
+            'is_gibberish': False,
+        }
 
 
 def handle_gibberish_input(state: State):
@@ -782,8 +958,6 @@ def handle_gibberish_input(state: State):
         uuid=uuid.uuid4(),
     )
     
-    # Update chat summary asynchronously in the background (non-blocking)
-    # Even for error messages to track conversation flow
     update_chat_summary(chat_id, [user_message, system_message])
     
     t2 = time.time()
@@ -809,71 +983,84 @@ def handle_gibberish_input(state: State):
 def check_input_relevance(state: State):
     """Check if the current input is related to the chat history"""
     t1 = time.time()
+    logger = logging.getLogger(__name__)
     
-    summary = state.get('summary', '')
-    history = state.get('history', [])
-    unsummarized_messages = state.get('unsummarized_messages', [])
-    
-    # If no summary and no history, it's definitely a new question
-    if not summary and (not history or len(history) == 0) and not unsummarized_messages:
-        t2 = time.time()
-        MessageStepLog.objects.create(
-            step_name='check_input_relevance',
-            message_id=state['message'].id,
-            time_sec=t2 - t1,
-            input={
-                'input': state['input'],
-                'history_count': 0,
-            },
-            output={
+    try:
+        message = state.get('message')
+        input_text = state.get('input')
+        
+        if message is None:
+            logger.error("check_input_relevance: message is None in state")
+            raise ValueError("Message is None in state")
+        
+        if input_text is None:
+            logger.error("check_input_relevance: input is None in state")
+            raise ValueError("Input is None in state")
+        
+        summary = state.get('summary', '')
+        history = state.get('history', [])
+        unsummarized_messages = state.get('unsummarized_messages', [])
+        
+        # If no summary and no history, it's definitely a new question
+        if not summary and (not history or len(history) == 0) and not unsummarized_messages:
+            t2 = time.time()
+            MessageStepLog.objects.create(
+                step_name='check_input_relevance',
+                message_id=message.id,
+                time_sec=t2 - t1,
+                input={
+                    'input': input_text,
+                    'history_count': 0,
+                },
+                output={
+                    'is_related_to_history': False,
+                    'reason': 'no_history',
+                }
+            )
+            return {
                 'is_related_to_history': False,
-                'reason': 'no_history',
             }
-        )
-        return {
-            'is_related_to_history': False,
-        }
-    
-    llm = create_llm('gpt-5-nano', reasoning_effort="minimal")
-    relevance_llm = llm.with_structured_output(InputRelevance)
-    
-    # Build conversation context from summary and recent messages
-    history_context = ""
-    last_ai_message = None
-    
-    if summary:
-        # Use summary as primary context
-        history_context = f"\n\nConversation Summary:\n{summary}"
-    
-    # Add messages that aren't in summary yet (from async update race condition)
-    if unsummarized_messages:
-        unsummarized_context = "\n\nRecent Messages (not yet in summary):\n"
-        for msg in unsummarized_messages:
-            role = "User" if msg.role == 'user' else "Assistant"
-            unsummarized_context += f"{role}: {msg.text}\n"
-        history_context += unsummarized_context
-    
-    # Add recent messages for immediate context (last 3 messages)
-    recent_messages = history[-3:] if len(history) > 3 else history
-    if recent_messages:
-        recent_context = "\n\nMost Recent Messages:\n"
-        for msg in recent_messages:
-            role = "User" if msg.role == 'user' else "Assistant"
-            recent_context += f"{role}: {msg.text}\n"
-        history_context += recent_context
-    
-    # Find the most recent AI message
-    for msg in reversed(recent_messages if recent_messages else history):
-        if msg.role == 'ai':
-            last_ai_message = msg.text
-            break
-    
-    # Highlight the last AI message if it exists
-    last_ai_context = ""
-    if last_ai_message:
-        last_ai_context = f"\n\nIMPORTANT: The Assistant's last message was:\n{last_ai_message}\n\nIf the user is answering this question (e.g., 'yes', 'no', 'ok', 'sure', etc.), it is RELATED."
-    
-    prompt = f"""You are analyzing whether the current user input is related to the previous conversation history.
+        
+        llm = create_llm('gpt-5-nano', reasoning_effort="minimal")
+        relevance_llm = llm.with_structured_output(InputRelevance)
+        
+        # Build conversation context from summary and recent messages
+        history_context = ""
+        last_ai_message = None
+        
+        if summary:
+            # Use summary as primary context
+            history_context = f"\n\nConversation Summary:\n{summary}"
+        
+        # Add messages that aren't in summary yet (from async update race condition)
+        if unsummarized_messages:
+            unsummarized_context = "\n\nRecent Messages (not yet in summary):\n"
+            for msg in unsummarized_messages:
+                role = "User" if msg.role == 'user' else "Assistant"
+                unsummarized_context += f"{role}: {msg.text}\n"
+            history_context += unsummarized_context
+        
+        # Add recent messages for immediate context (last 3 messages)
+        recent_messages = history[-3:] if len(history) > 3 else history
+        if recent_messages:
+            recent_context = "\n\nMost Recent Messages:\n"
+            for msg in recent_messages:
+                role = "User" if msg.role == 'user' else "Assistant"
+                recent_context += f"{role}: {msg.text}\n"
+            history_context += recent_context
+        
+        # Find the most recent AI message
+        for msg in reversed(recent_messages if recent_messages else history):
+            if msg.role == 'ai':
+                last_ai_message = msg.text
+                break
+        
+        # Highlight the last AI message if it exists
+        last_ai_context = ""
+        if last_ai_message:
+            last_ai_context = f"\n\nIMPORTANT: The Assistant's last message was:\n{last_ai_message}\n\nIf the user is answering this question (e.g., 'yes', 'no', 'ok', 'sure', etc.), it is RELATED."
+        
+        prompt = f"""You are analyzing whether the current user input is related to the previous conversation history.
 
 Determine if the current input is:
 - RELATED to the chat history: The user is asking about, referring to, or continuing a topic already discussed in the conversation, OR answering a question that the Assistant asked
@@ -897,33 +1084,59 @@ Examples of NOT RELATED (return False):
 - User asks about something that has no connection to the conversation history
 
 Current user input to check:
-{state['input']}
+{input_text}
 {history_context}{last_ai_context}
 """
-    
-    decision = relevance_llm.invoke([
-        SystemMessage(content=prompt),
-        HumanMessage(content=state['input']),
-    ])
-    
-    t2 = time.time()
-    MessageStepLog.objects.create(
-        step_name='check_input_relevance',
-        message_id=state['message'].id,
-        time_sec=t2 - t1,
-        input={
-            'input': state['input'],
-            'history_count': len(history),
-            'has_summary': bool(summary),
-        },
-        output={
+        
+        decision = relevance_llm.invoke([
+            SystemMessage(content=prompt),
+            HumanMessage(content=input_text),
+        ])
+        
+        t2 = time.time()
+        MessageStepLog.objects.create(
+            step_name='check_input_relevance',
+            message_id=message.id,
+            time_sec=t2 - t1,
+            input={
+                'input': input_text,
+                'history_count': len(history),
+                'has_summary': bool(summary),
+            },
+            output={
+                'is_related_to_history': decision.is_related_to_history,
+            }
+        )
+        
+        return {
             'is_related_to_history': decision.is_related_to_history,
         }
-    )
-    
-    return {
-        'is_related_to_history': decision.is_related_to_history,
-    }
+    except Exception as e:
+        logger.error(f"Error in check_input_relevance: {str(e)}", exc_info=True)
+        # Default to not related to allow processing to continue
+        t2 = time.time()
+        message = state.get('message')
+        input_text = state.get('input', '')
+        if message:
+            try:
+                MessageStepLog.objects.create(
+                    step_name='check_input_relevance',
+                    message_id=message.id,
+                    time_sec=t2 - t1,
+                    input={
+                        'input': input_text,
+                        'error': str(e),
+                    },
+                    output={
+                        'is_related_to_history': False,
+                        'error': True,
+                    }
+                )
+            except:
+                pass
+        return {
+            'is_related_to_history': False,
+        }
 
 
 def handle_related_input(state: State):
@@ -956,7 +1169,6 @@ Please be more specific in your question. Please rephrase your question more cle
         uuid=uuid.uuid4(),
     )
     
-    # Update chat summary asynchronously in the background (non-blocking)
     update_chat_summary(chat_id, [user_message, system_message])
     
     t2 = time.time()
