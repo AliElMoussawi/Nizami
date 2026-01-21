@@ -24,6 +24,7 @@ import {SubscriptionsComponent} from './subscriptions/components/subscriptions/s
 import {CreateSubscriptionComponent} from './subscriptions/components/create-subscription/create-subscription.component';
 import {EditSubscriptionComponent} from './subscriptions/components/edit-subscription/edit-subscription.component';
 import {PaymentsComponent} from './payments/components/payments/payments.component';
+import {UserRequestsComponent} from './user-requests/components/user-requests/user-requests.component';
 
 export const routes: Routes = [
   {
@@ -134,6 +135,16 @@ export const routes: Routes = [
       {
         path: '',
         component: PaymentsComponent,
+      },
+    ],
+    canActivateChild: [AuthenticatedGuard],
+  },
+  {
+    path: 'user-requests',
+    children: [
+      {
+        path: '',
+        component: UserRequestsComponent,
       },
     ],
     canActivateChild: [AuthenticatedGuard],

@@ -207,4 +207,16 @@ export class MessagesService {
         }),
       );
   }
+
+  createLegalAssistanceRequest(chatId: number) {
+    return this.http.post<any>(
+      environment.apiUrl + '/v1/user-requests/',
+      { chat_id: chatId },
+      {
+        headers: {
+          'Authorization': 'Bearer ' + this.auth.getToken()!,
+        },
+      },
+    );
+  }
 }

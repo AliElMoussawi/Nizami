@@ -13,6 +13,9 @@ RUN npm ci
 # Copy project source
 COPY . .
 
+# Clear Angular cache before building (optional - remove if not needed)
+RUN rm -rf .angular/cache || true
+
 # Build Angular app for the given configuration
 RUN npm run build -- --configuration ${CONFIGURATION}
 

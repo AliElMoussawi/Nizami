@@ -228,5 +228,16 @@
   "billing_interval.daily": "daily",
   "interval_prefix": "/",
   "credit_type.message": "messages",
-  "credit_type.messages": "messages"
+  "credit_type.messages": "messages",
+  "request_legal_assistance": "Request Legal Assistance",
+  "success.legal_assistance_requested": "Legal assistance request submitted successfully",
+  "errors.validation_error": "Validation error",
+  "errors.chat_min_messages": "Chat must have at least 3 messages",
+  "errors.chat_not_found": "Chat not found or does not belong to user",
+  "errors.request_already_exists": "A legal assistance request already exists for this chat.",
+  "errors.request_limit_exceeded": "You have reached the maximum limit of 5 legal assistance requests in the last 30 days. Please upgrade your subscription to continue.",
+  "legal_assistance_consent_title": "Request Help from Legal Team",
+  "legal_assistance_consent_message": "You are requesting help from a legal team. A summary of chat \"{{title}}\" will be sent for context for the team. The legal team will contact you via either email or phone to start the procedure and see how to start the next steps.",
+  "yes": "Yes",
+  "no": "No"
 }

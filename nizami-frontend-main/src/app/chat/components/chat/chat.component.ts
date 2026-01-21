@@ -19,6 +19,9 @@ import {marker} from '@colsen1991/ngx-translate-extract-marker';
 import {TranslateService} from '@ngx-translate/core';
 import {detectLanguage, extractErrorFromResponse} from '../../../common/utils';
 import {CreditErrorPopupComponent} from '../../../common/components/credit-error-popup/credit-error-popup.component';
+import {ToastrService} from 'ngx-toastr';
+import {HttpErrorResponse} from '@angular/common/http';
+import {LegalAssistanceConsentDialogComponent} from '../legal-assistance-consent-dialog/legal-assistance-consent-dialog.component';
 
 
 @UntilDestroy()
@@ -33,6 +36,7 @@ import {CreditErrorPopupComponent} from '../../../common/components/credit-error
     NgClass,
     NgStyle,
     CreditErrorPopupComponent,
+    LegalAssistanceConsentDialogComponent,
   ],
   providers: [
     MessagesService,
@@ -63,6 +67,7 @@ export class ChatComponent {
   submittingMessage = signal<MessageModel | null>(null);
   showCreditErrorPopup = signal<boolean>(false);
   creditErrorMessage = signal<string>('');
+  showLegalAssistanceConsent = signal<boolean>(false);
 
   stop$ = new Subject<void>();
 
@@ -74,6 +79,7 @@ export class ChatComponent {
     public sidebarService: ChatSideBarService,
     public historyChats: HistoryChatsService,
     private translate: TranslateService,
+    private toastr: ToastrService,
   ) {
     const id = this.route.snapshot.params['id'] ?? null;
     if (id) {
@@ -205,6 +211,121 @@ export class ChatComponent {
     this.refreshStop();
   }
 
+  requestLegalAssistance() {
+    const currentChat = this.chat();
+    if (!currentChat || !currentChat.id) {
+      return;
+    }
+
+    this.showLegalAssistanceConsent.set(true);
+  }
+
+  onLegalAssistanceConsentConfirmed() {
+    this.showLegalAssistanceConsent.set(false);
+    this.sendLegalAssistanceRequest();
+  }
+
+  onLegalAssistanceConsentClosed() {
+    this.showLegalAssistanceConsent.set(false);
+  }
+
+  private sendLegalAssistanceRequest() {
+    const currentChat = this.chat();
+    if (!currentChat || !currentChat.id) {
+      return;
+    }
+
+    this.messagesService
+      .createLegalAssistanceRequest(currentChat.id)
+      .pipe(
+        untilDestroyed(this),
+        catchError((err: HttpErrorResponse) => {
+          if (err.status === 400) {
+            let errorMessage = '';
+            
+            if (err.error && typeof err.error === 'object') {
+              const errorObj = err.error;
+              const fieldErrors = Object.values(errorObj).flat();
+              if (fieldErrors.length > 0 && typeof fieldErrors[0] === 'string') {
+                errorMessage = fieldErrors[0] as string;
+              } else if (errorObj.detail) {
+                errorMessage = errorObj.detail;
+              } else if (errorObj.error) {
+                errorMessage = errorObj.error;
+              } else {
+                const firstValue = Object.values(errorObj)[0];
+                if (typeof firstValue === 'string') {
+                  errorMessage = firstValue;
+                } else if (Array.isArray(firstValue) && firstValue.length > 0) {
+                  errorMessage = firstValue[0];
+                }
+              }
+            } else if (typeof err.error === 'string') {
+              errorMessage = err.error;
+            }
+            
+            let finalMessage = '';
+            
+            if (errorMessage.trim().length > 0) {
+              const isArabic = /[\u0600-\u06FF]/.test(errorMessage);
+              
+              if (isArabic) {
+                finalMessage = errorMessage;
+              } else {
+                let translationKey = null;
+                if (errorMessage.includes('maximum limit') && errorMessage.includes('legal assistance requests')) {
+                  translationKey = 'errors.request_limit_exceeded';
+                } else {
+                  const commonMessages: { [key: string]: string } = {
+                    'Chat must have at least 3 messages': 'errors.chat_min_messages',
+                    'Chat not found or does not belong to user': 'errors.chat_not_found',
+                    'A legal assistance request already exists for this chat.': 'errors.request_already_exists'
+                  };
+                  
+                  for (const [englishMsg, key] of Object.entries(commonMessages)) {
+                    if (errorMessage.includes(englishMsg) || errorMessage === englishMsg) {
+                      translationKey = key;
+                      break;
+                    }
+                  }
+                }
+                
+                if (translationKey) {
+                  finalMessage = this.translate.instant(marker(translationKey));
+                } else {
+                  finalMessage = errorMessage;
+                }
+              }
+            } else {
+              finalMessage = this.translate.instant(marker('errors.validation_error'));
+            }
+            
+            this.toastr.warning(
+              finalMessage,
+              '',
+              { timeOut: 5000 }
+            );
+          } else {
+            const extracted = extractErrorFromResponse(err);
+            const errorMsg = typeof extracted === 'string' && extracted.startsWith('errors.')
+              ? this.translate.instant(marker(extracted))
+              : (extracted || this.translate.instant(marker('errors.something_went_wrong')));
+            
+            this.toastr.error(errorMsg, '', { timeOut: 5000 });
+          }
+          
+          return EMPTY;
+        }),
+      )
+      .subscribe(() => {
+        this.toastr.success(
+          this.translate.instant(marker('success.legal_assistance_requested')),
+          '',
+          { timeOut: 5000 }
+        );
+      });
+  }
+
   loadMessages(scrollToBottom = true) {
     if (!this.chat()) {
       return;
@@ -299,7 +420,6 @@ export class ChatComponent {
         catchError((err) => {
           const extracted = extractErrorFromResponse(err);
           
-          // Define all ledger enum error types that should show popup
           const popupErrorTypes = [
             'errors.user_inactive',
             'errors.subscription_not_found',
@@ -309,7 +429,6 @@ export class ChatComponent {
             'errors.no_message_credits'
           ];
           
-          // Check if it's a ledger error and show popup instead of inline error
           if (typeof extracted === 'string' && popupErrorTypes.includes(extracted)) {
             this.creditErrorMessage.set(this.translate.instant(marker(extracted)));
             this.showCreditErrorPopup.set(true);
@@ -318,7 +437,6 @@ export class ChatComponent {
             return EMPTY;
           }
           
-          // Handle other errors normally
           if (typeof extracted === 'string' && extracted.startsWith('errors.')) {
             this.error.set(this.translate.instant(marker(extracted)));
           } else if (typeof extracted === 'string' && extracted.trim().length > 0) {
@@ -390,13 +508,11 @@ export class ChatComponent {
     this.messages.set([]);
   }
 
-  // Credit error popup handlers
   closeCreditErrorPopup() {
     this.showCreditErrorPopup.set(false);
   }
 
   goToPlansFromPopup() {
     this.showCreditErrorPopup.set(false);
-    // Navigation is handled in the popup component
   }
 }

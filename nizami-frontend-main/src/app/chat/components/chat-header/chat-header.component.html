@@ -23,6 +23,18 @@
 
   <span class="flex-1 hidden xl:block"></span>
 
+  @if (showLegalAssistanceButton()) {
+    <app-button
+      class="hidden xl:block"
+      (onClick)="legalAssistanceClicked()"
+    >
+      <div class="flex flex-row items-center gap-2">
+        <img src="/assets/icons/add-circle.svg" [alt]="'request_legal_assistance' | translate" class="w-min">
+        <span>{{ 'request_legal_assistance' | translate }}</span>
+      </div>
+    </app-button>
+  }
+
   <app-button
     class="hidden xl:block"
     (onClick)="newChatClicked()"
@@ -32,6 +44,16 @@
       <span>{{ 'new_chat' | translate }}</span>
     </div>
   </app-button>
+
+  @if (showLegalAssistanceButton()) {
+    <app-icon-button
+      type="primary"
+      class="block xl:hidden"
+      (onClick)="legalAssistanceClicked()"
+    >
+      <img src="/assets/icons/plus-circle.svg" [alt]="'request_legal_assistance' | translate">
+    </app-icon-button>
+  }
 
   <app-icon-button
     type="primary"

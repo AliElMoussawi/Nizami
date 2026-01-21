@@ -26,6 +26,9 @@
     <div class="flex flex-col flex-1">
       <app-chat-header
         (onNewChatClicked)="newChatClicked()"
+        (onLegalAssistanceClicked)="requestLegalAssistance()"
+        [messagesCount]="messages().length"
+        [showLegalAssistanceButton]="messages().length >= 3 && chat() !== null"
       ></app-chat-header>
 
       <app-chat-messages
@@ -54,7 +57,9 @@
           'xl:px-40': sidebarService.isOpen(),
           'xl:pl-80': !sidebarService.isOpen(),
           }"
-        [disabled]="isDisabled()"
+        [style.opacity]="showLegalAssistanceConsent() ? '0.5' : '1'"
+        [style.filter]="showLegalAssistanceConsent() ? 'blur(4px)' : 'none'"
+        [disabled]="isDisabled() || showLegalAssistanceConsent()"
         (onNewMessage)="onNewMessage($event)"
       ></app-chat-input>
 
@@ -70,3 +75,12 @@
   (onClose)="closeCreditErrorPopup()"
   (onGoToPlans)="goToPlansFromPopup()"
 ></app-credit-error-popup>
+
+<!-- Legal Assistance Consent Dialog -->
+@if (showLegalAssistanceConsent()) {
+  <app-legal-assistance-consent-dialog
+    [chatTitle]="chat()?.title || ''"
+    (confirmed)="onLegalAssistanceConsentConfirmed()"
+    (onClose)="onLegalAssistanceConsentClosed()"
+  ></app-legal-assistance-consent-dialog>
+}

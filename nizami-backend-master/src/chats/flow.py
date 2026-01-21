@@ -153,7 +153,8 @@ def router(state: State):
                         'error': True,
                     }
                 )
-            except:
+            except Exception as e:
+                logger.error(f"Error in router: {str(e)}", exc_info=True)
                 pass
         # Default to legal_question to continue processing
         return {
@@ -388,7 +389,8 @@ def rephrase_user_input(state: State):
                         'error': True,
                     }
                 )
-            except:
+            except Exception as e:
+                logger.error(f"Error in rephrase_user_input: {str(e)}", exc_info=True)
                 pass
         
         return {
@@ -456,7 +458,8 @@ def translate_user_input(state: State):
                         'error': True,
                     }
                 )
-            except:
+            except Exception as e:
+                logger.error(f"Error in translate_user_input: {str(e)}", exc_info=True)
                 pass
         
         # Return empty translation as fallback
@@ -1132,8 +1135,8 @@ Current user input to check:
                         'error': True,
                     }
                 )
-            except:
-                pass
+            except Exception as e:
+                logger.error(f"Error in check_input_relevance: {str(e)}", exc_info=True)
         return {
             'is_related_to_history': False,
         }
