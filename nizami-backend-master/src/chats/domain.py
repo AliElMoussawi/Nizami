@@ -19,7 +19,7 @@ def create_initial_summary(messages: list) -> str:
     if not messages:
         return ""
     
-    llm = create_llm('gpt-4o-mini', reasoning_effort="low")
+    llm = create_llm('gpt-4o-mini')
     
     # Format messages for summarization
     conversation_text = ""
@@ -94,7 +94,7 @@ def update_conversation_summary(existing_summary: str, new_messages: list) -> st
     if not new_messages:
         return existing_summary
     
-    llm = create_llm('gpt-4o-mini', reasoning_effort="low")
+    llm = create_llm('gpt-4o-mini')
     
     # Format new messages
     new_conversation_text = ""
