@@ -39,6 +39,7 @@
         [loadingError]="loadingError()"
         [messages]="messages()"
         [isGeneratingResponse]="isGeneratingResponse()"
+        [submittingMessageLanguage]="$any(submittingMessage()?.language ?? 'ar')"
         [isLoadingMessages]="isLoadingMessages()"
         (onRetry)="onNewMessage(this.submittingMessage()!)"
         (onRetryLoading)="loadMessages()"

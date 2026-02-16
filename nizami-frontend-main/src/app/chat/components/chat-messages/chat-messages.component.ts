@@ -67,6 +67,7 @@ export class ChatMessagesComponent {
   loadingError = input<string | null>(null);
 
   isGeneratingResponse = input<boolean>(false);
+  submittingMessageLanguage = input<'ar' | 'en'>('ar');
   error = input<string | null>(null);
 
   generatingResponseMessageComponent = viewChild(GeneratingResponseMessageComponent);

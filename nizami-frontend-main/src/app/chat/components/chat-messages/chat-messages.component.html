@@ -32,6 +32,7 @@ scroll-auto overflow-y-auto relative
 
   @if (isGeneratingResponse()) {
     <app-generating-response-message
+      [language]="submittingMessageLanguage()"
     ></app-generating-response-message>
   }
 
