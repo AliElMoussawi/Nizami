@@ -2,12 +2,13 @@
   class="
   leading-1.5 py-1
   rounded-xl flex flex-col gap-2
+  group
 "
 >
   <div class="flex flex-row gap-4">
     <app-chat-system-profile></app-chat-system-profile>
 
-    <p class="w-full text-sm font-normal flex items-start pt-2.5 xl:ml-32"
+    <div class="legal-content w-full text-sm font-normal flex items-start pt-2.5"
        [dir]="message().language === 'en' ? 'ltr' : 'rtl'"
     >
       @if (isLast() && isTyping()) {
@@ -25,19 +26,8 @@
         ></ngx-typed-writer>
       } @else {
         <div [innerHTML]="text | safeHtml"></div>
-<!--        <markdown-->
-<!--          class="whitespace-break-spaces"-->
-<!--          lineNumbers-->
-<!--          lineHighlight-->
-<!--          emoji-->
-<!--          katex-->
-<!--          clipboard-->
-<!--          [data]="message().text.trim()"-->
-<!--          [disableSanitizer]="true"-->
-<!--        >-->
-<!--        </markdown>-->
       }
-    </p>
+    </div>
   </div>
 
   @if (message().messageFiles && message().messageFiles!.length > 0) {
@@ -55,12 +45,10 @@
     </div>
   }
 
-  @if (false) {
-    <div class="flex flex-row gap-1">
-      <app-copy-button
-        [text]="message().text"
-      ></app-copy-button>
-    </div>
-  }
+  <div class="flex flex-row gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <app-copy-button
+      [text]="message().text"
+    ></app-copy-button>
+  </div>
 
 </div>
