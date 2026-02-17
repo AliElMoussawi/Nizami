@@ -4,12 +4,22 @@
   rounded-xl
 "
 >
-  <div class="flex flex-row gap-4 items-center">
+  <div class="flex flex-row gap-3 items-start">
     <app-chat-system-profile></app-chat-system-profile>
 
-    <div class="h-3 w-3">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-green201 border border-green202">
+      <div class="flex gap-1 items-center">
+        <span class="thinking-dot thinking-dot-1"></span>
+        <span class="thinking-dot thinking-dot-2"></span>
+        <span class="thinking-dot thinking-dot-3"></span>
+      </div>
+
       <span
-        class="animate-ping flex justify-center items-center h-full w-full rounded-full bg-gray-400 opacity-75"></span>
+        class="text-xs md:text-sm font-normal text-green203 transition-opacity duration-300"
+        [class.opacity-0]="isTransitioning()"
+        [class.opacity-100]="!isTransitioning()"
+        [dir]="language() === 'ar' ? 'rtl' : 'ltr'"
+      >{{ currentStepText() }}</span>
     </div>
   </div>
 </div>
