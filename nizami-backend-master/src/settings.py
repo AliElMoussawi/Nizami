@@ -58,7 +58,8 @@ ALLOWED_HOSTS = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
     'http://localhost:4201',
-
+    'http://localhost:4002',
+    'http://127.0.0.1:4002',
     'https://admin.nizami.xob-webservices.com',
     'https://nizami.xob-webservices.com',
 
@@ -87,6 +88,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     'django_q',
+    'storages',
 
     'src.common',
     'src.authentication',
@@ -102,6 +104,7 @@ INSTALLED_APPS = [
     'src.ledger',
     'src.gibberish',
     'src.user_requests',
+    'src.uploads',
 ]
 
 MIDDLEWARE = [
@@ -208,6 +211,36 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# S3 / object storage configuration for MEDIA files (STATIC remains on disk)
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default=None)
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default=None)
+AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default=None)
+AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL', default=None)
+USE_LOCALSTACK_S3 = env.bool('USE_LOCALSTACK_S3', default=False)
+
+# STORAGES (Django 4.2+); replaces deprecated DEFAULT_FILE_STORAGE
+STORAGES = {
+    'default': {
+        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage'
+        if (not TESTING and AWS_STORAGE_BUCKET_NAME)
+        else 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
+if not TESTING and AWS_STORAGE_BUCKET_NAME:
+    # Path-style for LocalStack/custom endpoint; omit for real AWS (virtual-hosted default).
+    if USE_LOCALSTACK_S3 or AWS_S3_ENDPOINT_URL:
+        AWS_S3_ADDRESSING_STYLE = 'path'
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_DEFAULT_ACL = None
+    AWS_S3_VERIFY = not USE_LOCALSTACK_S3
+
+    if AWS_S3_ENDPOINT_URL:
+        AWS_S3_CUSTOM_DOMAIN = None
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -284,6 +317,14 @@ Q_CLUSTER = {
     'orm': 'default',  # Use the default database as the broker
 }
 
+# When the user sends a message with attachments, we poll for extraction to complete
+# before returning a full answer. Increase this if the queue is often busy (e.g. 60–120 seconds).
+ATTACHMENT_EXTRACTION_WAIT_TIMEOUT_SEC = env.int('ATTACHMENT_EXTRACTION_WAIT_TIMEOUT_SEC', default=60)
+ATTACHMENT_EXTRACTION_POLL_INTERVAL_SEC = env.float('ATTACHMENT_EXTRACTION_POLL_INTERVAL_SEC', default=0.5)
+
+# Use OpenAI LLM to extract or refine document text after library extraction (and for PDFs with no text, use vision).
+USE_OPENAI_FOR_EXTRACTION = env.bool('USE_OPENAI_FOR_EXTRACTION', default=True)
+
 OPENAI_API_KEY = env('OPENAI_API_KEY', default='') if not TESTING else ''
 
 # Initialize embeddings and vectorstore only if not testing and OPENAI_API_KEY is set
@@ -304,7 +345,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://api.nizami.xob-webservices.com',
     'https://admin.nizami.xob-webservices.com',
     'https://nizami.xob-webservices.com',
-
     'https://api.app.nizami.ai',
     'https://admin.app.nizami.ai',
     'https://app.nizami.ai',
