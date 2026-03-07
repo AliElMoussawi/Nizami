@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
+from src.prompts.enums import PendingDocIntentStatus, PendingDocIntentIntentType
 from src.users.models import User
 
 
@@ -33,6 +34,7 @@ class Message(models.Model):
     translation_disclaimer_language = models.CharField(max_length=255, null=True)
 
     used_query = models.TextField(null=True)
+    metadata_json = models.JSONField(null=True, blank=True)
 
 
 class MessageFile(models.Model):
@@ -47,6 +49,50 @@ class MessageFile(models.Model):
 
     message = models.ForeignKey(Message, related_name='messageFiles', on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, related_name='messageFiles', on_delete=models.CASCADE, null=True)
+
+
+class MessageAttachment(models.Model):
+    """
+    Links a message to an uploaded file (uploads.File). Composite unique (message_id, file_id).
+    """
+    message = models.ForeignKey(Message, related_name='message_attachments', on_delete=models.CASCADE)
+    file = models.ForeignKey(
+        'uploads.File',
+        on_delete=models.CASCADE,
+        related_name='message_attachments',
+    )
+
+    class Meta:
+        db_table = 'chats_message_attachment'
+        constraints = [
+            models.UniqueConstraint(fields=['message', 'file'], name='chats_message_attachment_message_file_unique'),
+        ]
+
+
+class PendingDocIntent(models.Model):
+    """
+    Tracks pending final answer when docs are not yet READY; worker posts answer when extraction completes.
+    """
+    tenant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pending_doc_intents', db_column='tenant_id')
+    conversation = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='pending_doc_intents')
+    user_message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='pending_doc_intents')
+    file_ids = models.JSONField(help_text='List of uploads.File UUIDs')
+    user_question = models.TextField()
+    intent_type = models.CharField(max_length=32, choices=PendingDocIntentIntentType.choices)
+    status = models.CharField(
+        max_length=32,
+        choices=PendingDocIntentStatus.choices,
+        default=PendingDocIntentStatus.PENDING,
+        db_index=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'chats_pending_doc_intent'
+        indexes = [
+            models.Index(fields=['tenant', 'status']),
+        ]
 
 
 class LogsManager(models.Manager):

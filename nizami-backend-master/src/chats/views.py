@@ -68,7 +68,10 @@ class RetrieveChatViewSet(ReadOnlyModelViewSet):
     permission_classes = []
 
 class ListMessagesViewSet(ReadOnlyModelViewSet):
-    queryset = Message.objects.all()
+    queryset = Message.objects.prefetch_related(
+        "messageFiles",
+        "message_attachments__file",
+    )
     pagination_class = IDBasedPagination
     serializer_class = ListMessagesSerializer
     authentication_classes = [JWTAuthentication]

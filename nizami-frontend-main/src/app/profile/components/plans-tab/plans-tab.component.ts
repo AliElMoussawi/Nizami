@@ -1,5 +1,5 @@
 import { Component, OnInit, Optional, output } from '@angular/core';
-import { CommonModule, LowerCasePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DialogRef } from '@angular/cdk/dialog';
@@ -16,7 +16,6 @@ import { OutlineButtonComponent } from '../../../common/components/outline-butto
   imports: [
     CommonModule, 
     TranslatePipe, 
-    LowerCasePipe,
     SpinnerComponent,
     ButtonComponent,
     ErrorComponent,
