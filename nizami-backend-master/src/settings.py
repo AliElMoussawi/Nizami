@@ -67,6 +67,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://www.app.nizami.ai',
     'https://admin.app.nizami.ai',
     'https://app.nizami.ai',
+    'https://nizami.ai',
+    'https://www.nizami.ai',
 ]
 
 # CORS additional settings
@@ -350,6 +352,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://app.nizami.ai',
     'https://www.admin.app.nizami.ai',
     'https://www.app.nizami.ai',
+    'https://nizami.ai',
+    'https://www.nizami.ai',
 ]
 
 MOYASAR_URL = env('MOYASAR_URL', default='') if not TESTING else ''
