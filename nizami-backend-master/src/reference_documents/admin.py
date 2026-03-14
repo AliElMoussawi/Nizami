@@ -1,0 +1,38 @@
+from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+
+from .models import RagSourceDocument
+
+
+@admin.register(RagSourceDocument)
+class RagSourceDocumentAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "title",
+        "view_in_browser_link",
+        "processed_at",
+        "is_extracted",
+        "created_at",
+    )
+    list_filter = ("is_extracted",)
+    search_fields = ("title", "s3_key")
+    readonly_fields = ("uuid5", "s3_bucket", "s3_key", "view_in_browser_link", "created_at", "updated_at")
+    ordering = ("-created_at",)
+    fieldsets = (
+        (None, {"fields": ("title", "uuid5", "view_in_browser_link")}),
+        ("S3", {"fields": ("s3_bucket", "s3_key")}),
+        ("Status", {"fields": ("processed_at", "pulled_at", "is_extracted")}),
+        ("Timestamps", {"fields": ("created_at", "updated_at")}),
+    )
+
+    @admin.display(description="View in browser")
+    def view_in_browser_link(self, obj):
+        if not obj.pk or not obj.s3_bucket or not obj.s3_key:
+            return mark_safe("<span style='color:#999'>—</span>")
+        path = reverse("rag_source_document_view", args=[obj.pk])
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener">Open JSON</a>',
+            path,
+        )

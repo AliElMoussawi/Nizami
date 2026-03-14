@@ -3,6 +3,20 @@
 import os
 import sys
 
+# Python 3.12+ no longer bundles pkg_resources; django-q expects it. Provide a shim using stdlib.
+if sys.version_info >= (3, 12) and "pkg_resources" not in sys.modules:
+    import importlib.metadata
+    import types
+
+    def _iter_entry_points(group, name=None):
+        for ep in importlib.metadata.entry_points().select(group=group):
+            if name is None or ep.name == name:
+                yield ep
+
+    _pkg_resources = types.ModuleType("pkg_resources")
+    _pkg_resources.iter_entry_points = _iter_entry_points
+    sys.modules["pkg_resources"] = _pkg_resources
+
 from src.common.env_loader import load_env
 
 
