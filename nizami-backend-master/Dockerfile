@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.12
 
 WORKDIR /app
 
@@ -9,12 +9,13 @@ RUN apt-get update && \
     icu-devtools && \
     rm -rf /var/lib/apt/lists/*
 
+# Python 3.12+ does not ship pkg_resources; django-q needs it. Install setuptools before any app deps.
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir "setuptools==65.0.0"
+
 # Copy requirements first for better caching
 COPY requirements.txt /app/requirements.txt
-
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . /app
