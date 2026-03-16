@@ -360,3 +360,7 @@ MOYASAR_URL = env('MOYASAR_URL', default='') if not TESTING else ''
 MOYASAR_SECRET_KEY = env('MOYASAR_SECRET_KEY', default='') if not TESTING else ''
 MOYASAR_WEBHOOK_SECRET_KEY = env('MOYASAR_WEBHOOK_SECRET_KEY', default='') if not TESTING else ''
 
+RAG_S3_BUCKET = env('RAG_S3_BUCKET', default='')
+RAG_S3_PREFIX = env('RAG_S3_PREFIX', default='')
+RAG_S3_REGION = env('RAG_S3_REGION', default=env('AWS_DEFAULT_REGION', default=''))
+

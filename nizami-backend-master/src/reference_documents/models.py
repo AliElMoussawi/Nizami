@@ -62,3 +62,24 @@ class ReferenceDocumentPart(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     reference_document = models.ForeignKey(ReferenceDocument, on_delete=models.CASCADE, related_name='parts')
 
+
+class RagSourceDocument(models.Model):
+    """
+    Stores metadata for cleaned RAG source documents that live as JSON files in S3.
+    """
+
+    id = models.BigAutoField(auto_created=True, primary_key=True, serialize=True, verbose_name='ID')
+    uuid5 = models.UUIDField(unique=True)
+
+    title = models.CharField(max_length=512)
+    s3_bucket = models.CharField(max_length=255, null=True, blank=True)
+    s3_key = models.CharField(max_length=1024, null=True, blank=True)
+
+    processed_at = models.DateTimeField(null=True, blank=True)
+    pulled_at = models.DateTimeField(null=True, blank=True)
+
+    is_extracted = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
