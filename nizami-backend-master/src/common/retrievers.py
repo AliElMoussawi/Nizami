@@ -3,6 +3,10 @@ Vector similarity search retrievers with document filtering.
 
 This module provides utilities for performing similarity searches with document ID filtering,
 which is necessary because PGVector's filter syntax doesn't support filter-before-search.
+
+Supports two backends controlled by the RAG_SOURCE setting:
+  - "old": searches the langchain_pg_embedding table (ReferenceDocument pipeline)
+  - "new": searches the reference_documents_ragsourcedocumentchunk table (S3 RAG pipeline)
 """
 import json
 import logging
@@ -133,85 +137,153 @@ def fallback_similarity_search_with_filter(query_text, retriever, document_ids, 
     return filtered_docs[:k]
 
 
+def rag_source_similarity_search(query_text, document_ids, k=8, embeddings=None, logger=None):
+    """
+    Similarity search against RagSourceDocumentChunk (the new S3 RAG table).
+
+    Same pattern as similarity_search_with_document_filter but queries the
+    Django-managed reference_documents_ragsourcedocumentchunk table.
+    """
+    if embeddings is None:
+        from src.settings import embeddings
+
+    if not document_ids:
+        return []
+
+    try:
+        query_emb = embeddings.embed_query(query_text)
+
+        with connection.cursor() as cursor:
+            embedding_str = '[' + ','.join(str(x) for x in query_emb) + ']'
+            document_ids_list = list(document_ids)
+
+            cursor.execute("""
+                SELECT
+                    c.id,
+                    c.content,
+                    c.rag_source_document_id,
+                    c.chunk_index,
+                    d.title,
+                    1 - (c.embedding <=> %s::vector) AS similarity
+                FROM reference_documents_ragsourcedocumentchunk c
+                JOIN reference_documents_ragsourcedocument d ON d.id = c.rag_source_document_id
+                WHERE c.rag_source_document_id = ANY(%s::bigint[])
+                ORDER BY c.embedding <=> %s::vector
+                LIMIT %s
+            """, [embedding_str, document_ids_list, embedding_str, k])
+
+            rows = cursor.fetchall()
+            if rows:
+                docs = []
+                for row in rows:
+                    chunk_id, content, doc_id, chunk_idx, title, similarity = row
+                    metadata = {
+                        'id': str(chunk_id),
+                        'rag_source_document_id': doc_id,
+                        'chunk_index': chunk_idx,
+                        'title': title or '',
+                        'language': 'ar',
+                    }
+                    docs.append(Document(page_content=content or '', metadata=metadata))
+
+                if logger:
+                    logger.info(
+                        'rag_source_similarity_search found %s chunks from %s target documents',
+                        len(docs), len(document_ids),
+                    )
+                return docs
+    except Exception as e:
+        if logger:
+            logger.warning('rag_source_similarity_search failed: %s', e)
+        return None
+
+    return None
+
+
+def find_rag_source_document_ids_by_description(text):
+    """
+    Find the most relevant RagSourceDocument IDs by description embedding similarity.
+    Mirrors find_ref_document_ids_by_description but for the new table.
+    """
+    from pgvector.django import CosineDistance
+    from src.reference_documents.models import RagSourceDocument
+    from src.settings import embeddings
+
+    embedded_text = embeddings.embed_query(text)
+
+    files = (
+        RagSourceDocument.objects
+        .filter(is_embedded=True)
+        .order_by(CosineDistance('description_embedding', embedded_text))
+        .values('id')[:10]
+    )
+    return list(f['id'] for f in files)
+
+
 class FilteredRetriever:
     """
     Custom retriever that filters similarity search by document IDs.
-    
+
     Uses two strategies:
     1. SQL-based search: Filters FIRST, then searches within filtered set (preferred)
     2. Fallback search: Searches globally, then filters (less reliable)
-    
-    This is necessary because PGVector's filter syntax doesn't support
-    filter-before-search, which can result in zero results when target
-    documents don't appear in the top global results.
+
+    When RAG_SOURCE="new", uses the RagSourceDocumentChunk table instead.
     """
-    
+
     def __init__(self, document_ids, k=8, logger=None, vectorstore=None):
-        """
-        Initialize the filtered retriever.
-        
-        Args:
-            document_ids: List of document IDs to filter by
-            k: Number of results to return
-            logger: Optional logger instance
-            vectorstore: Vectorstore instance (defaults to settings.vectorstore)
-        """
-        from src.settings import vectorstore as default_vectorstore
-        
+        from src.settings import vectorstore as default_vectorstore, RAG_SOURCE
+
         self.document_ids = set(document_ids) if document_ids else set()
         self.k = k
         self.logger = logger or logging.getLogger(__name__)
+        self.rag_source = RAG_SOURCE
         self.vectorstore = vectorstore or default_vectorstore
-        # Fallback: base retriever for when SQL approach doesn't work
-        self.base_retriever = self.vectorstore.as_retriever(search_kwargs={'k': max(k * 20, 100)})
-    
+        if self.rag_source != 'new' and self.vectorstore is not None:
+            self.base_retriever = self.vectorstore.as_retriever(
+                search_kwargs={'k': max(k * 20, 100)},
+            )
+        else:
+            self.base_retriever = None
+
     def _sql_based_search(self, query_text):
-        """
-        Strategy 1: SQL-based similarity search within filtered chunks.
-        This ensures we search only within chunks from target documents.
-        Returns list of Document objects or None if search fails.
-        """
         return similarity_search_with_document_filter(
             query_text=query_text,
             document_ids=self.document_ids,
             k=self.k,
-            logger=self.logger
+            logger=self.logger,
         )
-    
+
+    def _rag_source_search(self, query_text):
+        return rag_source_similarity_search(
+            query_text=query_text,
+            document_ids=self.document_ids,
+            k=self.k,
+            logger=self.logger,
+        )
+
     def _fallback_search(self, query_text):
-        """
-        Strategy 2: Fallback - search globally and filter by document ID.
-        Less reliable but works when SQL-based search fails.
-        Returns list of Document objects.
-        """
+        if self.base_retriever is None:
+            return []
         return fallback_similarity_search_with_filter(
             query_text=query_text,
             retriever=self.base_retriever,
             document_ids=self.document_ids,
             k=self.k,
-            logger=self.logger
+            logger=self.logger,
         )
-    
+
     def invoke(self, query_text):
-        """
-        Invoke the retriever with the given query text.
-        
-        Tries SQL-based search first, falls back to global search if it fails.
-        
-        Args:
-            query_text: Text to search for
-        
-        Returns:
-            List of Document objects
-        """
         if not self.document_ids:
             return []
-        
-        # Try Strategy 1: SQL-based search
+
+        if self.rag_source == 'new':
+            docs = self._rag_source_search(query_text)
+            return docs if docs is not None else []
+
         docs = self._sql_based_search(query_text)
         if docs is not None:
             return docs
-        
-        # Fallback to Strategy 2: Global search then filter
+
         return self._fallback_search(query_text)
 

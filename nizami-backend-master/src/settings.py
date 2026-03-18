@@ -320,3 +320,7 @@ RAG_S3_BUCKET = env('RAG_S3_BUCKET', default='')
 RAG_S3_PREFIX = env('RAG_S3_PREFIX', default='')
 RAG_S3_REGION = env('RAG_S3_REGION', default=env('AWS_DEFAULT_REGION', default=''))
 
+# "old" = use langchain_pg_embedding (ReferenceDocument pipeline)
+# "new" = use RagSourceDocumentChunk table (S3 RAG pipeline)
+RAG_SOURCE = env('RAG_SOURCE', default='old')
+
