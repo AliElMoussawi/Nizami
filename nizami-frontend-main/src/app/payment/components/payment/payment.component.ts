@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CommonModule, LowerCasePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PaymentService } from '../../services/payment.service';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -18,7 +18,6 @@ declare let Moyasar: any;
     CommonModule,
     RouterLink,
     TranslatePipe,
-    LowerCasePipe,
     SpinnerComponent,
     ErrorComponent
   ],

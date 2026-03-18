@@ -15,15 +15,14 @@
     {{ message().text }}
   </span>
 
-  @if (message().messageFiles && message().messageFiles!.length > 0) {
+  @if ((message().messageFiles && message().messageFiles!.length > 0) || (message().attachments && message().attachments!.length > 0)) {
     <div class="flex flex-wrap gap-2 justify-end">
-
-      @for (file of message().messageFiles; track file.id) {
-        <app-user-message-file
-          [file]="file"
-        ></app-user-message-file>
+      @for (file of message().messageFiles ?? []; track file.id) {
+        <app-user-message-file [file]="file"></app-user-message-file>
       }
-
+      @for (file of message().attachments ?? []; track file.id) {
+        <app-user-message-file [file]="file"></app-user-message-file>
+      }
     </div>
   }
 </div>
