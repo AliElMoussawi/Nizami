@@ -81,10 +81,13 @@ def load_aspose_license():
     # Skip license loading if ASPOSE_LICENSE_PATH is not set (e.g., in test environments)
     if not settings.ASPOSE_LICENSE_PATH:
         return
+    path = os.path.abspath(settings.ASPOSE_LICENSE_PATH)
+    if not os.path.isfile(path):
+        return
 
     aw_license = aw.License()
     try:
-        aw_license.set_license(os.path.abspath(settings.ASPOSE_LICENSE_PATH))
+        aw_license.set_license(path)
         _is_license_set = True
     except RuntimeError as err:
         print("\nThere was an error setting the license:", err)

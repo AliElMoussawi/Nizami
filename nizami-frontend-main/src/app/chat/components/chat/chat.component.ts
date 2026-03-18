@@ -392,11 +392,13 @@ export class ChatComponent {
 
   private sendMessage(message: MessageModel) {
     if (message.uuid == null) {
+      const messageFiles = message.messageFiles ?? [];
       message = {
         ...message,
 
         language: detectLanguage(message.text),
-        message_file_ids: message.messageFiles?.map((file) => file.id),
+        message_file_ids: messageFiles.filter((f) => typeof f.id === 'number').map((f) => f.id as number),
+        attachment_file_ids: messageFiles.filter((f) => typeof f.id === 'string').map((f) => f.id as string),
         uuid: uuid(),
         chat_id: this.chat()?.id,
         role: 'user',

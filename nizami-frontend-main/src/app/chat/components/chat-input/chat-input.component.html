@@ -2,8 +2,7 @@
 bg-white border-2 border-grey1 rounded-xl p-1 mx-6 xl:mx-auto"
 >
   <div class="relative flex flex-col gap-2" [formGroup]="form">
-    <div class="flex flex-row gap-2" [ngClass]="{
-      'hidden': files.length <= 0,
+    <div class="flex flex-row flex-wrap gap-1" [ngClass]="{
       'pb-2': files.length > 2,
     }">
       <input
@@ -11,11 +10,11 @@ bg-white border-2 border-grey1 rounded-xl p-1 mx-6 xl:mx-auto"
         #filesInput
         hidden
         (change)="onFilesSelected($event)"
-        accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       />
 
       @if (files.length > 0) {
-        <div class="w-full grid grid-cols-1 xl:grid-cols-2 gap-2 max-h-28 overflow-y-auto">
+        <div class="w-full flex flex-row flex-wrap gap-1 max-h-28 overflow-y-auto">
           @for (file of files; track i; let i = $index) {
             <app-file-uploading-progress
               [file]="file().file"
@@ -43,7 +42,14 @@ bg-white border-2 border-grey1 rounded-xl p-1 mx-6 xl:mx-auto"
                 (keyup.enter)="sendMessage()"
       ></textarea>
 
-      <div class="flex justify-end">
+      <div class="flex items-center gap-1">
+        <app-icon-button
+          type="default"
+          (onClick)="addAttachment(filesInput)"
+        >
+          <ng-icon name="heroPaperClip" size="20"></ng-icon>
+        </app-icon-button>
+
         <app-icon-button
           type="primary"
           [disabled]="!isTyping() && (form.invalid || disabled() || form.disabled || uploadingFilesCount > 0)"

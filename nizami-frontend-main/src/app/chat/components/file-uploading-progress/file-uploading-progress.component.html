@@ -1,11 +1,11 @@
 <div
-  class="border-2 border-grey3 rounded-2xl p-3 flex flex-row gap-2"
+  class="border border-grey3 rounded-lg px-2 py-1 flex flex-row gap-1 items-center text-xs w-40"
   [ngClass]="{
   'bg-red1 border-red2 text-red3 font-bold': error() !== null,
   }"
 >
   <div>
-    <img src="/assets/icons/document-2.svg" alt="Uploading Document">
+    <img src="/assets/icons/document-2.svg" alt="Uploading Document" class="w-5 h-5">
   </div>
 
   <div class="flex flex-col flex-1 truncate">
@@ -41,28 +41,30 @@
         Try again
       </button>
     } @else {
-      <div class="text-grey6 text-bold">
+      <div class="text-grey6">
         {{ (file().size ?? file().file?.size) | fileSize }}
       </div>
 
-      <div class="flex flex-row gap-1 items-center justify-between">
-        <div class="w-full relative flex items-center">
-          <div
-            class="h-2 rounded-full bg-gray-300 w-full absolute"
-          ></div>
-          <div
-            [ngClass]="{
-        'bg-blue1': progress() < 100,
-        'bg-green1': progress() >= 100,
-        }"
-            class=" h-2 rounded-full absolute"
-            [style.width.%]="progress()"
-          ></div>
+      @if (progress() < 100) {
+        <div class="flex flex-row gap-1 items-center justify-between mt-1">
+          <div class="w-full relative flex items-center">
+            <div
+              class="h-1 rounded-full bg-gray-300 w-full absolute"
+            ></div>
+            <div
+              [ngClass]="{
+          'bg-blue1': progress() < 100,
+          'bg-green1': progress() >= 100,
+          }"
+              class="h-1 rounded-full absolute"
+              [style.width.%]="progress()"
+            ></div>
+          </div>
+          <span>
+        {{ progress() }}%
+        </span>
         </div>
-        <span>
-      {{ progress() }}%
-      </span>
-      </div>
+      }
     }
   </div>
 </div>

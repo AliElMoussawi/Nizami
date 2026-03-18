@@ -15,7 +15,7 @@ from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict, Literal, Any
-
+from src.chats.attachment_flow import load_attached_docs_context_for_chat
 
 from src.chats.domain import (
     rephrase_user_input_using_history,
@@ -74,6 +74,7 @@ class State(TypedDict):
     history: list
     summary: str
     unsummarized_messages: list
+    attached_docs_context: str  # Summaries of files uploaded in this chat (for follow-up questions)
     decision: str
     system_message: Message
     response: Any
@@ -294,7 +295,13 @@ def retrieve_history(state: State):
                 # Track the last message ID included in summary
                 chat.summary_last_message_id = all_messages[-1].id
                 chat.save(update_fields=['summary', 'summary_last_message_id'])
-        
+
+        # Load summaries of files uploaded in this chat so follow-up questions can use them
+        attached_docs_context = load_attached_docs_context_for_chat(
+            chat_id=chat_id,
+            user_id=chat.user_id,
+        )
+
         t2 = time.time()
         MessageStepLog.objects.create(
             step_name='retrieve_history',
@@ -306,6 +313,7 @@ def retrieve_history(state: State):
                 'has_summary': bool(summary),
                 'summary_length': len(summary) if summary else 0,
                 'unsummarized_count': len(unsummarized_messages),
+                'attached_docs_length': len(attached_docs_context),
             }
         )
 
@@ -313,6 +321,7 @@ def retrieve_history(state: State):
             'history': recent_messages,
             'summary': summary or '',
             'unsummarized_messages': unsummarized_messages,  # Messages not yet in summary
+            'attached_docs_context': attached_docs_context or '',
         }
     except Exception as e:
         logger.error(f"Error in retrieve_history: {str(e)}", exc_info=True)
@@ -321,6 +330,7 @@ def retrieve_history(state: State):
             'history': [],
             'summary': '',
             'unsummarized_messages': [],
+            'attached_docs_context': '',
         }
 
 
@@ -340,14 +350,22 @@ def rephrase_user_input(state: State):
             query = state.get('input', '')
         
         summary = state.get('summary', '')
+        attached_docs_context = (state.get('attached_docs_context') or '').strip()
+        # Include uploaded doc context so follow-ups like "give me more details" are rephrased with document topic
+        rephrase_context = summary or ''
+        if attached_docs_context:
+            rephrase_context += (
+                f"\n\nUploaded documents in this chat (user may ask for more details or refer to these):\n"
+                f"{attached_docs_context[:3000]}{'...' if len(attached_docs_context) > 3000 else ''}"
+            )
 
-        # Use summary for rephrasing if available, otherwise fall back to history
-        if summary:
-            query = rephrase_user_input_using_summary(query, summary)
+        # Use summary + doc context for rephrasing if available, otherwise fall back to history
+        if rephrase_context.strip():
+            query = rephrase_user_input_using_summary(query, rephrase_context)
             user_message.used_query = query
             user_message.save()
         else:
-            # Fallback to old method if no summary exists
+            # Fallback to old method if no summary or doc context
             history = state.get('history', [])
             if len(history) > 0:
                 used_queries = list(filter(None, [msg.used_query if msg.role != 'ai' else None for msg in history]))
@@ -658,6 +676,7 @@ def answer_legal_question(state: State):
     summary = state.get('summary', '')
     history = state.get('history', [])
     unsummarized_messages = state.get('unsummarized_messages', [])
+    attached_docs_context = state.get('attached_docs_context', '') or ''
     
     # Build history messages from summary and recent messages
     history_messages = []
@@ -665,6 +684,20 @@ def answer_legal_question(state: State):
         # Add summary as context
         history_messages.append(SystemMessage(
             content=f"Conversation Summary (for context):\n{summary}"
+        ))
+    if attached_docs_context.strip():
+        # Add summaries of files the user uploaded in this chat so follow-up questions can use them
+        history_messages.append(SystemMessage(
+            content=(
+                "Uploaded documents in this chat (use for questions about the user's files):\n"
+                f"{attached_docs_context}\n\n"
+                "If the user asks for more details, clarification, or a follow-up about a document they shared "
+                "(e.g. 'give me more details', 'tell me more about the document'), answer in detail using the "
+                "uploaded document content above. If the user asks about something specific in a document "
+                "(e.g. a clause, section, obligation, party, date, or term), find and cite that part of the "
+                "document and answer precisely. Do not ask the user to rephrase or be more specific when the "
+                "question clearly refers to the document or prior conversation."
+            )
         ))
     
     # Add messages that aren't in summary yet (from async update race condition)
@@ -1026,9 +1059,10 @@ def check_input_relevance(state: State):
         summary = state.get('summary', '')
         history = state.get('history', [])
         unsummarized_messages = state.get('unsummarized_messages', [])
+        attached_docs_context = state.get('attached_docs_context', '') or ''
         
-        # If no summary and no history, it's definitely a new question
-        if not summary and (not history or len(history) == 0) and not unsummarized_messages:
+        # If no summary, no history, no uploaded docs, it's definitely a new question
+        if not summary and (not history or len(history) == 0) and not unsummarized_messages and not attached_docs_context.strip():
             t2 = time.time()
             MessageStepLog.objects.create(
                 step_name='check_input_relevance',
@@ -1057,6 +1091,8 @@ def check_input_relevance(state: State):
         if summary:
             # Use summary as primary context
             history_context = f"\n\nConversation Summary:\n{summary}"
+        if attached_docs_context.strip():
+            history_context += f"\n\nUploaded documents in this chat:\n{attached_docs_context[:2000]}{'...' if len(attached_docs_context) > 2000 else ''}"
         
         # Add messages that aren't in summary yet (from async update race condition)
         if unsummarized_messages:
@@ -1096,9 +1132,11 @@ Examples of RELATED (return True):
 - User answers "yes" or "no" to a question the Assistant asked
 - User responds with short answers like "ok", "sure", "correct", "that's right" to the Assistant's question
 - User asks "Can you tell me more about that?" after discussing contracts
+- User asks "give me more details" or "more details please" after the Assistant answered about a document or topic
+- User asks "can you give me more details about the document I shared before?" (clearly about uploaded document)
 - User asks "What about the second point?" referring to a previous answer
 - User asks "How does this apply to my case?" after discussing a legal concept
-- User asks follow-up questions about the same topic
+- User asks follow-up questions about the same topic or uploaded document
 - User asks for clarification on something mentioned earlier
 - User provides additional information related to a previous discussion
 - User confirms or denies something the Assistant mentioned
@@ -1264,16 +1302,16 @@ def build_graph():
 
     graph_builder.add_edge("retrieve_history", "check_input_relevance")
     
+    # When input is related to history or uploaded docs (e.g. "give me more details"), answer using context.
+    # Do not ask user to "be more specific"; rephrase and answer in detail.
     graph_builder.add_conditional_edges(
         "check_input_relevance",
         lambda state: "related" if state.get('is_related_to_history', False) else "new_question",
         {
-            "related": 'handle_related_input',
+            "related": 'router',
             "new_question": 'router',
         },
     )
-    
-    graph_builder.add_edge("handle_related_input", END)
 
     graph_builder.add_conditional_edges(
         "router",
