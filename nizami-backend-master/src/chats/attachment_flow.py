@@ -9,7 +9,7 @@ from typing import List, Tuple
 
 from django.conf import settings
 from django.db import transaction
-from src.chats.models import Chat, Message, MessageAttachment
+from src.chats.models import Message, MessageAttachment
 from src.chats.utils import create_llm, detect_language
 from django_q.tasks import async_task
 
