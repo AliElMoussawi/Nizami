@@ -1,14 +1,5 @@
 from rest_framework import serializers
 
-from src.uploads.models import File, UploadSession
-from src.uploads.storage import (
-    delete_object_best_effort,
-    compute_sha256_from_s3,
-    head_object,
-    raw_s3_key,
-)
-
-
 # Allowed for chat attachments (plan: PDF, DOC, DOCX)
 ALLOWED_UPLOAD_EXTENSIONS = {"pdf", "doc", "docx"}
 ALLOWED_UPLOAD_CONTENT_TYPES = {

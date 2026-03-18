@@ -232,7 +232,6 @@ def run_attachment_message_flow(
     """
     Create user message, MessageAttachments, soft-wait, branch, return assistant message (or preliminary/processing).
     """
-    chat = Chat.objects.get(user=user, id=chat_id)
     user_id = user.id
 
     with transaction.atomic():
