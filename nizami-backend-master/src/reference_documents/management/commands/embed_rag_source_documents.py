@@ -1,11 +1,13 @@
 import json
 import logging
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional
 
 import boto3
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandParser
+from django.db import close_old_connections
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.reference_documents.models import RagSourceDocument, RagSourceDocumentChunk
@@ -66,23 +68,38 @@ class Command(BaseCommand):
             logger.info("No documents to embed.")
             return
 
-        logger.info("Starting embedding for %s RagSourceDocument(s)…", total)
+        workers = 4
+        logger.info("Starting embedding for %s RagSourceDocument(s) with %s workers…", total, workers)
 
-        s3_client = boto3.client("s3")
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP,
-        )
+        # Collect ids so we don't share ORM instances across threads.
+        doc_ids = list(qs.values_list("id", flat=True))
 
         created_total = 0
         failed_total = 0
 
-        for doc in qs.iterator(chunk_size=100):
+        def worker(doc_id: int) -> bool:
+            close_old_connections()
             try:
+                doc = RagSourceDocument.objects.get(id=doc_id)
+                s3_client = boto3.client("s3")
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=CHUNK_SIZE,
+                    chunk_overlap=CHUNK_OVERLAP,
+                )
                 self._process_document(doc, s3_client, bucket, text_splitter, batch_size)
-                created_total += 1
+                return True
             except Exception as exc:
-                logger.error("Failed to embed doc id=%s key=%r: %s", doc.id, doc.s3_key, exc)
-                failed_total += 1
+                logger.error("Failed to embed doc id=%s: %s", doc_id, exc)
+                return False
+
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            future_to_id = {executor.submit(worker, doc_id): doc_id for doc_id in doc_ids}
+            for future in as_completed(future_to_id):
+                ok = future.result()
+                if ok:
+                    created_total += 1
+                else:
+                    failed_total += 1
 
         logger.info(
             "Done. embedded=%s, failed=%s, total=%s.",

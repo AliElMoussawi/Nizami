@@ -32,6 +32,7 @@ from src.prompts.enums import PromptType
 from src.prompts.utils import get_prompt_value_by_name
 from src.common.retrievers import FilteredRetriever
 from src.gibberish import GibberishConfig, classify_input, InputVerdict
+from src.reference_documents.models import RagSourceDocument
 
 
 def determine_response_language(user_input: str) -> str:
@@ -628,7 +629,18 @@ def answer_legal_question(state: State):
 
     from src.settings import RAG_SOURCE
     if RAG_SOURCE == 'new':
-        ids = find_rag_source_document_ids_by_description(query)
+        ids_all = find_rag_source_document_ids_by_description(query)
+
+        # Prefer non-MOJ docs. Only use MOJ if filtering leaves us with zero docs.
+        moj_prefix = "processed/MOJ/"
+        ids_non_moj = list(
+            RagSourceDocument.objects
+            .filter(id__in=ids_all)
+            .exclude(s3_key__istartswith=moj_prefix)
+            .values_list("id", flat=True)
+        )
+
+        ids = ids_non_moj if ids_non_moj else ids_all
     else:
         ids = find_ref_document_ids_by_description(query)
 
@@ -638,7 +650,7 @@ def answer_legal_question(state: State):
     retriever = FilteredRetriever(ids, k=8, logger=logger)
 
     if RAG_SOURCE == 'new':
-        search_kwargs = {'k': 8, 'source': 'RagSourceDocumentChunk', 'filter': {'rag_source_document_id': {'$in': ids}}}
+        search_kwargs = {'k': 10, 'source': 'RagSourceDocumentChunk', 'filter': {'rag_source_document_id': {'$in': ids}}}
     else:
         search_kwargs = {'k': 8, 'source': 'langchain_pg_embedding', 'filter': {'reference_document_id': {'$in': ids}}}
 
