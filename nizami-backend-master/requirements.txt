@@ -110,4 +110,4 @@ xxhash==3.5.0
 yarl==1.18.3
 zstandard==0.23.0
 django-storages
-boto3==1.35.28
+boto3==1.36
