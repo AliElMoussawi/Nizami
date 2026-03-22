@@ -67,7 +67,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://www.app.nizami.ai',
     'https://admin.app.nizami.ai',
     'https://app.nizami.ai',
-    'https://nizami.ai',
+    'http://localhost:4202',
+    'https://main.d15yqles4zx6o7.amplifyapp.com',
     'https://www.nizami.ai',
 ]
 
@@ -353,6 +354,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.admin.app.nizami.ai',
     'https://www.app.nizami.ai',
     'https://nizami.ai',
+    'http://localhost:4202',
+    'https://main.d15yqles4zx6o7.amplifyapp.com/',
     'https://www.nizami.ai',
 ]
 

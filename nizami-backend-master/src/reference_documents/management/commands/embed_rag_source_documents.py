@@ -2,6 +2,7 @@ import json
 import logging
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import date, datetime
 from typing import List, Optional
 
 import boto3
@@ -45,11 +46,44 @@ class Command(BaseCommand):
             action="store_true",
             help="Re-embed documents that are already marked is_embedded=True.",
         )
+        parser.add_argument(
+            "--created-after",
+            type=str,
+            help="Only process documents with created_at date strictly after this date (YYYY-MM-DD).",
+        )
+        parser.add_argument(
+            "--created-on",
+            type=str,
+            help="Only process documents with created_at on this date (YYYY-MM-DD).",
+        )
+        parser.add_argument(
+            "--offset",
+            type=int,
+            default=0,
+            help="Skip the first N documents after filtering (for partitioned execution).",
+        )
+        parser.add_argument(
+            "--limit",
+            type=int,
+            default=None,
+            help="Maximum number of documents to process after applying offset.",
+        )
+        parser.add_argument(
+            "--workers",
+            type=int,
+            default=4,
+            help="Number of worker threads to process documents.",
+        )
 
     def handle(self, *args, **options):
         bucket: Optional[str] = options.get("bucket")
         batch_size: int = options["batch_size"]
         force: bool = options["force"]
+        created_after_str: Optional[str] = options.get("created_after")
+        created_on_str: Optional[str] = options.get("created_on")
+        offset: int = options["offset"]
+        limit: Optional[int] = options.get("limit")
+        workers: int = options["workers"]
 
         if not bucket:
             logger.error("Bucket name is required (use --bucket or RAG_S3_BUCKET env var).")
@@ -60,15 +94,42 @@ class Command(BaseCommand):
             return
 
         qs = RagSourceDocument.objects.all()
+
+        # Date filtering
+        if created_on_str and created_after_str:
+            logger.error("Use only one of --created-on or --created-after, not both.")
+            return
+
+        if created_on_str:
+            try:
+                created_on: date = datetime.strptime(created_on_str, "%Y-%m-%d").date()
+            except ValueError:
+                logger.error("Invalid --created-on date format. Use YYYY-MM-DD.")
+                return
+            qs = qs.filter(created_at__date=created_on)
+        elif created_after_str:
+            try:
+                created_after: date = datetime.strptime(created_after_str, "%Y-%m-%d").date()
+            except ValueError:
+                logger.error("Invalid --created-after date format. Use YYYY-MM-DD.")
+                return
+            qs = qs.filter(created_at__date__gt=created_after)
+
         if not force:
             qs = qs.filter(is_embedded=False)
+
+        # Partitioning: apply deterministic ordering, then offset/limit
+        qs = qs.order_by("id")
+        if offset:
+            qs = qs[offset:]
+        if limit is not None:
+            qs = qs[:limit]
 
         total = qs.count()
         if total == 0:
             logger.info("No documents to embed.")
             return
 
-        workers = 4
         logger.info("Starting embedding for %s RagSourceDocument(s) with %s workers…", total, workers)
 
         # Collect ids so we don't share ORM instances across threads.
