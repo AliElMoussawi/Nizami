@@ -765,16 +765,37 @@ def truncate_to_complete_words(text, max_length=255):
 
 
 def detect_language(text):
-    arabic_count = sum(1 for char in text if '\u0600' <= char <= '\u06FF')
-    english_count = sum(1 for char in text if 'A' <= char <= 'Z' or 'a' <= char <= 'z')
+    text = text or ""
 
-    if arabic_count > english_count:
+    devanagari_count = sum(1 for char in text if '\u0900' <= char <= '\u097F')
+    arabic_script_count = sum(1 for char in text if '\u0600' <= char <= '\u06FF')
+    latin_count = sum(1 for char in text if ('A' <= char <= 'Z') or ('a' <= char <= 'z'))
+
+    urdu_specific_chars = set("ٹڈڑںھہےیګکپچژ")
+    urdu_specific_count = sum(1 for char in text if char in urdu_specific_chars)
+
+    # Hindi (Devanagari)
+    if devanagari_count > 0:
+        return "hi"
+
+    # Arabic-script languages (Arabic vs Urdu heuristic)
+    if arabic_script_count > 0:
+        if urdu_specific_count > 0:
+            return "ur"
         return "ar"
-    elif english_count > arabic_count:
+
+    # Latin-script languages (French vs English heuristic)
+    if latin_count > 0:
+        lower = text.lower()
+        french_markers = (
+            " le ", " la ", " les ", " de ", " des ", " du ", " et ", " est ",
+            " que ", " pour ", " avec ", " dans ", " sur ", " pas ", " une ", " un "
+        )
+        if re.search(r"[àâçéèêëîïôûùüÿœæ]", lower) or any(marker in f" {lower} " for marker in french_markers):
+            return "fr"
         return "en"
-    elif arabic_count == english_count and arabic_count != 0:
-        return "ar"
-    else:
-        return "ar"
+
+    # Default (keep legacy fallback to Arabic)
+    return "ar"
 
 
