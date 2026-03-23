@@ -74,6 +74,17 @@ class Command(BaseCommand):
             default=4,
             help="Number of worker threads to process documents.",
         )
+        parser.add_argument(
+            "--document-id",
+            type=int,
+            action="append",
+            dest="document_ids",
+            default=None,
+            help=(
+                "Only process RagSourceDocument row(s) with this primary key. "
+                "Repeat the flag for multiple ids. Combine with --force to re-embed already embedded docs."
+            ),
+        )
 
     def handle(self, *args, **options):
         bucket: Optional[str] = options.get("bucket")
@@ -84,6 +95,7 @@ class Command(BaseCommand):
         offset: int = options["offset"]
         limit: Optional[int] = options.get("limit")
         workers: int = options["workers"]
+        document_ids: Optional[List[int]] = options.get("document_ids")
 
         if not bucket:
             logger.error("Bucket name is required (use --bucket or RAG_S3_BUCKET env var).")
@@ -94,6 +106,9 @@ class Command(BaseCommand):
             return
 
         qs = RagSourceDocument.objects.all()
+
+        if document_ids:
+            qs = qs.filter(id__in=document_ids)
 
         # Date filtering
         if created_on_str and created_after_str:
@@ -139,6 +154,7 @@ class Command(BaseCommand):
         failed_total = 0
 
         def worker(doc_id: int) -> bool:
+            print(f"worker for doc_id {doc_id}")
             close_old_connections()
             try:
                 doc = RagSourceDocument.objects.get(id=doc_id)
@@ -148,9 +164,13 @@ class Command(BaseCommand):
                     chunk_overlap=CHUNK_OVERLAP,
                 )
                 self._process_document(doc, s3_client, bucket, text_splitter, batch_size)
+                print(f"execution done for doc_id {doc_id}")
+
                 return True
             except Exception as exc:
                 logger.error("Failed to embed doc id=%s: %s", doc_id, exc)
+                print(f"execution failed for doc_id {doc_id}")
+
                 return False
 
         with ThreadPoolExecutor(max_workers=workers) as executor:
