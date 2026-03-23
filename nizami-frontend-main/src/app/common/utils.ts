@@ -85,25 +85,47 @@ export function extractErrorFromResponse(error: any) {
 }
 
 
-export function detectLanguage(text: string): "ar" | "en" {
-  let arabicCount = 0;
-  let englishCount = 0;
+const URDU_SPECIFIC_CHARS = new Set('ٹڈڑںھہےیګکپچژ');
+const FRENCH_ACCENT_RE = /[àâçéèêëîïôûùüÿœæ]/;
+const FRENCH_MARKERS = [
+  ' le ', ' la ', ' les ', ' de ', ' des ', ' du ', ' et ', ' est ',
+  ' que ', ' pour ', ' avec ', ' dans ', ' sur ', ' pas ', ' une ', ' un ',
+];
+
+export function detectLanguage(text: string): string {
+  let devanagariCount = 0;
+  let arabicScriptCount = 0;
+  let latinCount = 0;
+  let urduSpecificCount = 0;
 
   for (const char of text) {
-    if (char >= '\u0600' && char <= '\u06FF') {
-      arabicCount++;
+    if (char >= '\u0900' && char <= '\u097F') {
+      devanagariCount++;
+    } else if (char >= '\u0600' && char <= '\u06FF') {
+      arabicScriptCount++;
+      if (URDU_SPECIFIC_CHARS.has(char)) {
+        urduSpecificCount++;
+      }
     } else if ((char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z')) {
-      englishCount++;
+      latinCount++;
     }
   }
 
-  if (arabicCount > englishCount) {
-    return "ar";
-  } else if (englishCount > arabicCount) {
-    return "en";
-  } else if (arabicCount === englishCount && arabicCount !== 0) {
-    return "ar";
-  } else {
-    return "ar";
+  if (devanagariCount > 0) {
+    return 'hi';
   }
+
+  if (arabicScriptCount > 0) {
+    return urduSpecificCount > 0 ? 'ur' : 'ar';
+  }
+
+  if (latinCount > 0) {
+    const lower = ` ${text.toLowerCase()} `;
+    if (FRENCH_ACCENT_RE.test(lower) || FRENCH_MARKERS.some(m => lower.includes(m))) {
+      return 'fr';
+    }
+    return 'en';
+  }
+
+  return 'ar';
 }
