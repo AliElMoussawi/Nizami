@@ -33,22 +33,6 @@ from src.common.retrievers import FilteredRetriever
 from src.gibberish import GibberishConfig, classify_input, InputVerdict
 
 
-def determine_response_language(user_input: str) -> str:
-    """
-    Determine the response language based on user input.
-    
-    Rules:
-    - Detect input language and respond in the same detected language
-    
-    Args:
-        user_input: The user's input text
-        
-    Returns:
-        Language code (e.g. 'en', 'ar', 'fr', 'hi', 'ur')
-    """
-    return detect_language(user_input)
-
-
 class State(TypedDict):
     input: str
     query: str
@@ -485,7 +469,7 @@ def calculate_disclaimer(state: State):
     is_answer = response.get('is_answer', False)
 
     # Determine response language based on user's input (not detected from answer)
-    answer_language = determine_response_language(user_message.text)
+    answer_language = detect_language(user_message.text)
 
     context_multi_language = len(used_languages) > 1
     context_different_lang_from_question = len(used_languages) == 1 and list(used_languages)[0] != question_language
@@ -682,7 +666,7 @@ def answer_legal_question(state: State):
             history_messages.append(AIMessage(content=msg.text))
 
     # Determine the response language based on user's input
-    response_language = determine_response_language(user_message.text)
+    response_language = detect_language(user_message.text)
     
     languages = {
         'ar': "Arabic",
@@ -693,12 +677,11 @@ def answer_legal_question(state: State):
     }
     
     # Update the template to explicitly instruct the LLM to respond in the determined language
-    language_name = languages.get(response_language, "English")
-    language_instruction = f"IMPORTANT: You must respond ONLY in {language_name}. Do not mix languages. "
+    language_instruction = f"IMPORTANT: You must respond ONLY in {languages[response_language]}. Do not mix languages. "
     updated_template = language_instruction + template
 
     prompt = ChatPromptTemplate.from_messages([
-        ("system", re.sub(r"\{language}", language_name, updated_template)),
+        ("system", re.sub(r"\{language}", languages[response_language], updated_template)),
         *history_messages,
         ("human", "{input}"),
     ])
@@ -833,7 +816,7 @@ def translate_previous_message(state: State):
     }
 
     previous_message: Message = history[-1]
-    to_lang = to_langs.get(previous_message.language, 'English')
+    to_lang = to_langs[previous_message.language]
 
     result = llm.invoke([
         SystemMessage(
@@ -964,7 +947,7 @@ def handle_gibberish_input(state: State):
     chat_id = user_message.chat_id
     
     input_text = state['input']
-    input_language = determine_response_language(input_text)
+    input_language = detect_language(input_text)
     messages = {
         "en": "I couldn't understand your message. Could you please rephrase it? I'm here to help with legal inquiries.",
         "ar": "لم أتمكن من فهم رسالتك. هل يمكنك إعادة صياغتها؟ أنا هنا للمساعدة في الاستفسارات القانونية.",
