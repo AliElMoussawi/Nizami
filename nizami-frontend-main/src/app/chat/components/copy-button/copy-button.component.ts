@@ -1,10 +1,12 @@
 import {Component, input, signal} from '@angular/core';
+import {NgClass} from '@angular/common';
 import {NgIcon} from '@ng-icons/core';
 import {TooltipComponent} from '../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-copy-button',
   imports: [
+    NgClass,
     NgIcon,
     TooltipComponent
   ],

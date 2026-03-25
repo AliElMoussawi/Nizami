@@ -257,6 +257,9 @@ def translate_question(text: str, from_lang: str) -> str:
     translations = {
         'ar': 'English',
         'en': 'Arabic',
+        'fr': 'Arabic',
+        'hi': 'Arabic',
+        'ur': 'Arabic',
     }
 
     to_lang = translations.get(from_lang)

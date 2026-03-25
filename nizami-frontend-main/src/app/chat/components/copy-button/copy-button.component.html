@@ -4,12 +4,16 @@
   <button
     [disabled]="isCopied()"
     (click)="onClick()"
-    class="relative-element"
+    class="relative-element flex items-center justify-center w-7 h-7 rounded-md transition-colors duration-150"
+    [ngClass]="{
+      'text-green203': isCopied(),
+      'text-grey8 hover:text-grey12 hover:bg-green202': !isCopied()
+    }"
   >
     @if (isCopied()) {
-      <ng-icon name="heroCheck" size="16"></ng-icon>
+      <ng-icon name="heroCheck" size="14"></ng-icon>
     } @else {
-      <ng-icon name="heroDocumentDuplicate" size="16"></ng-icon>
+      <ng-icon name="heroClipboardDocument" size="14"></ng-icon>
     }
   </button>
 
