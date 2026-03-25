@@ -35,35 +35,6 @@ from src.gibberish import GibberishConfig, classify_input, InputVerdict
 from src.reference_documents.models import RagSourceDocument
 
 
-def determine_response_language(user_input: str) -> str:
-    """
-    Determine the response language based on user input.
-    
-    Rules:
-    - 100% English (no Arabic characters) → English
-    - 100% Arabic (no English letters) → Arabic
-    - Mixed (both Arabic and English) → Arabic
-    
-    Args:
-        user_input: The user's input text
-        
-    Returns:
-        'en' for English, 'ar' for Arabic
-    """
-    arabic_chars = sum(1 for char in user_input if '\u0600' <= char <= '\u06FF')
-    english_chars = sum(1 for char in user_input if ('A' <= char <= 'Z') or ('a' <= char <= 'z'))
-    
-    # If there are any Arabic characters, respond in Arabic (handles 100% Arabic and mixed)
-    if arabic_chars > 0:
-        return "ar"
-    # If only English characters (or no letters), respond in English
-    elif english_chars > 0:
-        return "en"
-    # Default to Arabic if no letters detected
-    else:
-        return "ar"
-
-
 class State(TypedDict):
     input: str
     query: str
@@ -500,8 +471,7 @@ def calculate_disclaimer(state: State):
     is_answer = response.get('is_answer', False)
 
     # Determine response language based on user's input (not detected from answer)
-    # Rules: 100% English → English, 100% Arabic → Arabic, Mixed → Arabic
-    answer_language = determine_response_language(user_message.text)
+    answer_language = detect_language(user_message.text)
 
     context_multi_language = len(used_languages) > 1
     context_different_lang_from_question = len(used_languages) == 1 and list(used_languages)[0] != question_language
@@ -717,11 +687,14 @@ def answer_legal_question(state: State):
             history_messages.append(AIMessage(content=msg.text))
 
     # Determine the response language based on user's input
-    response_language = determine_response_language(user_message.text)
+    response_language = detect_language(user_message.text)
     
     languages = {
         'ar': "Arabic",
         'en': "English",
+        'fr': "French",
+        'hi': "Hindi",
+        'ur': "Urdu",
     }
     
     # Update the template to explicitly instruct the LLM to respond in the determined language
@@ -860,6 +833,9 @@ def translate_previous_message(state: State):
     to_langs = {
         'ar': 'English',
         'en': 'Arabic',
+        'fr': 'English',
+        'hi': 'English',
+        'ur': 'English',
     }
 
     previous_message: Message = history[-1]
@@ -993,20 +969,17 @@ def handle_gibberish_input(state: State):
     user_message = state['message']
     chat_id = user_message.chat_id
     
-    # Detect if input is purely English (no Arabic characters)
     input_text = state['input']
-    has_arabic = any('\u0600' <= char <= '\u06FF' for char in input_text)
-    
-    if not has_arabic:
-        # Pure English input - return English only
-        response_message = "I couldn't understand your message. Could you please rephrase it? I'm here to help with legal inquiries."
-        answer_language = "en"
-    else:
-        # Arabic or mixed input - return bilingual message
-        response_message = """I couldn't understand your message. Could you please rephrase it? I'm here to help with legal inquiries.
-
-لم أتمكن من فهم رسالتك. هل يمكنك إعادة صياغتها؟ أنا هنا للمساعدة في الاستفسارات القانونية."""
-        answer_language = detect_language(response_message)
+    input_language = detect_language(input_text)
+    messages = {
+        "en": "I couldn't understand your message. Could you please rephrase it? I'm here to help with legal inquiries.",
+        "ar": "لم أتمكن من فهم رسالتك. هل يمكنك إعادة صياغتها؟ أنا هنا للمساعدة في الاستفسارات القانونية.",
+        "fr": "Je n'ai pas pu comprendre votre message. Pouvez-vous le reformuler, s'il vous plaît ? Je suis là pour vous aider dans les questions juridiques.",
+        "hi": "मैं आपका संदेश समझ नहीं पाया। क्या आप कृपया इसे दोबारा स्पष्ट रूप से लिख सकते हैं? मैं कानूनी प्रश्नों में सहायता के लिए यहां हूं।",
+        "ur": "میں آپ کا پیغام سمجھ نہیں سکا۔ کیا آپ براہ کرم اسے دوبارہ واضح انداز میں لکھ سکتے ہیں؟ میں قانونی سوالات میں مدد کے لیے یہاں ہوں۔",
+    }
+    response_message = messages.get(input_language, messages["en"])
+    answer_language = input_language
     
     system_message = Message.objects.create(
         chat_id=chat_id,
@@ -1211,24 +1184,21 @@ def handle_related_input(state: State):
     chat_id = user_message.chat_id
     question_language = user_message.language
     
-    # Bilingual response message
-    if question_language == 'ar':
-        bilingual_message = """يرجى أن تكون أكثر تحديداً في سؤالك. يرجى إعادة صياغة سؤالك بشكل أوضح وأكثر تفصيلاً.
-
-Please be more specific in your question. Please rephrase your question more clearly and in more detail."""
-    else:
-        bilingual_message = """Please be more specific in your question. Please rephrase your question more clearly and in more detail.
-
-يرجى أن تكون أكثر تحديداً في سؤالك. يرجى إعادة صياغة سؤالك بشكل أوضح وأكثر تفصيلاً."""
-    
-    # Detect language for the response
-    answer_language = detect_language(bilingual_message)
+    by_language_message = {
+        "en": "Please be more specific in your question. Please rephrase your question more clearly and in more detail.",
+        "ar": "يرجى أن تكون أكثر تحديداً في سؤالك. يرجى إعادة صياغة سؤالك بشكل أوضح وأكثر تفصيلاً.",
+        "fr": "Veuillez être plus précis dans votre question. Merci de la reformuler de manière plus claire et plus détaillée.",
+        "hi": "कृपया अपने प्रश्न में और अधिक स्पष्टता दें। कृपया अपने प्रश्न को अधिक साफ़ और विस्तृत रूप से दोबारा लिखें।",
+        "ur": "براہ کرم اپنے سوال میں مزید وضاحت دیں۔ مہربانی کرکے اپنے سوال کو زیادہ واضح اور تفصیل سے دوبارہ لکھیں۔",
+    }
+    response_text = by_language_message.get(question_language, by_language_message["en"])
+    answer_language = question_language
     
     system_message = Message.objects.create(
         chat_id=chat_id,
         parent=user_message,
         language=answer_language,
-        text=bilingual_message,
+        text=response_text,
         role='ai',
         uuid=uuid.uuid4(),
     )
