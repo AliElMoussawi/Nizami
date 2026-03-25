@@ -4,7 +4,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from ..chats.models import Chat, Message
 from ..common.permissions import IsAdminPermission
-from ..reference_documents.models import ReferenceDocument
+from ..reference_documents.models import ReferenceDocument, RagSourceDocument
+from ..settings import RAG_SOURCE
 from ..users.models import User
 
 
@@ -25,9 +26,16 @@ def get_cards(request):
         },
         {
             'icon': 'heroDocument',
-            'title': 'Documents',
+            'title': 'Documents (Reference)' if RAG_SOURCE == 'new' else 'Documents',
             'body': ReferenceDocument.objects.count(),
         },
+        *(
+            [{
+                'icon': 'heroDocument',
+                'title': 'Documents (RAG Source)',
+                'body': RagSourceDocument.objects.filter(is_embedded=True).count(),
+            }] if RAG_SOURCE == 'new' else []
+        ),
         {
             'icon': 'heroChatBubbleBottomCenterText',
             'title': 'Messages',

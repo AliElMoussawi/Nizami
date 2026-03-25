@@ -8,12 +8,8 @@ from unittest.mock import patch
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
-from src.chats.attachment_flow import (
-    _infer_intent,
-    _poll_extraction_statuses,
-    run_attachment_message_flow,
-)
-from src.chats.models import Chat, Message, MessageAttachment, PendingDocIntent
+from src.chats.attachment_flow import _infer_intent,_poll_extraction_statuses
+from src.chats.models import Chat, Message, PendingDocIntent
 from src.uploads.models import File, FileExtraction, FileSummary
 from src.users.models import User
 from src.prompts.enums import PendingDocIntentIntentType, PendingDocIntentStatus

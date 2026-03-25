@@ -9,7 +9,7 @@ from typing import List, Tuple
 
 from django.conf import settings
 from django.db import transaction
-from src.chats.models import Chat, Message, MessageAttachment
+from src.chats.models import Message, MessageAttachment
 from src.chats.utils import create_llm, detect_language
 from django_q.tasks import async_task
 
@@ -232,7 +232,6 @@ def run_attachment_message_flow(
     """
     Create user message, MessageAttachments, soft-wait, branch, return assistant message (or preliminary/processing).
     """
-    chat = Chat.objects.get(user=user, id=chat_id)
     user_id = user.id
 
     with transaction.atomic():

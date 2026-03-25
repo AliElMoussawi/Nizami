@@ -10,7 +10,7 @@ from typing import List
 from django.db import transaction
 from src.prompts.enums import PendingDocIntentStatus
 from src.chats.flow import update_chat_summary
-from src.chats.models import Chat, Message, PendingDocIntent
+from src.chats.models import  Message, PendingDocIntent
 from src.chats.utils import create_llm, detect_language
 from src.uploads.models import File, FileExtraction, FileSummary
 from src.uploads.storage import download_text_from_s3

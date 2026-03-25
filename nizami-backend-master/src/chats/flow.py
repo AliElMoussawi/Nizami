@@ -25,12 +25,14 @@ from src.chats.domain import (
     create_initial_summary,
     update_conversation_summary,
 )
+from src.common.retrievers import find_rag_source_document_ids_by_description
 from src.chats.models import Message, MessageLog, MessageStepLog, Chat
 from src.chats.utils import create_legal_advice_llm, detect_language, create_llm
 from src.prompts.enums import PromptType
 from src.prompts.utils import get_prompt_value_by_name
 from src.common.retrievers import FilteredRetriever
 from src.gibberish import GibberishConfig, classify_input, InputVerdict
+from src.reference_documents.models import RagSourceDocument
 
 
 class State(TypedDict):
@@ -613,13 +615,32 @@ def answer_legal_question(state: State):
     translation = state['input_translation']
     query = state['query']
 
-    ids = find_ref_document_ids_by_description(query)
+    from src.settings import RAG_SOURCE
+    if RAG_SOURCE == 'new':
+        ids_all = find_rag_source_document_ids_by_description(query)
+
+        # Prefer non-MOJ docs. Only use MOJ if filtering leaves us with zero docs.
+        moj_prefix = "processed/MOJ/"
+        ids_non_moj = list(
+            RagSourceDocument.objects
+            .filter(id__in=ids_all)
+            .exclude(s3_key__istartswith=moj_prefix)
+            .values_list("id", flat=True)
+        )
+
+        ids = ids_non_moj if ids_non_moj else ids_all
+    else:
+        ids = find_ref_document_ids_by_description(query)
 
     llm = create_legal_advice_llm()
     template = get_prompt_value_by_name(PromptType.LEGAL_ADVICE)
 
     retriever = FilteredRetriever(ids, k=8, logger=logger)
-    search_kwargs = {'k': 8, 'filter': {'reference_document_id': {'$in': ids}}}
+
+    if RAG_SOURCE == 'new':
+        search_kwargs = {'k': 10, 'source': 'RagSourceDocumentChunk', 'filter': {'rag_source_document_id': {'$in': ids}}}
+    else:
+        search_kwargs = {'k': 8, 'source': 'langchain_pg_embedding', 'filter': {'reference_document_id': {'$in': ids}}}
 
     # Use summary for context, with recent messages for immediate context
     summary = state.get('summary', '')
@@ -748,7 +769,9 @@ def extract_used_languages(state: State):
     used_languages = set()
     for source_document in source_documents:
         d: Document = source_document
-        used_languages.add(d.metadata['language'])
+        lang = d.metadata.get('language')
+        if lang:
+            used_languages.add(lang)
 
 
     t2 = time.time()

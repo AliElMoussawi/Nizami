@@ -20,7 +20,7 @@ from src.uploads.storage import (
     extracted_pages_json_s3_key,
     upload_bytes_to_s3,
 )
-from src.prompts.enums import PendingDocIntentStatus, PendingDocIntentIntentType
+from src.prompts.enums import PendingDocIntentStatus
 logger = logging.getLogger(__name__)
 
 
